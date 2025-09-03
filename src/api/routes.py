@@ -116,4 +116,65 @@ def signup():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
     
+
+
+
+############################################
+#######           LOG-IN             #######
+############################################
+""" JSON request body for Log-in:
+{
+    "email":    "john@email.com",
+    "password": "secure_password"
+}
+"""
+@api.route('/login', methods=['POST'])
+def handle_login():
+
+    try:
+
+        # Receive data (email and password)
+        data = request.get_json()
+
+        email    = data.get("email")
+        password = data.get("password")
+        
+
+        # Check if both fields exist
+        if not email or not password:
+            return jsonify({"error": "Email and/or password are missing"}), 400
+        
+
+        # Search for user in database filtering only by email (unique)
+        user = User.query.filter_by(email=email).first()
+
+
+        # Verify if user and/or password exist
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        if not check_password_hash(user.hashed_psswrd, password):
+            return jsonify({"error": "Incorrect password"}), 401
+
+
+        # Check if user is deactivated
+        if not user.is_active:
+            return jsonify({"error": "User has been deactivated"}), 401
+
+
+        # Generate access token (with expiration)
+        access_token = create_access_token(
+            identity=str(user.id),  # User identity (you can use ID or email)
+            expires_delta=datetime.timedelta(hours=24)  # Token expiration
+        )
+
+        return jsonify({
+            "msg": "Login successful.",
+            "access_token": access_token,
+            "user": user.serialize()
+        }), 200
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
     
