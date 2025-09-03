@@ -51,7 +51,6 @@ def handle_hello():
 
 
 
-
 ############################################
 #######     SIGN-UP (register)       #######
 ############################################
@@ -63,6 +62,7 @@ def handle_hello():
     "password":   "example_password"
 }
 """
+
 @api.route('/signup', methods=['POST'])
 def signup():
 
@@ -118,7 +118,6 @@ def signup():
     
 
 
-
 ############################################
 #######           LOG-IN             #######
 ############################################
@@ -128,6 +127,7 @@ def signup():
     "password": "secure_password"
 }
 """
+
 @api.route('/login', methods=['POST'])
 def handle_login():
 
@@ -180,7 +180,6 @@ def handle_login():
 
 ####################################################################################
 
-
 ############################################
 #######     PRIVATE SITE TESTING     #######
 ############################################
@@ -189,6 +188,7 @@ def handle_login():
     - Choose "Bearer Token" in dropdown
     - Paste token WITHOUT QUOTES
 """
+
 @api.route('/testing-private', methods=['GET'])
 @jwt_required()
 def private_route():
@@ -205,5 +205,45 @@ def private_route():
         "user": user.serialize()
     }), 200
 
-
 ####################################################################################
+
+
+
+############################################
+#######             USER             #######
+#######        Private Profile       #######
+#######        [GET] user data       #######
+############################################
+@api.route('/profile', methods=['GET'])
+@jwt_required()
+def get_user_private_profile():
+    
+    try:
+
+        # Get authenticated user ID
+        current_user_id = get_jwt_identity()
+
+        # Search for user in database
+        current_user = User.query.get(current_user_id)
+        
+        if not current_user:
+            return jsonify({"error": "User not found."}), 404
+
+
+        # Included additional information for private user profile
+        profile_data = current_user.serialize()
+
+        profile_data.update({
+            'recipes_count': len(current_user.recipes),
+            'recipes':       [recipe.serialize() for recipe in current_user.recipes]
+        })
+        
+        
+        return jsonify({
+            "message":      "User data found successfully",
+            "current_user":  profile_data
+        }), 200
+
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
