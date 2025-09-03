@@ -247,3 +247,90 @@ def get_user_private_profile():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+
+
+
+
+############################################
+#######             USER             #######
+#######        Private Profile       #######
+#######       MODIFY user data       #######
+############################################
+""" JSON request body to update profile:
+{
+    "full_name":   "New Full Name",       // optional
+    "username":    "new_username",        // optional
+    "email":       "new@email.com",       // optional
+    "profile_url": "https://...",         // optional
+
+    "current_password": "old_password",   // optional
+    "password":         "new_password"    // optional
+}
+"""
+@api.route('/profile', methods=['PUT'])
+@jwt_required()
+def update_user_private_profile():
+
+
+    # Get authenticated user ID from token
+    user_id = get_jwt_identity()
+
+    # Search for user in database
+    user = User.query.get(user_id)
+    
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+
+    # Get request data
+    data = request.get_json()
+
+
+    try:  
+
+        if "full_name" in data:
+            user.full_name = data["full_name"]
+        
+        if "username" in data:
+            # Check that username is not in use
+            existing_user = User.query.filter(User.username == data["username"], User.id != user.id).first()
+            if existing_user:
+                return jsonify({"msg": "This username is already taken."}), 400
+            user.username = data["username"]
+        
+        if "email" in data:
+            # Check that email is not in use
+            existing_user = User.query.filter(User.email == data["email"], User.id != user.id).first()
+            if existing_user:
+                return jsonify({"msg": "This email is already registered."}), 400
+            user.email = data["email"]
+
+        if "profile_url" in data:
+            user.profile_url = data["profile_url"]  ##### CHECK LATER
+
+
+        # Password change handling
+        if 'password' in data:
+            if 'current_password' not in data:
+                return jsonify({'error': 'Current password is needed to change to new password.'}), 400
+            
+            if not check_password_hash(user.hashed_psswrd, data['current_password']):
+                return jsonify({'error': 'Current password is incorrect.'}), 400
+            
+            user.hashed_psswrd = generate_password_hash(data['password'])
+        
+        
+        # Save changes to database
+        db.session.commit()
+
+
+        return jsonify({
+            'msg':   'Profile updated successfully.',
+            'user':  user.serialize()
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Error updating profile.", 'error': str(e)}), 500
