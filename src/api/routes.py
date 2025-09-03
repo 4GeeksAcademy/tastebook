@@ -177,4 +177,33 @@ def handle_login():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
+
+####################################################################################
+
+
+############################################
+#######     PRIVATE SITE TESTING     #######
+############################################
+""" How to add Access_Token in header in Postman:
+    - Go to "Authorization" tab
+    - Choose "Bearer Token" in dropdown
+    - Paste token WITHOUT QUOTES
+"""
+@api.route('/testing-private', methods=['GET'])
+@jwt_required()
+def private_route():
+
+    current_user_id = get_jwt_identity()
+
+    user = User.query.get(current_user_id)
+
+    if not user:
+        return jsonify({ "msg": "User not found." }), 404
     
+    return jsonify({
+        "msg": f"Welcome {user.email}!",
+        "user": user.serialize()
+    }), 200
+
+
+####################################################################################
