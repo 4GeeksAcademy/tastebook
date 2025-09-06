@@ -32,7 +32,7 @@ app.url_map.strict_slashes = False
 ### JWT (JSON Web Token) CONFIGURATION
 
 # Configuración de la clave secreta para JWT
-app.config["JWT_SECRET_KEY"] = "a3f5c8d9e7b1c4a6d2f8e9b7a1c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1"
+app.config["JWT_SECRET_KEY"] = "a3f5c8d9e7b1c4a6d2f8e9b7a1c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c2"
 
 # Caducidad del token
 # app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=24)

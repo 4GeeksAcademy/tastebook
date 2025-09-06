@@ -269,6 +269,7 @@ def get_user_private_profile():
     "password":         "new_password"    // optional
 }
 """
+
 @api.route('/profile', methods=['PUT'])
 @jwt_required()
 def update_user_private_profile():
@@ -334,3 +335,138 @@ def update_user_private_profile():
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Error updating profile.", 'error': str(e)}), 500
+    
+
+######################################################################################################
+
+
+############################################
+#######       CREATE NEW RECIPE      #######
+############################################
+"""JSON request body to CREATE NEW RECIPE:
+{
+    "title":       "Classic Chocolate Chip Cookies",
+    "description": "Delicious homemade cookies perfect for any occasion",
+    "ingredients": [
+        {
+            "quantity":    2.25,
+            "unit":       "cups",
+            "ingredient": "all-purpose flour"
+        },
+        {
+            "quantity":    1,
+            "unit":       "tsp",
+            "ingredient": "baking soda"
+        },
+        {
+            "quantity":    2,
+            "unit":       "large",
+            "ingredient": "eggs"
+        }
+    ],
+    "instructions": [
+        "Preheat oven to 375°F (190°C)",
+        "In a medium bowl, whisk together flour, baking soda, and salt",
+        "In a large bowl, cream together butter and both sugars until light and fluffy",
+        "Beat in eggs one at a time, then add vanilla",
+        "Gradually blend in flour mixture",
+        "Stir in chocolate chips",
+        "Drop rounded tablespoons of dough onto ungreased cookie sheets",
+        "Bake 9-11 minutes or until golden brown",
+        "Cool on baking sheet for 2 minutes, then transfer to wire rack"
+    ]
+}
+"""
+
+@api.route('/new-recipe', methods=['POST'])
+@jwt_required()
+def create_new_recipe():
+
+    try: 
+        # Get authenticated user ID (recipe author)
+        current_user_id = get_jwt_identity()
+        
+        # Verify that user exists and is active
+        user = User.query.get(current_user_id)
+        if not user or not user.is_active:
+            return jsonify({"error": "Invalid user."}), 401
+        
+
+        # Get request data
+        data = request.get_json()
+        
+
+        # Validate required fields
+        required_fields = ["title", "ingredients", "instructions"]
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"msg": f"The field '{field}' is required."}), 400
+    
+
+        # Validate ingredients structure
+        ingredients = data.get('ingredients')
+        if not isinstance(ingredients, list) or len(ingredients) == 0:
+            return jsonify({"error": "Ingredients must be a non-empty array."}), 400
+        
+        for i, ingredient in enumerate(ingredients):
+            if not isinstance(ingredient, dict):
+                return jsonify({"error": f"Ingredient {i+1} must be an object."}), 400
+            
+            required_ingredient_fields = ["quantity", "unit", "ingredient"]
+            for field in required_ingredient_fields:
+                if field not in ingredient:
+                    return jsonify({"error": f"Ingredient {i+1} is missing field '{field}'."}), 400
+            
+            try:
+                # Validate quantity is a number
+                float(ingredient['quantity'])
+            except (ValueError, TypeError):
+                return jsonify({"error": f"Ingredient {i+1} quantity must be a number."}), 400
+
+
+        # Validate instructions structure
+        instructions = data.get('instructions')
+        if not isinstance(instructions, list) or len(instructions) == 0:
+            return jsonify({"error": "Instructions must be a non-empty array."}), 400
+        
+        for i, instruction in enumerate(instructions):
+            if not isinstance(instruction, str) or not instruction.strip():
+                return jsonify({"error": f"Instruction {i+1} must be a non-empty string."}), 400
+
+        # Create new recipe
+        new_recipe = Recipe(
+            author_id    = current_user_id,
+            title        = data["title"][:100],  # Ensure maximum length
+            description  = data.get("description", ""),  # Optional field
+            ingredients  = ingredients,
+            instructions = instructions
+        )
+        
+        # Save to database
+        db.session.add(new_recipe)
+        db.session.commit()
+        
+
+        # Prepare response with author info
+        recipe_response = new_recipe.serialize()
+
+        recipe_response['author'] = {
+            'user_id':     user.id,
+            'username':    user.username,
+            'full_name':   user.full_name,
+            'profile_url': user.profile_url
+        }
+        
+        return jsonify({
+            "msg":    "Recipe created successfully.",
+            "recipe": recipe_response
+        }), 201
+    
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Error creating recipe.", "error": str(e)}), 500
+
+
+
+
