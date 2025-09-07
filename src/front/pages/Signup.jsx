@@ -17,6 +17,9 @@ export const Signup = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [emailError, setEmailError] = useState(null);
+    const [usernameError, setUsernameError] = useState(null);
+    const [usernameAvailable, setUsernameAvailable] = useState(null);
+    const [checkingUsername, setCheckingUsername] = useState(false);
     
     
 
@@ -68,6 +71,38 @@ export const Signup = () => {
         }
     };
 
+    // Check if username exists
+    const checkUsernameExists = async () => {
+        setUsernameError(null);
+        setUsernameAvailable(null);
+        if (!username) return;
+        if (!backendUrl) return;
+        setCheckingUsername(true);
+        try {
+            const res = await fetch(`${backendUrl}/api/check-username`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ username })
+            });
+            const data = await res.json();
+            if (res.ok && data.exists) {
+                setUsernameError("Username is already taken.");
+                setUsernameAvailable(null);
+            } else if (res.ok && username.length > 0) {
+                setUsernameError(null);
+                setUsernameAvailable("Username is available.");
+            } else {
+                setUsernameError(null);
+                setUsernameAvailable(null);
+            }
+        } catch (err) {
+            setUsernameError("Could not check username.");
+            setUsernameAvailable(null);
+        } finally {
+            setCheckingUsername(false);
+        }
+    };
+
     return (
 
     <div className="container py-5">
@@ -112,8 +147,18 @@ export const Signup = () => {
                                     className="form-control"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
+                                    onBlur={checkUsernameExists}
                                     required
                                 />
+                                {checkingUsername && (
+                                    <div className="text-secondary mt-1" style={{fontSize: "0.95em"}}>Checking username...</div>
+                                )}
+                                {usernameError && (
+                                    <div className="text-danger mt-1" style={{fontSize: "0.95em"}}>{usernameError}</div>
+                                )}
+                                {usernameAvailable && !usernameError && (
+                                    <div className="text-success mt-1" style={{fontSize: "0.95em"}}>{usernameAvailable}</div>
+                                )}
                             </div>
 
                             {/* Email */}

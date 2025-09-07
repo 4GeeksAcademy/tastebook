@@ -119,6 +119,29 @@ def signup():
         return jsonify({'error': str(e)}), 500
     
 
+############################################
+#######   CHECK USERNAME EXISTS      #######
+############################################
+""" JSON request body:
+{
+    "username": "desired_username"
+}
+Returns: { "exists": true/false }
+"""
+@api.route('/check-username', methods=['POST'])
+def check_username():
+
+    data = request.get_json()
+    username = data.get("username")
+
+    if not username:
+        return jsonify({"exists": False}), 400
+    
+    exists = User.query.filter_by(username=username).first() is not None
+
+    return jsonify({"exists": exists}), 200
+
+
 
 ############################################
 #######           LOG-IN             #######
