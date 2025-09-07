@@ -14,6 +14,8 @@ import { Demo } from "./pages/Demo";
 
 import { Login } from "./pages/Login";
 import { Signup } from "./pages/Signup";
+import { PasswordRecovery } from "./pages/PasswordRecovery";
+import { ResetPassword } from "./pages/ResetPassword";
 
 
 export const router = createBrowserRouter(
@@ -33,8 +35,13 @@ export const router = createBrowserRouter(
         <Route path= "/signup" element={<Signup />} />
         <Route path= "/login"  element={<Login />} />
 
+        <Route path= "/recovery-validation" element={<PasswordRecovery />} />
+        <Route path= "/reset-password/:token" element={<ResetPassword />} />
+
         <Route path= "/demo" element={<Demo />} />
         <Route path= "/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
+
+
 
       </Route>
     )

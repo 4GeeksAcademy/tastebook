@@ -13,6 +13,8 @@ from decimal import Decimal
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+
 
 # Register the blueprint
 api = Blueprint('api', __name__)
@@ -250,9 +252,6 @@ def get_user_private_profile():
     
 
 
-
-
-
 ############################################
 #######             USER             #######
 #######        Private Profile       #######
@@ -467,6 +466,87 @@ def create_new_recipe():
         db.session.rollback()
         return jsonify({"error": "Error creating recipe.", "error": str(e)}), 500
 
+#######################################################################################
 
 
+#######################################################
+########            PASSWORD                   ########
+########            RECOVERY                   ########
+#######################################################
 
+
+############################################
+#######       Email Validation       #######
+############################################
+def send_recovery_email(email, token):
+    # This function should implement the actual email sending logic
+    # For demonstration purposes, we'll just print the recovery link
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+    recovery_link = f"{frontend_url}/reset-password/{token}"
+    print(f"Send this link to {email}: {recovery_link}")
+
+""" JSON request body to validate email for recovery:
+{
+    "email": "user@example.com"
+}
+"""
+@api.route('/recovery-validation', methods=['POST'])
+def recover_account():
+    data = request.get_json()
+    email = data.get("email")
+
+    if not email:
+        return jsonify({"error": "Email is required."}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "User not found."}), 404
+
+    # Generate recovery token using itsdangerous
+
+
+    secret_key = os.environ.get("SECRET_KEY", "default_secret")
+    serializer = URLSafeTimedSerializer(secret_key)
+    token = serializer.dumps(user.email, salt="password-recovery")
+    send_recovery_email(user.email, token)
+
+    return jsonify({"msg": "Recovery email sent.", "token": token}), 200
+
+
+############################################
+#######     Change Password          #######
+#######     as logged out user     #######
+############################################
+""" JSON request body to change password:
+{
+    "new_password": "your_new_secure_password"
+}
+"""
+@api.route('/reset-password/<token>', methods=['POST'])
+def reset_password(token):
+
+    data = request.get_json()
+    new_password = data.get("new_password")
+
+    if not new_password:
+        return jsonify({"error": "New password is required."}), 400
+
+    # Verify token using itsdangerous
+
+    secret_key = os.environ.get("SECRET_KEY", "default_secret")
+    serializer = URLSafeTimedSerializer(secret_key)
+    try:
+        email = serializer.loads(token, salt="password-recovery", max_age=3600)  # 1 hour expiration
+    except SignatureExpired:
+        return jsonify({"error": "Token expired."}), 400
+    except BadSignature:
+        return jsonify({"error": "Invalid token."}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "User not found."}), 404
+
+    user.hashed_psswrd = generate_password_hash(new_password)
+    db.session.commit()
+
+    return jsonify({"msg": "Password updated successfully."}), 200
