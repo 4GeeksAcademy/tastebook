@@ -1,8 +1,21 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 export const Navbar = () => {
+
+	const navigate = useNavigate();
+
+	const token = localStorage.getItem("token");
+
+	const handleLogout = () => {
+		if (localStorage.getItem("token")) {
+			localStorage.removeItem("token");
+			alert("You have successfully logged out ✅");
+		}
+		navigate("/");
+	};
+
 
 	
 	return (
@@ -31,29 +44,40 @@ export const Navbar = () => {
 				{/* Links */}
 				<div className="collapse navbar-collapse" id="navbarContent">
 					
-					<ul className="navbar-nav ms-auto align-items-lg-center gap-2">
+					<div className="ms-auto d-flex gap-2">
+						{!token ? (
+							<>
+								<ul className="navbar-nav ms-auto align-items-lg-center gap-2">
 
-						{/* <li className="nav-item">
-							<Link to="/about" className="nav-link">
-								Acerca de
-							</Link>
-						</li> */}
-
-
-						<li className="nav-item">
-							<Link to="/login" className="btn btn-primary ms-lg-2">
-								Log in
-							</Link>
-						</li>
+									{/* <li className="nav-item">
+										<Link to="/about" className="nav-link">
+											About
+										</Link>
+									</li> */}
 
 
-						<li className="nav-item">
-							<Link to="/signup" className="btn btn-outline-primary">
-								Sign up
-							</Link>
-						</li>
+									<li className="nav-item">
+										<Link to="/login" className="btn btn-primary ms-lg-2">
+											Log in
+										</Link>
+									</li>
 
-					</ul>
+
+									<li className="nav-item">
+										<Link to="/signup" className="btn btn-outline-primary">
+											Sign up
+										</Link>
+									</li>
+
+								</ul>
+							</>
+						) : (
+							<>
+								<button onClick={handleLogout} className="btn btn-danger">Log out</button>
+							</>
+						)}
+					</div>			
+
 				</div>
 
 			</div>
