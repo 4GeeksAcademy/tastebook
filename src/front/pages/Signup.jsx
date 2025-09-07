@@ -20,8 +20,31 @@ export const Signup = () => {
     const [usernameError, setUsernameError] = useState(null);
     const [usernameAvailable, setUsernameAvailable] = useState(null);
     const [checkingUsername, setCheckingUsername] = useState(false);
-    
-    
+
+    // Password requirements
+    const passwordRequirements = [
+        {
+            label: "At least 8 characters",
+            test: (pw) => pw.length >= 8
+        },
+        {
+            label: "At least 1 uppercase letter",
+            test: (pw) => /[A-Z]/.test(pw)
+        },
+        {
+            label: "At least 1 lowercase letter",
+            test: (pw) => /[a-z]/.test(pw)
+        },
+        {
+            label: "At least 1 number",
+            test: (pw) => /[0-9]/.test(pw)
+        },
+        {
+            label: "At least 1 special character",
+            test: (pw) => /[^A-Za-z0-9]/.test(pw)
+        }
+    ];
+    const isPasswordValid = passwordRequirements.every(r => r.test(password));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -32,6 +55,12 @@ export const Signup = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             setEmailError('Please enter a valid email address like "example@domain.com"');
+            return;
+        }
+
+        // Strong password validation
+        if (!isPasswordValid) {
+            setError("Password does not meet all requirements.");
             return;
         }
 
@@ -190,9 +219,24 @@ export const Signup = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    minLength={6}
-                                    // autoComplete="current-password"
+                                    minLength={8}
                                 />
+                            </div>
+                            {/* Password requirements box */}
+                            <div className="mb-2" style={{fontSize: "0.97em"}}>
+                                <div className="p-2 border rounded" style={{background: "#f8f9fa"}}>
+                                    <strong>Password must contain:</strong>
+                                    <ul className="mb-0" style={{listStyle: "none", paddingLeft: 0}}>
+                                        {passwordRequirements.map((req, idx) => (
+                                            <li key={idx} style={{color: req.test(password) ? "#198754" : "#6c757d", display: "flex", alignItems: "center"}}>
+                                                <span style={{fontWeight: req.test(password) ? "bold" : "normal", marginRight: "0.5em"}}>
+                                                    {req.test(password) ? <>&#10003;</> : <>&#9675;</>}
+                                                </span>
+                                                {req.label}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
 
                             {/* Show characters in password */}
