@@ -9,13 +9,13 @@ export const Navbar = () => {
 		<nav className="navbar navbar-expand-lg navbar-light bg-light">
 			<div className="container">
 
-				{/* Brand */}
+				{/* Logo and Name */}
 				<Link to="/" className="navbar-brand mb-0 h1">
 					<img src="../src/front/assets/logo/tb_logo_black_115x150.svg" className="pe-2"  height={"35px"} alt="TasteBook Logo" />
 					TasteBook
 				</Link>
 
-				{/* Toggler (móvil) */}
+				{/* Toggler (mobile) */}
 				<button
 					className="navbar-toggler"
 					type="button"
@@ -30,6 +30,7 @@ export const Navbar = () => {
 
 				{/* Links */}
 				<div className="collapse navbar-collapse" id="navbarContent">
+					
 					<ul className="navbar-nav ms-auto align-items-lg-center gap-2">
 
 						{/* <li className="nav-item">
@@ -59,19 +60,3 @@ export const Navbar = () => {
 		</nav>
 	);
 };
-
-// 	return (
-// 		<nav className="navbar navbar-light bg-light">
-// 			<div className="container">
-// 				<Link to="/">
-// 					<span className="navbar-brand mb-0 h1">React Boilerplate</span>
-// 				</Link>
-// 				<div className="ml-auto">
-// 					<Link to="/demo">
-// 						<button className="btn btn-primary">Check the Context in action</button>
-// 					</Link>
-// 				</div>
-// 			</div>
-// 		</nav>
-// 	);
-// };
