@@ -58,7 +58,7 @@ export const Login = () => {
             <div className="row justify-content-center">
                 <div className="col-12 col-md-8 col-lg-5">
                     
-                    <div className="card shadow-sm border-0 rounded-4">
+                    <div className="card shadow border-1 rounded-4">
                         <div className="card-body p-4">
                             <h1 className="h3 mb-3 text-center">Log in</h1>
 

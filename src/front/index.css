@@ -1,0 +1,294 @@
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+}
+
+.dark-mode {
+  --bg-primary: #000000;
+  --bg-secondary: #111111;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --border-color: #333333;
+}
+
+/* Apply base styles */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Typography styles */
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode p,
+.dark-mode span,
+.dark-mode div,
+.dark-mode small {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode .navbar-brand {
+  color: var(--text-primary) !important;
+}
+
+/* Navbar styles */
+.dark-mode .navbar {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark-mode .navbar-brand,
+.dark-mode .nav-link {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .navbar-toggler {
+  border-color: var(--border-color);
+}
+
+.dark-mode .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+/* Footer styles */
+.dark-mode footer {
+  background-color: var(--bg-secondary) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+.dark-mode footer .navbar-brand {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode footer a {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode footer a:hover {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode footer hr {
+  border-color: var(--border-color) !important;
+}
+
+/* Card styles */
+.dark-mode .card {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .card-header {
+  background-color: var(--bg-secondary);
+  border-bottom-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .card-body {
+  color: var(--text-primary);
+}
+
+.dark-mode .card-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .card-text {
+  color: var(--text-primary) !important;
+}
+
+/* Form styles */
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode input:focus,
+.dark-mode textarea:focus,
+.dark-mode select:focus {
+  background-color: var(--bg-secondary) !important;
+  border-color: #0d6efd !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+}
+
+.dark-mode .form-label {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .form-text {
+  color: var(--text-secondary) !important;
+}
+
+/* Button styles */
+.dark-mode .btn-outline-primary {
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+
+.dark-mode .btn-outline-primary:hover {
+  background-color: #0d6efd;
+  color: white;
+}
+
+/* Table styles */
+.dark-mode table {
+  color: var(--text-primary);
+}
+
+.dark-mode .table {
+  --bs-table-bg: var(--bg-secondary);
+  --bs-table-color: var(--text-primary);
+  --bs-table-border-color: var(--border-color);
+}
+
+.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > td,
+.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > th {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .table th {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-mode .table td {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Modal styles */
+.dark-mode .modal-content {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .modal-header {
+  border-bottom-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .modal-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .modal-body {
+  color: var(--text-primary);
+}
+
+.dark-mode .modal-footer {
+  border-top-color: var(--border-color);
+}
+
+/* List group styles */
+.dark-mode .list-group-item {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* Dropdown styles */
+.dark-mode .dropdown-menu {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dark-mode .dropdown-item {
+  color: var(--text-primary);
+}
+
+.dark-mode .dropdown-item:hover {
+  background-color: var(--border-color);
+}
+
+/* Alert styles */
+.dark-mode .alert {
+  border-color: var(--border-color);
+}
+
+.dark-mode .alert-primary {
+  background-color: rgba(13, 110, 253, 0.15);
+  border-color: rgba(13, 110, 253, 0.3);
+  color: #6ea8fe;
+}
+
+.dark-mode .alert-success {
+  background-color: rgba(25, 135, 84, 0.15);
+  border-color: rgba(25, 135, 84, 0.3);
+  color: #75b798;
+}
+
+.dark-mode .alert-danger {
+  background-color: rgba(220, 53, 69, 0.15);
+  border-color: rgba(220, 53, 69, 0.3);
+  color: #ea868f;
+}
+
+.dark-mode .alert-warning {
+  background-color: rgba(255, 193, 7, 0.15);
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #ffda6a;
+}
+
+/* Badge styles */
+.dark-mode .badge {
+  color: var(--text-primary);
+}
+
+/* Breadcrumb styles */
+.dark-mode .breadcrumb {
+  background-color: var(--bg-secondary);
+}
+
+.dark-mode .breadcrumb-item a {
+  color: var(--text-secondary);
+}
+
+.dark-mode .breadcrumb-item.active {
+  color: var(--text-primary);
+}
+
+/* Pagination styles */
+.dark-mode .pagination .page-link {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .pagination .page-link:hover {
+  background-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+
+.dark-mode .text-primary {
+  color: #0d6efd !important;
+}

@@ -1,14 +1,29 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat } from "lucide-react";
+import { ChefHat, Moon, Sun } from "lucide-react";
 
 
 export const Navbar = () => {
-
 	const navigate = useNavigate();
-
 	const token = localStorage.getItem("token");
+	const [darkMode, setDarkMode] = useState(false);
+
+	useEffect(() => {
+		// Check if user has a dark mode preference saved
+		const isDark = localStorage.getItem("darkMode") === "true";
+		setDarkMode(isDark);
+		if (isDark) {
+			document.documentElement.classList.add("dark-mode");
+		}
+	}, []);
+
+	const toggleDarkMode = () => {
+		const newDarkMode = !darkMode;
+		setDarkMode(newDarkMode);
+		localStorage.setItem("darkMode", newDarkMode);
+		document.documentElement.classList.toggle("dark-mode");
+	};
 
 	const handleLogout = () => {
 		if (localStorage.getItem("token")) {
@@ -46,7 +61,18 @@ export const Navbar = () => {
 				{/* Links */}
 				<div className="collapse navbar-collapse" id="navbarContent">
 					
-					<div className="ms-auto d-flex gap-2">
+					<div className="ms-auto d-flex gap-2 align-items-center">
+						<button
+							onClick={toggleDarkMode}
+							className="btn btn-link text-decoration-none p-2 d-flex align-items-center"
+							aria-label="Toggle dark mode"
+						>
+							{darkMode ? (
+								<Sun size={20} className="text-warning" />
+							) : (
+								<Moon size={20} className="text-primary" />
+							)}
+						</button>
 						{!token ? (
 							<>
 								<ul className="navbar-nav ms-auto align-items-lg-center gap-2">
