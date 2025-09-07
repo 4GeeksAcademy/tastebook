@@ -7,30 +7,35 @@ export const Signup = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     // Form
-    // const [firstName, setFirstName] = useState("");
-    // const [lastName,  setLastName]  = useState("");
     const [fullName,  setFullName]  = useState("");
     const [username,  setUsername]  = useState("");
     const [email,     setEmail]     = useState("");
     const [password,  setPassword]  = useState("");
 
-    // Other elements
+ 
     const [showPass, setShowPass] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [emailError, setEmailError] = useState(null);
     
     
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+        setEmailError(null);
 
+        // Simple email regex VALIDATION
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setEmailError('Please enter a valid email address like "example@domain.com"');
+            return;
+        }
 
         if (!backendUrl) {
             setError("Configure VITE_BACKEND_URL in your .env");
             return;
         }
-
 
         setLoading(true);
 
@@ -40,13 +45,11 @@ export const Signup = () => {
                 headers: {"Content-Type": "application/json"},
                 // credentials: "include", 
                 body: JSON.stringify({
-                            // first_name: firstName,
-                            // last_name:  lastName,
-                            full_name:  fullName,
-                            username:   username,
-                            email:      email,
-                            password:   password,
-                        })
+                    full_name:  fullName,
+                    username:   username,
+                    email:      email,
+                    password:   password,
+                })
             });
 
             const data = await res.json();
@@ -80,38 +83,9 @@ export const Signup = () => {
                         {error && <div className="alert alert-danger">{error}</div>}
 
 
-                            {/* FORMULARIO */}
-                            {/* <form onSubmit={handleSubmit}> */}
-                            <form onSubmit={handleSubmit} noValidate>
-                            {/* Nombre (first_name) */}
-                            {/* <div className="mb-3">
-                                <label htmlFor="firstName" className="form-label">Nombre</label>
-                                <input
-                                    id="firstName"
-                                    type="text"
-                                    placeholder="tu nombre..."
-                                    className="form-control"
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    required
-                                />
-                            </div> */}
+                        {/* Signup Form */}
 
-
-                            {/* Apellido (last_name) */}
-                            {/* <div className="mb-3">
-                                <label htmlFor="lastName" className="form-label">Apellido</label>
-                                <input
-                                    id="lastName"
-                                    type="text"
-                                    placeholder="tu apellido..."
-                                    className="form-control"
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    required
-                                />
-                            </div> */}
-
+                        <form onSubmit={handleSubmit} noValidate>
 
                             {/* Full Name */}
                             <div className="mb-3">
@@ -142,7 +116,7 @@ export const Signup = () => {
                                 />
                             </div>
 
-                            {/* Correo electrónico */}
+                            {/* Email */}
                             <div className="mb-3">
                                 <label htmlFor="email" className="form-label">Email</label>
                                 <input
@@ -155,10 +129,13 @@ export const Signup = () => {
                                     required
                                     autoComplete="email"
                                 />
+                                {emailError && (
+                                    <div className="text-danger mt-1" style={{fontSize: "0.95em"}}>{emailError}</div>
+                                )}
                             </div>
 
 
-                            {/* Contraseña */}
+                            {/* Password */}
                             <div className="mb-2">
                                 <label htmlFor="password" className="form-label">Password</label>
                                 <input
@@ -173,7 +150,7 @@ export const Signup = () => {
                                 />
                             </div>
 
-                            {/* Mostrar caracteres de contraseña */}
+                            {/* Show characters in password */}
                             <div className="form-check mb-3">
                                 <input
                                     id="showPass"

@@ -45,7 +45,7 @@ export const Home = () => {
 									Welcome to <span className="text-primary">Tastebook</span>
 								</h1>
 								<p className="lead mb-4">
-									Your place to discover, save, and share delicious recipes.
+									Your place to discover and share delicious recipes.
 								</p>
 
 							</div>
