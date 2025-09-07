@@ -38,77 +38,63 @@ export const Home = () => {
 		<div className="container py-5">
 
 
-			{/* Hero */}
-			<div className="row align-items-center g-4">
+						{/* Hero Section */}
+						<div className="row align-items-center g-4 mb-5">
+							<div className="col-lg-6 text-center text-lg-start">
+								<h1 className="display-4 fw-bold mb-3">
+									Welcome to <span className="text-primary">Tastebook</span>
+								</h1>
+								<p className="lead mb-4">
+									Your place to discover, save, and share delicious recipes.
+								</p>
 
-				<div className="col-lg-6 text-center text-lg-start">
-
-					<h1 className="display-4 fw-bold mb-3">Welcome!</h1>
-
-					<p className="lead mb-4">
-						Esta es la página de inicio. Usa los botones para entrar o crear tu cuenta.
-					</p>
-
-
-					<div className="d-flex flex-column flex-sm-row gap-3">
-						<Link to="/login" className="btn btn-primary btn-lg">
-							Log in
-						</Link>
-
-						<Link to="/signup" className="btn btn-outline-secondary btn-lg">
-							Sign up
-						</Link>
-					</div>
-
-				</div>
-
-				<div className="col-lg-6 text-center">
-					<img
-						src={food}
-						alt="Food"
-						className="img-fluid rounded-circle shadow-sm"
-						style={{ maxWidth: 260 }}
-					/>
-				</div>
-			</div>
-
-			{/* Accesos rápidos (opcional) */}
-
-			{/* <div className="row row-cols-1 row-cols-md-3 g-3 mt-5">
-				<div className="col">
-					<div className="card h-100 shadow-sm border-0">
-						<div className="card-body">
-							<h5 className="card-title">Login</h5>
-							<p className="card-text">Ingresa a tu cuenta para continuar.</p>
-							<Link to="/login" className="btn btn-primary">Entrar</Link>
-						</div>
-					</div>
-				</div>
-
-				<div className="col">
-					<div className="card h-100 shadow-sm border-0">
-						<div className="card-body">
-							<h5 className="card-title">Registro</h5>
-							<p className="card-text">Crea una cuenta nueva en segundos.</p>
-							<Link to="/register" className="btn btn-outline-secondary">Crear cuenta</Link>
-						</div>
-					</div>
-				</div>
-
-				<div className="col">
-					<div className="card h-100 shadow-sm border-0">
-						<div className="card-body">
-							<h5 className="card-title">Demo / Acerca</h5>
-							<p className="card-text">Conoce más sobre la app.</p>
-							<div className="d-flex gap-2">
-								<Link to="/demo" className="btn btn-light border">Demo</Link>
-								<Link to="/about" className="btn btn-success">Acerca</Link>
+							</div>
+							<div className="col-lg-6 text-center">
+								<img
+									src={food}
+									alt="Food"
+									className="img-fluid rounded shadow-sm border border-2 border-primary"
+									style={{ maxWidth: 260 }}
+								/>
 							</div>
 						</div>
-					</div>
-				</div>
 
-			</div> */}
+						{/* Placeholder Cards for Features */}
+						<div className="row row-cols-1 row-cols-md-3 g-4 mt-3">
+							<div className="col">
+								<div className="card h-100 shadow-sm border-0">
+									<div className="card-body text-center">
+										<div className="mb-3">
+											<i className="bi bi-search display-5 text-primary"></i>
+										</div>
+										<h5 className="card-title">Explore recipes</h5>
+										<p className="card-text">Search among hundreds of recipes and find your next favorite meal.</p>
+									</div>
+								</div>
+							</div>
+							<div className="col">
+								<div className="card h-100 shadow-sm border-0">
+									<div className="card-body text-center">
+										<div className="mb-3">
+											<i className="bi bi-bookmark display-5 text-success"></i>
+										</div>
+										<h5 className="card-title">Save your favorite recipes</h5>
+										<p className="card-text">Create your own personal recipe book and access it at any time.</p>
+									</div>
+								</div>
+							</div>
+							<div className="col">
+								<div className="card h-100 shadow-sm border-0">
+									<div className="card-body text-center">
+										<div className="mb-3">
+											<i className="bi bi-share display-5 text-warning"></i>
+										</div>
+										<h5 className="card-title">Share with friends</h5>
+										<p className="card-text">Share your favorite recipes with the community and your friends.</p>
+									</div>
+								</div>
+							</div>
+						</div>
 
 
 			

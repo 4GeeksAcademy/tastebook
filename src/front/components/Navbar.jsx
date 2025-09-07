@@ -1,5 +1,7 @@
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ChefHat } from "lucide-react";
 
 
 export const Navbar = () => {
@@ -22,11 +24,11 @@ export const Navbar = () => {
 		<nav className="navbar navbar-expand-lg navbar-light bg-light">
 			<div className="container">
 
-				{/* Logo and Name */}
-				<Link to="/" className="navbar-brand mb-0 h1">
-					<img src="../src/front/assets/logo/tb_logo_black_115x150.svg" className="pe-2"  height={"35px"} alt="TasteBook Logo" />
-					TasteBook
-				</Link>
+				   {/* Logo and Name */}
+				   <Link to="/" className="navbar-brand mb-0 h1 d-flex align-items-center gap-2">
+					   <ChefHat size={32} strokeWidth={2.2} className="text-primary" />
+					   <span className="fw-bold">Tastebook</span>
+				   </Link>
 
 				{/* Toggler (mobile) */}
 				<button

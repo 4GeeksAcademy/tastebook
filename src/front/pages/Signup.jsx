@@ -27,7 +27,7 @@ export const Signup = () => {
 
 
         if (!backendUrl) {
-            setError("Configura VITE_BACKEND_URL en tu .env");
+            setError("Configure VITE_BACKEND_URL in your .env");
             return;
         }
 
@@ -79,11 +79,9 @@ export const Signup = () => {
                         {error && <div className="alert alert-danger">{error}</div>}
 
 
-                        {/* FORMULARIO */}
-                        {/* <form onSubmit={handleSubmit}> */}
-                        <form onSubmit={handleSubmit} noValidate>
-
-
+                            {/* FORMULARIO */}
+                            {/* <form onSubmit={handleSubmit}> */}
+                            <form onSubmit={handleSubmit} noValidate>
                             {/* Nombre (first_name) */}
                             {/* <div className="mb-3">
                                 <label htmlFor="firstName" className="form-label">Nombre</label>
@@ -131,7 +129,7 @@ export const Signup = () => {
 
                             {/* Username */}
                             <div className="mb-3">
-                                <label htmlFor="username" className="form-label">Nombre de usuario</label>
+                                <label htmlFor="username" className="form-label">Username</label>
                                 <input
                                     id="username"
                                     type="text"
@@ -184,7 +182,7 @@ export const Signup = () => {
                                     onChange={(e) => setShowPass(e.target.checked)}
                                 />
                                 <label className="form-check-label" htmlFor="showPass">
-                                    Mostrar contraseña
+                                    Show password
                                 </label>
                             </div>
 
@@ -192,10 +190,10 @@ export const Signup = () => {
                                 {loading ? (
                                     <>
                                         <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                                        Creando cuenta…
+                                        Creating account...
                                     </>
                                 ) : (
-                                    "Crear cuenta"
+                                    "Create account"
                                 )}
                             </button>
                         </form>

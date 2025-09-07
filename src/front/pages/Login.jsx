@@ -20,7 +20,7 @@ export const Login = () => {
 
         const backendUrl = import.meta.env.VITE_BACKEND_URL;
         if (!backendUrl) {
-            setError("Configura VITE_BACKEND_URL en tu .env");
+            setError("Configure VITE_BACKEND_URL in your .env");
             return;
         }
 
@@ -38,14 +38,14 @@ export const Login = () => {
             const data = await resp.json().catch(() => ({}));
 
             if (!resp.ok) {
-                throw new Error(data?.msg || "Credenciales inválidas");
+                throw new Error(data?.msg || "Invalid credentials");
             }
 
-            // Guarda el token si tu backend lo devuelve
+            // Save the token if your backend returns it
             const token = data.access_token || data.token;
             if (token) localStorage.setItem("token", token);
 
-            navigate("/"); // redirige al Home
+            navigate("/"); // redirect to Home
         } catch (err) {
             setError(err.message || "Error al iniciar sesión");
         } finally {
@@ -57,13 +57,14 @@ export const Login = () => {
         <div className="container py-5">
             <div className="row justify-content-center">
                 <div className="col-12 col-md-8 col-lg-5">
+                    
                     <div className="card shadow-sm border-0 rounded-4">
                         <div className="card-body p-4">
                             <h1 className="h3 mb-3 text-center">Log in</h1>
 
                             {error && <div className="alert alert-danger">{error}</div>}
 
-                            <form onSubmit={handleSubmit} noValidate>  {/* Por qué noValidate? */}
+                            <form onSubmit={handleSubmit} noValidate>
                                 <div className="mb-3">
                                     <label htmlFor="email" className="form-label">Email</label>
                                     <input
@@ -78,7 +79,7 @@ export const Login = () => {
                                 </div>
 
                                 <div className="mb-2">
-                                    <label htmlFor="password" className="form-label">Contraseña</label>
+                                    <label htmlFor="password" className="form-label">Password</label>
                                     <input
                                         id="password"
                                         type={showPass ? "text" : "password"}
@@ -100,7 +101,7 @@ export const Login = () => {
                                         onChange={(e) => setShowPass(e.target.checked)}
                                     />
                                     <label className="form-check-label" htmlFor="showPass">
-                                        Mostrar contraseña
+                                        Show password
                                     </label>
                                 </div>
 
@@ -108,35 +109,29 @@ export const Login = () => {
                                     {loading ? (
                                         <>
                                             <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                                            Entrando…
+                                            Logging in...
                                         </>
                                     ) : (
-                                        "Entrar"
+                                        "Log in"
                                     )}
                                 </button>
                             </form>
 
                             <div className="text-center mt-3">
-                                <small className="text-muted">¿Olvidaste tu contraseña?</small>{" "}
-                                <Link to="/recover">Recuperar</Link>
+                                <Link to="/recovery-validation" className="text-decoration-none">
+                                    <small>Forgot your password?</small>
+                                </Link>
                             </div>
 
-                            <hr className="my-4" />
+                            <hr/>
 
                             <div className="text-center">
-                                <small className="text-muted">¿No tienes cuenta?</small>{" "}
-                                <Link to="/register">Regístrate</Link>
+                                <small className="text-muted">Don't have an account? <Link to="/register" className="text-decoration-none">Signup</Link></small>
                             </div>
                         </div>
                     </div>
-
-                    <p className="text-center text-muted small mt-3 mb-0">
-                        Usa <code>VITE_BACKEND_URL</code> (ej. <code>http://localhost:3001</code>)
-                    </p>
                 </div>
             </div>
         </div>
-
-
     );
 };
