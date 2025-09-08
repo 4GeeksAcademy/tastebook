@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat, Moon, Sun, Cog } from "lucide-react";
+import { ChefHat, Moon, Sun, Cog, DoorOpen } from "lucide-react";
 
 
 export const Navbar = () => {
@@ -120,7 +120,7 @@ export const Navbar = () => {
 									<Cog size={22} />
 								</Link>
 								
-								<button onClick={handleLogout} className="btn btn-danger w-100">Log out</button>
+								<button onClick={handleLogout} className="btn btn-light border-0 text-danger w-100"><DoorOpen size={22} /></button>
 							</>
 						)}
 					</div>			

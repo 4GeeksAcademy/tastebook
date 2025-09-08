@@ -153,6 +153,15 @@ body {
   color: white;
 }
 
+.dark-mode .btn-light {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-mode .btn-light:hover {
+  background-color: var(--border-color) !important;
+}
+
 /* Table styles */
 .dark-mode table {
   color: var(--text-primary);
