@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChefHat, Moon, Sun } from "lucide-react";
@@ -39,11 +38,11 @@ export const Navbar = () => {
 		<nav className="navbar navbar-expand-lg navbar-light bg-light">
 			<div className="container">
 
-				   {/* Logo and Name */}
-				   <Link to="/" className="navbar-brand mb-0 h1 d-flex align-items-center gap-2">
-					   <ChefHat size={32} strokeWidth={2.2} className="text-primary" />
-					   <span className="fw-bold">Tastebook</span>
-				   </Link>
+				{/* Logo and Name */}
+				<Link to="/" className="navbar-brand mb-0 h1 d-flex align-items-center gap-2">
+					<ChefHat size={32} strokeWidth={2.2} className="text-primary" />
+					<span className="fw-bold">Tastebook</span>
+				</Link>
 
 				{/* Toggler (mobile) */}
 				<button
@@ -60,11 +59,10 @@ export const Navbar = () => {
 
 				{/* Links */}
 				<div className="collapse navbar-collapse" id="navbarContent">
-					
-					<div className="ms-auto d-flex gap-2 align-items-center">
+					<div className="ms-auto d-flex gap-2 align-items-center flex-lg-row flex-column text-center">
 						<button
 							onClick={toggleDarkMode}
-							className="btn btn-link text-decoration-none p-2 d-flex align-items-center"
+							className="btn btn-link text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto"
 							aria-label="Toggle dark mode"
 						>
 							{darkMode ? (
@@ -73,15 +71,12 @@ export const Navbar = () => {
 								<Moon size={20} className="text-primary" />
 							)}
 						</button>
+
 						{!token ? (
+
 							<>
 								<ul className="navbar-nav ms-auto align-items-lg-center gap-2">
 
-									{/* <li className="nav-item">
-										<Link to="/about" className="nav-link">
-											About
-										</Link>
-									</li> */}
 
 
 									<li className="nav-item">
@@ -99,10 +94,28 @@ export const Navbar = () => {
 
 								</ul>
 							</>
+
+							// <ul className="navbar-nav ms-auto align-items-lg-center gap-2 flex-lg-row flex-column w-100">
+
+							// 	<li className="nav-item">
+
+							// 		<Link to="/login" className="btn btn-primary ms-lg-2 w-100 mb-lg-0 mb-2">
+							// 			Log in
+							// 		</Link>
+							// 	</li>
+
+
+							// 	<li className="nav-item">
+
+							// 		<Link to="/signup" className="btn btn-outline-primary w-100">
+							// 			Sign up
+							// 		</Link>
+
+							// 	</li>
+							// </ul>
+							
 						) : (
-							<>
-								<button onClick={handleLogout} className="btn btn-danger">Log out</button>
-							</>
+							<button onClick={handleLogout} className="btn btn-danger w-100">Log out</button>
 						)}
 					</div>			
 

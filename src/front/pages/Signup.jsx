@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CheckCircle2, Circle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const Signup = () => {
@@ -222,15 +223,19 @@ export const Signup = () => {
                                     minLength={8}
                                 />
                             </div>
+                            
                             {/* Password requirements box */}
                             <div className="mb-2" style={{fontSize: "0.97em"}}>
                                 <div className="p-2 border rounded" style={{background: "#f8f9fa"}}>
-                                    <strong>Password must contain:</strong>
+                                    <strong className="text-dark-emphasis">Password must contain:</strong>
                                     <ul className="mb-0" style={{listStyle: "none", paddingLeft: 0}}>
                                         {passwordRequirements.map((req, idx) => (
                                             <li key={idx} style={{color: req.test(password) ? "#198754" : "#6c757d", display: "flex", alignItems: "center"}}>
                                                 <span style={{fontWeight: req.test(password) ? "bold" : "normal", marginRight: "0.5em"}}>
-                                                    {req.test(password) ? <>&#10003;</> : <>&#9675;</>}
+                                                    {req.test(password)
+                                                        ? <CheckCircle2 size={18} color="#198754" style={{verticalAlign: "middle"}} />
+                                                        : <Circle size={18} color="#6c757d" style={{verticalAlign: "middle"}} />
+                                                    }
                                                 </span>
                                                 {req.label}
                                             </li>
