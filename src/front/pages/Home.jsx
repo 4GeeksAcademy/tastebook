@@ -62,7 +62,8 @@ export const Home = () => {
 						{/* Placeholder Cards for Features */}
 						<div className="row row-cols-1 row-cols-md-3 g-4 mt-3">
 							<div className="col">
-								<div className="card h-100 shadow-sm border-0">
+								<div className="card h-100 shadow border-0">
+
 									<div className="card-body text-center">
 										<div className="mb-3">
 											<i className="bi bi-search display-5 text-primary"></i>
@@ -70,10 +71,12 @@ export const Home = () => {
 										<h5 className="card-title">Explore recipes</h5>
 										<p className="card-text">Search among hundreds of recipes and find your next favorite meal.</p>
 									</div>
+
 								</div>
 							</div>
 							<div className="col">
-								<div className="card h-100 shadow-sm border-0">
+
+								<div className="card h-100 shadow border-0">
 									<div className="card-body text-center">
 										<div className="mb-3">
 											<i className="bi bi-bookmark display-5 text-success"></i>
@@ -81,10 +84,11 @@ export const Home = () => {
 										<h5 className="card-title">Save your favorite recipes</h5>
 										<p className="card-text">Create your own personal recipe book and access it at any time.</p>
 									</div>
+
 								</div>
 							</div>
 							<div className="col">
-								<div className="card h-100 shadow-sm border-0">
+								<div className="card h-100 shadow border-0">
 									<div className="card-body text-center">
 										<div className="mb-3">
 											<i className="bi bi-share display-5 text-warning"></i>
