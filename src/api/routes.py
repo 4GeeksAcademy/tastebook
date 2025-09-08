@@ -239,7 +239,7 @@ def private_route():
 #######        Private Profile       #######
 #######        [GET] user data       #######
 ############################################
-@api.route('/profile', methods=['GET'])
+@api.route('/settings', methods=['GET'])
 @jwt_required()
 def get_user_private_profile():
     
@@ -252,7 +252,7 @@ def get_user_private_profile():
         current_user = User.query.get(current_user_id)
         
         if not current_user:
-            return jsonify({"error": "User not found."}), 404
+            return jsonify({"msg": "User not found"}), 404
 
 
         # Included additional information for private user profile
@@ -264,6 +264,8 @@ def get_user_private_profile():
         })
         
         
+        # return jsonify(current_user=profile_data), 200
+    
         return jsonify({
             "message":      "User data found successfully",
             "current_user":  profile_data
@@ -271,13 +273,14 @@ def get_user_private_profile():
 
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"msg": "Error fetching profile", "error": str(e)}), 500
     
 
 
 ############################################
 #######             USER             #######
 #######        Private Profile       #######
+#######            Settings          #######
 #######       MODIFY user data       #######
 ############################################
 """ JSON request body to update profile:
@@ -292,7 +295,7 @@ def get_user_private_profile():
 }
 """
 
-@api.route('/profile', methods=['PUT'])
+@api.route('/settings', methods=['PUT'])
 @jwt_required()
 def update_user_private_profile():
 

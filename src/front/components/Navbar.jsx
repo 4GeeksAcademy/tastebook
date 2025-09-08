@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat, Moon, Sun } from "lucide-react";
+import { ChefHat, Moon, Sun, Cog } from "lucide-react";
 
 
 export const Navbar = () => {
@@ -57,7 +57,7 @@ export const Navbar = () => {
 					<span className="navbar-toggler-icon"></span>
 				</button>
 
-				{/* Links */}
+
 				<div className="collapse navbar-collapse" id="navbarContent">
 					<div className="ms-auto d-flex gap-2 align-items-center flex-lg-row flex-column text-center">
 						<button
@@ -115,7 +115,13 @@ export const Navbar = () => {
 							// </ul>
 							
 						) : (
-							<button onClick={handleLogout} className="btn btn-danger w-100">Log out</button>
+							<>
+								<Link to="/settings" className="btn btn-link text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Settings">
+									<Cog size={22} />
+								</Link>
+								
+								<button onClick={handleLogout} className="btn btn-danger w-100">Log out</button>
+							</>
 						)}
 					</div>			
 
