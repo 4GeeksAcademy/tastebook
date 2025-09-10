@@ -1,9 +1,9 @@
 :root {
-  --bg-primary: #ffffff;
+  --bg-primary: #ebf3ff;
   --bg-secondary: #f8f9fa;
   --text-primary: #212529;
   --text-secondary: #6c757d;
-  --border-color: #dee2e6;
+  --border-color: #e4e4e4;
 }
 
 .dark-mode {
@@ -11,7 +11,7 @@
   --bg-secondary: #111111;
   --text-primary: #ffffff;
   --text-secondary: #cccccc;
-  --border-color: #333333;
+  --border-color: #292929;
 }
 
 /* Apply base styles */
@@ -49,6 +49,7 @@ body {
 /* Navbar styles */
 .dark-mode .navbar {
   background-color: var(--bg-secondary) !important;
+  border-bottom-color: var(--border-color) !important;
 }
 
 .dark-mode .navbar-brand,

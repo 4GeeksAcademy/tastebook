@@ -154,11 +154,11 @@ export const Signup = () => {
 
                             {/* Full Name */}
                             <div className="mb-3">
-                                <label htmlFor="fullName" className="form-label">Full name</label>
+                                <label htmlFor="fullName" className="form-label">Full Name</label>
                                 <input
                                     id="fullName"
                                     type="text"
-                                    placeholder="your full name..."
+                                    placeholder=""
                                     className="form-control"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
@@ -173,7 +173,7 @@ export const Signup = () => {
                                 <input
                                     id="username"
                                     type="text"
-                                    placeholder="write your username..."
+                                    placeholder=""
                                     className="form-control"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
@@ -197,7 +197,7 @@ export const Signup = () => {
                                 <input
                                     id="email"
                                     type="email"
-                                    placeholder="example@mail.com"
+                                    placeholder=""
                                     className="form-control"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -225,12 +225,12 @@ export const Signup = () => {
                             </div>
                             
                             {/* Password requirements box */}
-                            <div className="mb-2" style={{fontSize: "0.97em"}}>
-                                <div className="p-2 border rounded" style={{background: "#f8f9fa"}}>
+                            <div className="mb-2 " style={{fontSize: "0.97em"}}>
+                                <div className="p-2 rounded dark-mode:bg-secondary">
                                     <strong className="text-dark-emphasis">Password must contain:</strong>
                                     <ul className="mb-0" style={{listStyle: "none", paddingLeft: 0}}>
                                         {passwordRequirements.map((req, idx) => (
-                                            <li key={idx} style={{color: req.test(password) ? "#198754" : "#6c757d", display: "flex", alignItems: "center"}}>
+                                            <li key={idx} style={{color: req.test(password) ? "#198754" : "var(--text-secondary)", display: "flex", alignItems: "center"}}>
                                                 <span style={{fontWeight: req.test(password) ? "bold" : "normal", marginRight: "0.5em"}}>
                                                     {req.test(password)
                                                         ? <CheckCircle2 size={18} color="#198754" style={{verticalAlign: "middle"}} />
