@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { User, KeyRound, Mail, BookOpenText, Image, Edit, X } from "lucide-react";
+import { User, KeyRound, Mail, BookOpenText, Image, Edit, X, Camera } from "lucide-react";
+import ImageUpload from "../components/ImageUpload";
 
 export const Settings = () => {
   const [userData, setUserData] = useState(null);
   const [form, setForm] = useState({});
   const [passwordForm, setPasswordForm] = useState({ current_password: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [activePanel, setActivePanel] = useState("profile");
@@ -57,6 +59,88 @@ export const Settings = () => {
     setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
   };
 
+  const handleImageUpload = async (file) => {
+    if (!backendUrl) {
+      setError("Backend URL not configured.");
+      return;
+    }
+    
+    setImageLoading(true);
+    setError("");
+    setSuccess("");
+    
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const resp = await fetch(`${backendUrl}/api/user/upload-image`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data?.error || "Failed to upload image.");
+      
+      const updatedUserData = { ...userData, ...data.user };
+      setUserData(updatedUserData);
+      setSuccess("Profile image updated successfully!");
+      
+      // Auto-dismiss success message after 3 seconds
+      setTimeout(() => setSuccess(""), 15000);
+      
+      // Dispatch custom event to update navbar
+      window.dispatchEvent(new CustomEvent('userDataUpdated', {
+        detail: { userData: updatedUserData }
+      }));
+    } catch (err) {
+      setError(err.message || "Failed to upload image.");
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
+  const handleImageDelete = async () => {
+    if (!backendUrl) {
+      setError("Backend URL not configured.");
+      return;
+    }
+    
+    setImageLoading(true);
+    setError("");
+    setSuccess("");
+    
+    try {
+      const resp = await fetch(`${backendUrl}/api/user/delete-image`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data?.error || "Failed to delete image.");
+      
+      const updatedUserData = { ...userData, ...data.user };
+      setUserData(updatedUserData);
+      setSuccess("Profile image deleted successfully!");
+      
+      // Auto-dismiss success message after 3 seconds
+      setTimeout(() => setSuccess(""), 15000);
+      
+      // Dispatch custom event to update navbar
+      window.dispatchEvent(new CustomEvent('userDataUpdated', {
+        detail: { userData: updatedUserData }
+      }));
+    } catch (err) {
+      setError(err.message || "Failed to delete image.");
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
   const handleSave = async e => {
     e.preventDefault();
     if (!backendUrl) {
@@ -81,6 +165,9 @@ export const Settings = () => {
       setError("");
       setUserData(prevData => ({...prevData, ...form}));
       setIsEditing(false);
+      
+      // Auto-dismiss success message after 3 seconds
+      setTimeout(() => setSuccess(""), 15000);
     } catch (err) {
       setError("Failed to save changes.");
     } finally {
@@ -111,6 +198,9 @@ export const Settings = () => {
       setSuccess("Password changed successfully!");
       setError("");
       setPasswordForm({ current_password: "", password: "" });
+      
+      // Auto-dismiss success message after 3 seconds
+      setTimeout(() => setSuccess(""), 15000);
     } catch (err) {
       setError("Failed to change password.");
     } finally {
@@ -136,6 +226,7 @@ export const Settings = () => {
         <div className="col-md-3 mb-4">
           <div className="list-group">
             <button className={`list-group-item list-group-item-action ${activePanel === "profile" ? "active" : ""}`} onClick={() => setActivePanel("profile")}> <User size={18} className="me-2" /> Profile Info </button>
+            <button className={`list-group-item list-group-item-action ${activePanel === "image" ? "active" : ""}`} onClick={() => setActivePanel("image")}> <Camera size={18} className="me-2" /> Profile Image </button>
             <button className={`list-group-item list-group-item-action ${activePanel === "password" ? "active" : ""}`} onClick={() => setActivePanel("password")}> <KeyRound size={18} className="me-2" /> Change Password </button>
           </div>
         </div>
@@ -144,8 +235,29 @@ export const Settings = () => {
             <div className="card-body">
               <h3 className="mb-4">Settings</h3>
               {loading && <div className="alert alert-info">Loading...</div>}
-              {error && <div className="alert alert-danger">{error}</div>}
-              {success && <div className="alert alert-success">{success}</div>}
+              {error && (
+                <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                  {error}
+                  <button 
+                    type="button" 
+                    className="btn-close" 
+                    aria-label="Close"
+                    onClick={() => setError("")}
+                  ></button>
+                </div>
+              )}
+              {success && (
+                <div className="alert alert-success alert-dismissible fade show" role="alert">
+                  {success}
+                  <button 
+                    type="button" 
+                    className="btn-close" 
+                    aria-label="Close"
+                    onClick={() => setSuccess("")}
+                  ></button>
+                </div>
+              )}
+              
               {activePanel === "profile" && (
                 <div>
                   {!isEditing ? (
@@ -196,6 +308,7 @@ export const Settings = () => {
                       <div className="col-md-6">
                         <label className="form-label fw-semibold"><Image size={16} className="me-1" /> Profile URL</label>
                         <input type="url" name="profile_url" className="form-control" value={form.profile_url || ""} onChange={handleChange} />
+                        <div className="form-text">Optional: External profile link (e.g., personal website, social media)</div>
                       </div>
                       <div className="col-12 mt-3">
                         <button type="submit" className="btn btn-primary me-2" disabled={loading}>Save Changes</button>
@@ -203,6 +316,25 @@ export const Settings = () => {
                       </div>
                     </form>
                   )}
+                </div>
+              )}
+
+              {activePanel === "image" && (
+                <div className="text-center">
+                  <h5 className="mb-4">Manage Your Profile Image</h5>
+                  <ImageUpload
+                    currentImageUrl={userData?.cloudinary_url}
+                    onImageUpload={handleImageUpload}
+                    onImageDelete={handleImageDelete}
+                    loading={imageLoading}
+                    size="large"
+                    className="mb-4"
+                  />
+                  <div className="mt-4">
+                    <small className="text-muted">
+                      Your profile image will be visible to other users and displayed in the navigation bar.
+                    </small>
+                  </div>
                 </div>
               )}
               {activePanel === "password" && (

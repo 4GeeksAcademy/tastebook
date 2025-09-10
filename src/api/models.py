@@ -43,6 +43,10 @@ class User(db.Model):
     is_active:       Mapped[bool]     = mapped_column( Boolean,      default=True,        nullable=False)
     created_at:      Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
 
+    # Cloudinary attributes
+    cloudinary_url:         Mapped[str]      = mapped_column( String(255), nullable=True)
+    cloudinary_img_id:          Mapped[str]      = mapped_column( String(100), nullable=True)
+
 
     #-----------#
     # Relations #
@@ -67,7 +71,9 @@ class User(db.Model):
             "full_name":   self.full_name,
             "profile_url": self.profile_url,
             "is_active":   self.is_active,
-            "created_at":  self.created_at.isoformat() if self.created_at else None
+            "created_at":  self.created_at.isoformat() if self.created_at else None,
+            "cloudinary_url": self.cloudinary_url,
+            "cloudinary_img_id": self.cloudinary_img_id
             # do not serialize the password, its a security breach
         }
 
@@ -149,6 +155,13 @@ class Recipe(db.Model):
         back_populates="recipes"
     )
 
+    # One-to-many relationship with RecipeImage --> shows all images associated with this recipe
+    images: Mapped[List["RecipeImage"]] = relationship(
+        "RecipeImage",
+        back_populates="recipe",
+        cascade="all, delete-orphan"
+    )
+
 
     #---------------#
     # Serialization #
@@ -170,3 +183,52 @@ class Recipe(db.Model):
     #-----------------#
     def __repr__(self):
         return f"<Recipe ID {self.id} | Title: {self.title} | Author ID: {self.author_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
+
+
+
+############################################
+#########       RECIPE IMAGE       #########
+############################################
+
+class RecipeImage(db.Model):
+    __tablename__ = "recipe_image"
+
+    # Primary Key
+    id:        Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
+ 
+    # Foreign Key to Recipe 
+    recipe_id: Mapped[int] = mapped_column( Integer, ForeignKey("recipe.id", ondelete="CASCADE"), nullable=False)
+
+    # Cloudinary fields
+    url:          Mapped[str]      = mapped_column( String(255),                      nullable=False)
+    image_id:     Mapped[str]      = mapped_column( String(100),                      nullable=False)
+    is_primary:   Mapped[bool]     = mapped_column( Boolean,     default=False,       nullable=False)
+    uploaded_at:  Mapped[datetime] = mapped_column( DateTime,    default=func.now(),  nullable=False)
+
+    # Relation Many-to-One with Recipe --> shows the recipe this image is associated with
+    recipe: Mapped["Recipe"] = relationship(
+        "Recipe",
+        back_populates="images"
+    )
+
+
+    #---------------#
+    # Serialization #
+    #---------------#
+    def serialize(self):
+        return {
+            "id":          self.id,
+            "recipe_id":   self.recipe_id,
+            "url":         self.url,
+            "image_id":    self.image_id,
+            "is_primary":  self.is_primary,
+            "uploaded_at": self.uploaded_at.isoformat() if self.uploaded_at else None
+        }
+
+    #-----------------#
+    # __repr__ Method #
+    #-----------------#
+    def __repr__(self):
+        return f"<RecipeImage ID {self.id} | Recipe ID: {self.recipe_id} | Primary: {self.is_primary}>"
+
+

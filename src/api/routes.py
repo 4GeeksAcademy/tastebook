@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import os
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Recipe
+from api.models import db, User, Recipe, RecipeImage
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
@@ -27,6 +27,22 @@ CORS(api) # Allow CORS requests to this API
 ##################################################
 
 # Configure JWT ??? ---> this is configured in "app.py"
+
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+
+
+# Cloudinary configuration
+cloudinary.config(
+    cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key    = os.getenv('CLOUDINARY_API_KEY'),
+    api_secret = os.getenv('CLOUDINARY_API_SECRET'),
+    secure     = True
+)
+
 
 #############################################
 ## Example endpoint
@@ -576,3 +592,189 @@ def reset_password(token):
     db.session.commit()
 
     return jsonify({"msg": "Password updated successfully."}), 200
+
+
+
+
+#######################################################
+########              CLOUDINARY               ########
+#######################################################
+
+
+# =============================
+#   USER PROFILE IMAGE UPLOAD
+# =============================
+@api.route('/user/upload-image', methods=['POST'])
+@jwt_required()
+def upload_user_image():
+    """
+    Uploads a user profile image to Cloudinary and saves the URL/image_id in the User model.
+    Expects a multipart/form-data POST with 'image' field.
+    """
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image file provided.'}), 400
+    image_file = request.files['image']
+
+    # Validate file type
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    filename = image_file.filename.lower()
+    if not any(filename.endswith('.' + ext) for ext in allowed_extensions):
+        return jsonify({'error': 'Invalid file type. Only images are allowed.'}), 400
+
+    try:
+        # Delete old image if exists
+        if user.cloudinary_img_id:
+            try:
+                cloudinary.uploader.destroy(user.cloudinary_img_id)
+            except:
+                pass  # Continue even if deletion fails
+        
+        # Upload new image with transformation for profile pictures
+        upload_result = cloudinary.uploader.upload(
+            image_file, 
+            folder=f"tastebook/users/{user_id}",
+            transformation=[
+                {'width': 400, 'height': 400, 'crop': 'fill', 'gravity': 'face'},
+                {'quality': 'auto:good'},
+                {'format': 'auto'}
+            ]
+        )
+        
+        user.cloudinary_url = upload_result['secure_url']
+        user.cloudinary_img_id = upload_result['public_id']
+        db.session.commit()
+        
+        return jsonify({
+            'msg': 'Profile image uploaded successfully.',
+            'user': user.serialize()
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+# =============================
+#   DELETE USER PROFILE IMAGE
+# =============================
+@api.route('/user/delete-image', methods=['DELETE'])
+@jwt_required()
+def delete_user_image():
+    """
+    Deletes a user's profile image from Cloudinary and removes URL/image_id from User model.
+    """
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    if not user.cloudinary_img_id:
+        return jsonify({'error': 'No profile image to delete'}), 404
+
+    try:
+        # Delete from Cloudinary
+        cloudinary.uploader.destroy(user.cloudinary_img_id)
+        
+        # Clear from database
+        user.cloudinary_url = None
+        user.cloudinary_img_id = None
+        db.session.commit()
+        
+        return jsonify({
+            'msg': 'Profile image deleted successfully.',
+            'user': user.serialize()
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+# =============================
+#   RECIPE IMAGE UPLOAD
+# =============================
+@api.route('/recipe/<int:recipe_id>/upload-image', methods=['POST'])
+@jwt_required()
+def upload_recipe_image(recipe_id):
+    """
+    Uploads an image for a recipe to Cloudinary, saves to RecipeImage table.
+    Expects a multipart/form-data POST with 'image' field and optional 'is_primary' boolean.
+    """
+    user_id = get_jwt_identity()
+    recipe = Recipe.query.get(recipe_id)
+    if not recipe or recipe.author_id != user_id:
+        return jsonify({'error': 'Recipe not found or unauthorized.'}), 404
+
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image file provided.'}), 400
+    image_file = request.files['image']
+    is_primary = request.form.get('is_primary', 'false').lower() == 'true'
+
+    try:
+        upload_result = cloudinary.uploader.upload(image_file, folder=f"tastebook/recipes/{recipe_id}")
+        # If is_primary, unset previous primary
+        if is_primary:
+            RecipeImage.query.filter_by(recipe_id=recipe_id, is_primary=True).update({'is_primary': False})
+        new_image = RecipeImage(
+            recipe_id=recipe_id,
+            url=upload_result['secure_url'],
+            image_id=upload_result['public_id'],
+            is_primary=is_primary
+        )
+        db.session.add(new_image)
+        db.session.commit()
+        return jsonify({'msg': 'Recipe image uploaded.', 'image': new_image.serialize()}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+# =============================
+#   SET PRIMARY RECIPE IMAGE
+# =============================
+@api.route('/recipe/<int:recipe_id>/image/<int:image_id>/set-primary', methods=['PUT'])
+@jwt_required()
+def set_primary_recipe_image(recipe_id, image_id):
+    """
+    Sets a recipe image as primary, unsets previous primary.
+    """
+    user_id = get_jwt_identity()
+    recipe = Recipe.query.get(recipe_id)
+    if not recipe or recipe.author_id != user_id:
+        return jsonify({'error': 'Recipe not found or unauthorized.'}), 404
+    image = RecipeImage.query.get(image_id)
+    if not image or image.recipe_id != recipe_id:
+        return jsonify({'error': 'Image not found.'}), 404
+    try:
+        RecipeImage.query.filter_by(recipe_id=recipe_id, is_primary=True).update({'is_primary': False})
+        image.is_primary = True
+        db.session.commit()
+        return jsonify({'msg': 'Primary image set.', 'image': image.serialize()}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+# =============================
+#   DELETE RECIPE IMAGE
+# =============================
+@api.route('/recipe/<int:recipe_id>/image/<int:image_id>', methods=['DELETE'])
+@jwt_required()
+def delete_recipe_image(recipe_id, image_id):
+    """
+    Deletes a recipe image from Cloudinary and DB.
+    """
+    user_id = get_jwt_identity()
+    recipe = Recipe.query.get(recipe_id)
+    if not recipe or recipe.author_id != user_id:
+        return jsonify({'error': 'Recipe not found or unauthorized.'}), 404
+    image = RecipeImage.query.get(image_id)
+    if not image or image.recipe_id != recipe_id:
+        return jsonify({'error': 'Image not found.'}), 404
+    try:
+        cloudinary.uploader.destroy(image.image_id)
+        db.session.delete(image)
+        db.session.commit()
+        return jsonify({'msg': 'Image deleted.'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

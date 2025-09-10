@@ -302,3 +302,89 @@ body {
 .dark-mode .text-primary {
   color: #0d6efd !important;
 }
+
+/* Image Upload Component Styles */
+.image-upload-container {
+  transition: all 0.3s ease;
+}
+
+.image-upload-dropzone {
+  transition: all 0.3s ease;
+  min-height: 120px;
+  border-width: 2px !important;
+}
+
+.image-upload-dropzone:hover {
+  border-color: #0d6efd !important;
+  background-color: rgba(13, 110, 253, 0.05) !important;
+}
+
+.image-upload-dropzone.active {
+  border-color: #0d6efd !important;
+  background-color: rgba(13, 110, 253, 0.1) !important;
+  transform: scale(1.02);
+}
+
+.profile-image-preview {
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.profile-image-preview:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-image-placeholder {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  transition: all 0.3s ease;
+}
+
+.dark-mode .profile-image-placeholder {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--border-color) 100%);
+}
+
+.image-delete-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image-delete-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode adjustments for image upload */
+.dark-mode .image-upload-dropzone {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .image-upload-dropzone:hover {
+  background-color: rgba(13, 110, 253, 0.1) !important;
+}
+
+.dark-mode .image-upload-dropzone.active {
+  background-color: rgba(13, 110, 253, 0.15) !important;
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.image-loading {
+  animation: pulse 2s infinite;
+}

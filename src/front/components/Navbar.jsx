@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat, Moon, Sun, Cog, DoorOpen } from "lucide-react";
+import { ChefHat, Moon, Sun, Cog, DoorOpen, FilePlus } from "lucide-react";
+import UserAvatar from "./UserAvatar";
 
 
 export const Navbar = () => {
 	const navigate = useNavigate();
 	const token = localStorage.getItem("token");
 	const [darkMode, setDarkMode] = useState(false);
+	const [userData, setUserData] = useState(null);
 
 	useEffect(() => {
 		// Check if user has a dark mode preference saved
@@ -16,6 +18,55 @@ export const Navbar = () => {
 			document.documentElement.classList.add("dark-mode");
 		}
 	}, []);
+
+	useEffect(() => {
+		// Fetch user data if logged in
+		const fetchUserData = async () => {
+			if (!token) {
+				setUserData(null);
+				return;
+			}
+			
+			const backendUrl = import.meta.env.VITE_BACKEND_URL;
+			if (!backendUrl) return;
+			
+			try {
+				const resp = await fetch(`${backendUrl}/api/settings`, {
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`
+					}
+				});
+				
+				if (resp.ok) {
+					const data = await resp.json();
+					setUserData(data.current_user);
+				} else {
+					console.error("Failed to fetch user data");
+					setUserData(null);
+				}
+			} catch (error) {
+				console.error("Failed to fetch user data:", error);
+				setUserData(null);
+			}
+		};
+
+		fetchUserData();
+
+		// Listen for user data updates from Settings page
+		const handleUserUpdate = (event) => {
+			if (event.detail && event.detail.userData) {
+				setUserData(event.detail.userData);
+			}
+		};
+
+		window.addEventListener('userDataUpdated', handleUserUpdate);
+
+		return () => {
+			window.removeEventListener('userDataUpdated', handleUserUpdate);
+		};
+	}, [token]);
 
 	const toggleDarkMode = () => {
 		const newDarkMode = !darkMode;
@@ -27,11 +78,15 @@ export const Navbar = () => {
 	const handleLogout = () => {
 		if (localStorage.getItem("token")) {
 			localStorage.removeItem("token");
+			setUserData(null);
 			alert("You have successfully logged out ✅");
 		}
 		navigate("/");
 	};
 
+	const handleAvatarClick = () => {
+		navigate("/settings");
+	};
 
 	
 	return (
@@ -116,11 +171,25 @@ export const Navbar = () => {
 							
 						) : (
 							<>
+								<Link to="/new-recipe" className="btn btn-link text-success text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="New Recipe">
+									<FilePlus size={22} />
+								</Link>
+
 								<Link to="/settings" className="btn btn-link text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Settings">
 									<Cog size={22} />
 								</Link>
-								
-								<button onClick={handleLogout} className="btn btn-light border-0 text-danger w-100"><DoorOpen size={22} /></button>
+
+								{/* User Avatar */}
+								<UserAvatar
+									imageUrl={userData?.cloudinary_url}
+									username={userData?.username}
+									fullName={userData?.full_name}
+									size="medium"
+									onClick={handleAvatarClick}
+									className="me-2"
+								/>
+
+								<button onClick={handleLogout} className="btn btn-light border-0 text-danger"><DoorOpen size={22} /></button>
 							</>
 						)}
 					</div>			
