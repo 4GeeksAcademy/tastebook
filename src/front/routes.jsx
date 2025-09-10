@@ -1,10 +1,12 @@
 // Import necessary components and functions from react-router-dom.
 
+
 import {
     createBrowserRouter,
     createRoutesFromElements,
     Route,
 } from "react-router-dom";
+
 
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
@@ -17,8 +19,10 @@ import { Signup } from "./pages/Signup";
 import { PasswordRecovery } from "./pages/PasswordRecovery";
 import { ResetPassword } from "./pages/ResetPassword";
 
+
 import { Settings } from "./pages/Settings";
 import { CreateRecipe } from "./pages/CreateRecipe";
+import { Recipe } from "./pages/Recipe";
 
 
 
@@ -44,6 +48,7 @@ export const router = createBrowserRouter(
 
         <Route path= "/settings" element={<Settings />} />
         <Route path= "/new-recipe" element={<CreateRecipe />} />
+        <Route path= "/recipe/:id" element={<Recipe />} />
  
         <Route path= "/demo" element={<Demo />} />
         <Route path= "/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}

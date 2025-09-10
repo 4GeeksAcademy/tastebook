@@ -7,8 +7,9 @@ from api.models import db, User, Recipe, RecipeImage
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
-import datetime
-from datetime import datetime
+
+# import datetime
+from datetime import datetime, date, timedelta
 from decimal import Decimal
 
 
@@ -212,7 +213,7 @@ def handle_login():
         # Generate access token (with expiration)
         access_token = create_access_token(
             identity=str(user.id),  # User identity (you can use ID or email)
-            expires_delta=datetime.timedelta(hours=24)  # Token expiration
+            expires_delta=timedelta(hours=24)  # Token expiration
         )
 
         return jsonify({
@@ -516,6 +517,126 @@ def create_new_recipe():
         return jsonify({"error": "Error creating recipe.", "error": str(e)}), 500
 
 #######################################################################################
+
+
+############################################
+#######        GET SINGLE RECIPE     #######
+############################################
+@api.route('/recipe/<int:recipe_id>', methods=['GET'])
+def get_single_recipe(recipe_id):
+    """
+    Get a single recipe by ID with author information and images.
+    """
+    try:
+        # Find the recipe
+        recipe = Recipe.query.get(recipe_id)
+        
+        if not recipe:
+            return jsonify({"error": "Recipe not found"}), 404
+        
+        # Get recipe data with author info
+        recipe_data = recipe.serialize()
+        
+        # Add author information
+        author = User.query.get(recipe.author_id)
+        if author:
+            recipe_data['author'] = {
+                'user_id': author.id,
+                'username': author.username,
+                'full_name': author.full_name,
+                'profile_url': author.profile_url,
+                'cloudinary_url': author.cloudinary_url
+            }
+        else:
+            # Fallback if author is somehow missing
+            recipe_data['author'] = {
+                'user_id': recipe.author_id,
+                'username': 'Unknown',
+                'full_name': 'Unknown User',
+                'profile_url': None,
+                'cloudinary_url': None
+            }
+        
+        # Add images
+        images = RecipeImage.query.filter_by(recipe_id=recipe_id).order_by(RecipeImage.display_order).all()
+        recipe_data['images'] = [img.serialize() for img in images]
+        
+        return jsonify({
+            "msg": "Recipe found successfully",
+            "recipe": recipe_data
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": "Error fetching recipe", "details": str(e)}), 500
+
+
+############################################
+#######        GET ALL RECIPES       #######
+############################################
+@api.route('/recipes', methods=['GET'])
+def get_all_recipes():
+    """
+    Get all recipes with basic information, author details, and primary images.
+    Supports pagination with limit and offset parameters.
+    """
+    try:
+        # Get pagination parameters
+        limit = request.args.get('limit', 20, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        
+        # Ensure reasonable limits
+        limit = min(limit, 100)  # Max 100 recipes per request
+        
+        # Get recipes with pagination
+        recipes_query = Recipe.query.order_by(Recipe.created_at.desc()).offset(offset).limit(limit)
+        recipes = recipes_query.all()
+        
+        # Get total count for pagination
+        total_count = Recipe.query.count()
+        
+        recipes_data = []
+        for recipe in recipes:
+            recipe_data = recipe.serialize()
+            
+            # Add author information
+            author = User.query.get(recipe.author_id)
+            if author:
+                recipe_data['author'] = {
+                    'user_id': author.id,
+                    'username': author.username,
+                    'full_name': author.full_name,
+                    'cloudinary_url': author.cloudinary_url
+                }
+            
+            # Add primary image
+            primary_image = RecipeImage.query.filter_by(
+                recipe_id=recipe.id, 
+                is_primary=True
+            ).first()
+            
+            if not primary_image:
+                # If no primary image, get the first image
+                primary_image = RecipeImage.query.filter_by(
+                    recipe_id=recipe.id
+                ).order_by(RecipeImage.display_order).first()
+            
+            recipe_data['primary_image'] = primary_image.serialize() if primary_image else None
+            
+            recipes_data.append(recipe_data)
+        
+        return jsonify({
+            "msg": "Recipes retrieved successfully",
+            "recipes": recipes_data,
+            "pagination": {
+                "total": total_count,
+                "limit": limit,
+                "offset": offset,
+                "has_more": offset + limit < total_count
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": "Error fetching recipes", "details": str(e)}), 500
 
 
 #######################################################
