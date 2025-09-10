@@ -35,7 +35,11 @@ export const Login = () => {
                                     })
             });
 
+            console.log(resp);
+
             const data = await resp.json().catch(() => ({}));
+
+            console.log(data);
 
             if (!resp.ok) {
                 throw new Error(data?.msg || "Invalid credentials");
@@ -65,6 +69,7 @@ export const Login = () => {
                             {error && <div className="alert alert-danger">{error}</div>}
 
                             <form onSubmit={handleSubmit} noValidate>
+
                                 <div className="mb-3">
                                     <label htmlFor="email" className="form-label">Email</label>
                                     <input
