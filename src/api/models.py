@@ -203,6 +203,7 @@ class RecipeImage(db.Model):
     url:          Mapped[str]      = mapped_column( String(255),                      nullable=False)
     image_id:     Mapped[str]      = mapped_column( String(100),                      nullable=False)
     is_primary:   Mapped[bool]     = mapped_column( Boolean,     default=False,       nullable=False)
+    display_order: Mapped[int]     = mapped_column( Integer,     default=0,           nullable=False)
     uploaded_at:  Mapped[datetime] = mapped_column( DateTime,    default=func.now(),  nullable=False)
 
     # Relation Many-to-One with Recipe --> shows the recipe this image is associated with
@@ -217,12 +218,13 @@ class RecipeImage(db.Model):
     #---------------#
     def serialize(self):
         return {
-            "id":          self.id,
-            "recipe_id":   self.recipe_id,
-            "url":         self.url,
-            "image_id":    self.image_id,
-            "is_primary":  self.is_primary,
-            "uploaded_at": self.uploaded_at.isoformat() if self.uploaded_at else None
+            "id":            self.id,
+            "recipe_id":     self.recipe_id,
+            "url":           self.url,
+            "image_id":      self.image_id,
+            "is_primary":    self.is_primary,
+            "display_order": self.display_order,
+            "uploaded_at":   self.uploaded_at.isoformat() if self.uploaded_at else None
         }
 
     #-----------------#

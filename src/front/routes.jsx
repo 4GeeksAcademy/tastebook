@@ -18,7 +18,7 @@ import { PasswordRecovery } from "./pages/PasswordRecovery";
 import { ResetPassword } from "./pages/ResetPassword";
 
 import { Settings } from "./pages/Settings";
-import CreateRecipe from "./pages/CreateRecipe";
+import { CreateRecipe } from "./pages/CreateRecipe";
 
 
 
@@ -35,16 +35,16 @@ export const router = createBrowserRouter(
 
         {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
 
-        <Route path= "/"       element={<Home />} />
+        <Route path= "/" element={<Home />} />
         
         <Route path= "/signup" element={<Signup />} />
         <Route path= "/login"  element={<Login />} />
         <Route path= "/recovery-validation" element={<PasswordRecovery />} />
         <Route path= "/reset-password/:token" element={<ResetPassword />} />
 
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/new-recipe" element={<CreateRecipe />} />
-
+        <Route path= "/settings" element={<Settings />} />
+        <Route path= "/new-recipe" element={<CreateRecipe />} />
+ 
         <Route path= "/demo" element={<Demo />} />
         <Route path= "/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
 

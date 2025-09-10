@@ -8,7 +8,9 @@ from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
 import datetime
+from datetime import datetime
 from decimal import Decimal
+
 
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -29,19 +31,23 @@ CORS(api) # Allow CORS requests to this API
 # Configure JWT ??? ---> this is configured in "app.py"
 
 
+##################################################
+# Cloudinary configuration
+
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
-
-
-# Cloudinary configuration
 cloudinary.config(
     cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'),
     api_key    = os.getenv('CLOUDINARY_API_KEY'),
     api_secret = os.getenv('CLOUDINARY_API_SECRET'),
     secure     = True
 )
+##################################################
+
+
+
 
 
 #############################################
@@ -420,6 +426,7 @@ def update_user_private_profile():
 """
 
 @api.route('/new-recipe', methods=['POST'])
+@api.route('/recipe', methods=['POST'])  # Alternative endpoint for frontend
 @jwt_required()
 def create_new_recipe():
 
@@ -713,20 +720,71 @@ def upload_recipe_image(recipe_id):
 
     try:
         upload_result = cloudinary.uploader.upload(image_file, folder=f"tastebook/recipes/{recipe_id}")
+        
+        # Get the next display order
+        max_order = db.session.query(db.func.max(RecipeImage.display_order)).filter_by(recipe_id=recipe_id).scalar()
+        next_order = (max_order or -1) + 1
+        
         # If is_primary, unset previous primary
         if is_primary:
             RecipeImage.query.filter_by(recipe_id=recipe_id, is_primary=True).update({'is_primary': False})
+        
         new_image = RecipeImage(
             recipe_id=recipe_id,
             url=upload_result['secure_url'],
             image_id=upload_result['public_id'],
-            is_primary=is_primary
+            is_primary=is_primary,
+            display_order=next_order
         )
         db.session.add(new_image)
         db.session.commit()
         return jsonify({'msg': 'Recipe image uploaded.', 'image': new_image.serialize()}), 200
     except Exception as e:
         db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+# =============================
+#   TEMPORARY IMAGE UPLOAD
+# =============================
+@api.route('/recipe/temp/upload-image', methods=['POST'])
+@jwt_required()
+def upload_temp_recipe_image():
+    """
+    Temporarily uploads an image to Cloudinary for recipes being created.
+    The image will be moved to the proper recipe folder after recipe creation.
+    """
+    user_id = get_jwt_identity()
+
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image file provided.'}), 400
+    image_file = request.files['image']
+    is_primary = request.form.get('is_primary', 'false').lower() == 'true'
+
+    try:
+        # Upload to a temporary folder
+        upload_result = cloudinary.uploader.upload(
+            image_file, 
+            folder=f"tastebook/temp/{user_id}",
+            # Add transformation for optimization
+            transformation=[
+                {'width': 800, 'height': 800, 'crop': 'limit'},
+                {'quality': 'auto'},
+                {'format': 'auto'}
+            ]
+        )
+        
+        # Return the image data in the same format as regular uploads
+        temp_image = {
+            'id': f"temp_{upload_result['public_id']}",
+            'url': upload_result['secure_url'],
+            'image_id': upload_result['public_id'],
+            'is_primary': is_primary,
+            'display_order': 0,  # Will be set properly when recipe is created
+            'uploaded_at': datetime.now().isoformat()
+        }
+        
+        return jsonify({'msg': 'Temporary image uploaded.', 'image': temp_image}), 200
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 # =============================
@@ -778,3 +836,60 @@ def delete_recipe_image(recipe_id, image_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+# =============================
+#   REORDER RECIPE IMAGES
+# =============================
+@api.route('/recipe/<int:recipe_id>/reorder-images', methods=['PUT'])
+@jwt_required()
+def reorder_recipe_images(recipe_id):
+    """
+    Reorders recipe images. Expects JSON with 'image_ids' array in desired order.
+    """
+    user_id = get_jwt_identity()
+    recipe = Recipe.query.get(recipe_id)
+    if not recipe or recipe.author_id != user_id:
+        return jsonify({'error': 'Recipe not found or unauthorized.'}), 404
+    
+    data = request.get_json()
+    if not data or 'image_ids' not in data:
+        return jsonify({'error': 'Missing image_ids array.'}), 400
+    
+    image_ids = data['image_ids']
+    
+    try:
+        # Update display order for each image
+        for index, image_id in enumerate(image_ids):
+            image = RecipeImage.query.filter_by(id=image_id, recipe_id=recipe_id).first()
+            if image:
+                image.display_order = index
+        
+        db.session.commit()
+        
+        # Return updated images
+        updated_images = RecipeImage.query.filter_by(recipe_id=recipe_id).order_by(RecipeImage.display_order).all()
+        return jsonify({
+            'msg': 'Images reordered successfully.',
+            'images': [img.serialize() for img in updated_images]
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+# =============================
+#   GET RECIPE IMAGES
+# =============================
+@api.route('/recipe/<int:recipe_id>/images', methods=['GET'])
+def get_recipe_images(recipe_id):
+    """
+    Gets all images for a recipe, ordered by display_order.
+    """
+    recipe = Recipe.query.get(recipe_id)
+    if not recipe:
+        return jsonify({'error': 'Recipe not found.'}), 404
+    
+    images = RecipeImage.query.filter_by(recipe_id=recipe_id).order_by(RecipeImage.display_order).all()
+    return jsonify({
+        'images': [img.serialize() for img in images]
+    }), 200
