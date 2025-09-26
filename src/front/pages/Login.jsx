@@ -131,7 +131,7 @@ export const Login = () => {
                             <hr/>
 
                             <div className="text-center">
-                                <small className="text-muted">Don't have an account? <Link to="/register" className="text-decoration-none">Signup</Link></small>
+                                <small className="text-muted">Don't have an account? <Link to="/signup" className="text-decoration-none">Signup</Link></small>
                             </div>
                         </div>
                     </div>
