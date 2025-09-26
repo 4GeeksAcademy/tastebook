@@ -152,7 +152,7 @@ const MultiImageUpload = ({
                   />
 
                   {/* Image Controls Overlay */}
-                  <div className="image-controls position-absolute bottom-0 start-0 end-0 p-2 bg-dark bg-opacity-75 rounded-bottom">
+                  <div className="image-controls position-absolute bottom-0 start-0 end-0 p-2 image-controls-overlay rounded-bottom">
                     <div className="d-flex justify-content-center gap-1">
                       {/* Set as Primary Button */}
                       <button
