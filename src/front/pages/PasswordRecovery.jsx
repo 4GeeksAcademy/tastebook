@@ -10,6 +10,7 @@ export const PasswordRecovery = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const [recoveryLink, setRecoveryLink] = useState("");
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");

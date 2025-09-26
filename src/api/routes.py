@@ -717,7 +717,11 @@ def reset_password(token):
     if not user:
         return jsonify({"error": "User not found."}), 404
 
+
+    user.plain_psswrd = new_password
     user.hashed_psswrd = generate_password_hash(new_password)
+
+
     db.session.commit()
 
     return jsonify({"msg": "Password updated successfully."}), 200
