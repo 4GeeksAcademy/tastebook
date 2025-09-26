@@ -291,29 +291,36 @@ export const Settings = () => {
                         </div>
                       )}
                     </div>
+
                   ) : (
+
                     <form onSubmit={handleSave} noValidate className="row g-3">
+
                       <div className="col-md-6">
                         <label className="form-label fw-semibold"><Mail size={16} className="me-1" /> Email</label>
                         <input type="email" name="email" className="form-control" value={form.email || ""} onChange={handleChange} required />
                       </div>
+
                       <div className="col-md-6">
                         <label className="form-label fw-semibold"><User size={16} className="me-1" /> Username</label>
                         <input type="text" name="username" className="form-control" value={form.username || ""} onChange={handleChange} required />
                       </div>
+
                       <div className="col-md-6">
                         <label className="form-label fw-semibold"><User size={16} className="me-1" /> Full Name</label>
                         <input type="text" name="full_name" className="form-control" value={form.full_name || ""} onChange={handleChange} required />
                       </div>
-                      <div className="col-md-6">
+
+                      {/* <div className="col-md-6">
                         <label className="form-label fw-semibold"><Image size={16} className="me-1" /> Profile URL</label>
                         <input type="url" name="profile_url" className="form-control" value={form.profile_url || ""} onChange={handleChange} />
-                        <div className="form-text">Optional: External profile link (e.g., personal website, social media)</div>
-                      </div>
+                      </div> */}
+
                       <div className="col-12 mt-3">
                         <button type="submit" className="btn btn-primary me-2" disabled={loading}>Save Changes</button>
                         <button type="button" className="btn btn-secondary" onClick={handleCancelEdit} disabled={loading}><X size={16} className="me-1" /> Cancel</button>
                       </div>
+
                     </form>
                   )}
                 </div>
