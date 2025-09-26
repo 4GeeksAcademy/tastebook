@@ -255,7 +255,7 @@ export const CreateRecipe = () => {
           <div className="card shadow">
 
 
-            <div className="card-header bg-primary text-white">
+            <div className="card-header bg-primary">
               <h2 className="mb-0">
                 <BadgePlus className="me-2" size={30} />
                 Create New Recipe

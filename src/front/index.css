@@ -6,8 +6,8 @@
   /* TasteBook Design System - Warm, inviting colors inspired by cooking */
   
   /* Core theme colors - warm and inviting */
-  --bg-primary: hsl(28, 20%, 98%);  /* Very light cream background */
-  --bg-secondary: hsl(28, 40%, 92%); /* Warm cream secondary */
+  --bg-primary:  hsl(28, 40%, 92%);  /* Very light cream background */
+  --bg-secondary: hsl(28, 20%, 98%); /* Warm cream secondary */
   --text-primary: hsl(20, 14.3%, 4.1%); /* Dark brown text */
   --text-secondary: hsl(25, 5.3%, 44.7%); /* Muted brown text */
   --border-color: hsl(28, 20%, 88%); /* Light cream border */
