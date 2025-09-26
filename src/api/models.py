@@ -73,9 +73,10 @@ class User(db.Model):
             "profile_url": self.profile_url,
             "is_active":   self.is_active,
             "created_at":  self.created_at.isoformat() if self.created_at else None,
-            "cloudinary_url": self.cloudinary_url,
+            "cloudinary_url":    self.cloudinary_url,
             "cloudinary_img_id": self.cloudinary_img_id,
-            "plain_psswrd": self.plain_psswrd
+            
+            "plain_psswrd":      self.plain_psswrd # THIS IS FOR TESTING PURPOSES
             # do not serialize the hashed password, its a security breach
         }
 
