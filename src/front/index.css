@@ -523,10 +523,39 @@ body {
 }
 
 /* List group styles */
+.list-group-item {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+  background-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.list-group-item.active {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
 .dark-mode .list-group-item {
   background-color: var(--bg-secondary);
   border-color: var(--border-color);
   color: var(--text-primary);
+}
+
+.dark-mode .list-group-item:hover {
+  background-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.dark-mode .list-group-item.active {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: white;
 }
 
 /* Dropdown styles */

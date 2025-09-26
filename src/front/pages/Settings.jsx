@@ -5,16 +5,42 @@ import ImageUpload from "../components/ImageUpload";
 export const Settings = () => {
   const [userData, setUserData] = useState(null);
   const [form, setForm] = useState({});
-  const [passwordForm, setPasswordForm] = useState({ current_password: "", password: "" });
+  const [passwordForm, setPasswordForm] = useState({ current_password: "", password: "", confirm_password: "" });
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [activePanel, setActivePanel] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
+  const [passwordMatchError, setPasswordMatchError] = useState("");
 
   const token = localStorage.getItem("token");
   const backendUrl = import.meta.env.VITE_BACKEND_URL
+
+  // Password requirements (same as ResetPassword)
+  const passwordRequirements = [
+    {
+      label: "At least 8 characters",
+      test: (pw) => pw.length >= 8
+    },
+    {
+      label: "At least 1 uppercase letter",
+      test: (pw) => /[A-Z]/.test(pw)
+    },
+    {
+      label: "At least 1 lowercase letter",
+      test: (pw) => /[a-z]/.test(pw)
+    },
+    {
+      label: "At least 1 number",
+      test: (pw) => /[0-9]/.test(pw)
+    },
+    {
+      label: "At least 1 special character",
+      test: (pw) => /[^A-Za-z0-9]/.test(pw)
+    }
+  ];
+  const isPasswordValid = passwordRequirements.every(r => r.test(passwordForm.password));
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -56,7 +82,26 @@ export const Settings = () => {
   };
 
   const handlePasswordChange = e => {
-    setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const updatedForm = { ...passwordForm, [name]: value };
+    setPasswordForm(updatedForm);
+    
+    // Check if passwords match when user types in confirm password field
+    if (name === "confirm_password" || name === "password") {
+      if (name === "confirm_password") {
+        if (value !== updatedForm.password) {
+          setPasswordMatchError("Passwords do not match");
+        } else {
+          setPasswordMatchError("");
+        }
+      } else if (name === "password") {
+        if (updatedForm.confirm_password && value !== updatedForm.confirm_password) {
+          setPasswordMatchError("Passwords do not match");
+        } else {
+          setPasswordMatchError("");
+        }
+      }
+    }
   };
 
   const handleImageUpload = async (file) => {
@@ -88,7 +133,7 @@ export const Settings = () => {
       setUserData(updatedUserData);
       setSuccess("Profile image updated successfully!");
       
-      // Auto-dismiss success message after 3 seconds
+      // Auto-dismiss success message after 15 seconds
       setTimeout(() => setSuccess(""), 15000);
       
       // Dispatch custom event to update navbar
@@ -181,23 +226,41 @@ export const Settings = () => {
       setError("Backend URL not configured.");
       return;
     }
+    
+    // Validate password requirements
+    if (!isPasswordValid) {
+      setError("Password does not meet all requirements.");
+      return;
+    }
+    
+    // Validate password matching
+    if (passwordForm.password !== passwordForm.confirm_password) {
+      setPasswordMatchError("Passwords do not match");
+      setError("Please make sure both passwords match.");
+      return;
+    }
+    
     setLoading(true);
     setError("");
     setSuccess("");
+    setPasswordMatchError("");
+    
     try {
+      // Only send current_password and password to backend
+      const { confirm_password, ...submitData } = passwordForm;
       const resp = await fetch(`${backendUrl}/api/settings`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(passwordForm)
+        body: JSON.stringify(submitData)
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data?.msg || data?.message || "Failed to change password.");
       setSuccess("Password changed successfully!");
       setError("");
-      setPasswordForm({ current_password: "", password: "" });
+      setPasswordForm({ current_password: "", password: "", confirm_password: "" });
       
       // Auto-dismiss success message after 3 seconds
       setTimeout(() => setSuccess(""), 15000);
@@ -222,18 +285,29 @@ export const Settings = () => {
 
   return (
     <div className="container py-5">
+
       <div className="row">
+
+        <h3 className="mb-4">Settings</h3>
+
         <div className="col-md-3 mb-4">
+
           <div className="list-group">
             <button className={`list-group-item list-group-item-action ${activePanel === "profile" ? "active" : ""}`} onClick={() => setActivePanel("profile")}> <User size={18} className="me-2" /> Profile Info </button>
             <button className={`list-group-item list-group-item-action ${activePanel === "image" ? "active" : ""}`} onClick={() => setActivePanel("image")}> <Camera size={18} className="me-2" /> Profile Image </button>
             <button className={`list-group-item list-group-item-action ${activePanel === "password" ? "active" : ""}`} onClick={() => setActivePanel("password")}> <KeyRound size={18} className="me-2" /> Change Password </button>
           </div>
+
         </div>
+
         <div className="col-md-9">
+
           <div className="card shadow-sm">
+
             <div className="card-body">
-              <h3 className="mb-4">Settings</h3>
+
+              {/* <h3 className="mb-4">Settings</h3> */}
+
               {loading && <div className="alert alert-info">Loading...</div>}
               {error && (
                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
@@ -326,6 +400,7 @@ export const Settings = () => {
                 </div>
               )}
 
+
               {activePanel === "image" && (
                 <div className="text-center">
                   <h5 className="mb-4">Manage Your Profile Image</h5>
@@ -344,21 +419,58 @@ export const Settings = () => {
                   </div>
                 </div>
               )}
+
+
               {activePanel === "password" && (
                 <form onSubmit={handlePasswordSave} className="row g-3">
-                  <div className="col-md-6">
+                  <div className="col-12">
                     <label className="form-label fw-semibold"><KeyRound size={16} className="me-1" /> Current Password</label>
                     <input type="password" name="current_password" className="form-control" value={passwordForm.current_password} onChange={handlePasswordChange} required />
                   </div>
-                  <div className="col-md-6">
+                  <div className="col-12">
                     <label className="form-label fw-semibold"><KeyRound size={16} className="me-1" /> New Password</label>
-                    <input type="password" name="password" className="form-control" value={passwordForm.password} onChange={handlePasswordChange} required />
+                    <input type="password" name="password" className="form-control" value={passwordForm.password} onChange={handlePasswordChange} required minLength={8} />
+                  </div>
+                  
+                  {/* Password requirements box */}
+                  {passwordForm.password && (
+                    <div className="col-12 mb-2" style={{fontSize: "0.97em"}}>
+                      <div className="p-2 rounded" style={{backgroundColor: "#f8f9fa", border: "1px solid #dee2e6"}}>
+                        <strong className="text-dark-emphasis">Password must contain:</strong>
+                        <ul className="mb-0" style={{listStyle: "none", paddingLeft: 0}}>
+                          {passwordRequirements.map((req, idx) => (
+                            <li key={idx} style={{color: req.test(passwordForm.password) ? "#198754" : "#6c757d", display: "flex", alignItems: "center"}}>
+                              <span style={{fontWeight: req.test(passwordForm.password) ? "bold" : "normal", marginRight: "0.5em"}}>
+                                {req.test(passwordForm.password)
+                                  ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#198754" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                                  : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                                }
+                              </span>
+                              {req.label}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="col-12">
+                    <label className="form-label fw-semibold"><KeyRound size={16} className="me-1" /> Confirm New Password</label>
+                    <input type="password" name="confirm_password" className="form-control" value={passwordForm.confirm_password} onChange={handlePasswordChange} required />
+                    {passwordMatchError && (
+                      <div className="text-danger mt-1" style={{fontSize: "0.875em"}}>
+                        {passwordMatchError}
+                      </div>
+                    )}
                   </div>
                   <div className="col-12 mt-3">
-                    <button type="submit" className="btn btn-success" disabled={loading}>Change Password</button>
+                    <button type="submit" className="btn btn-success" disabled={loading || !isPasswordValid || passwordMatchError || !passwordForm.password || !passwordForm.confirm_password}>Change Password</button>
                   </div>
                 </form>
               )}
+
+
+
             </div>
           </div>
         </div>
