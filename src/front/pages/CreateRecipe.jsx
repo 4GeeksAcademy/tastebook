@@ -248,17 +248,23 @@ export const CreateRecipe = () => {
   };
 
   return (
+
     <div className="container py-4">
       <div className="row justify-content-center">
         <div className="col-lg-8">
           <div className="card shadow">
+
+
             <div className="card-header bg-primary text-white">
               <h2 className="mb-0">
                 <BadgePlus className="me-2" size={30} />
                 Create New Recipe
               </h2>
             </div>
+
+
             <div className="card-body">
+
               {/* Alert */}
               {alert.show && (
                 <div className={`alert alert-${alert.type} alert-dismissible fade show`} role="alert">
@@ -272,6 +278,7 @@ export const CreateRecipe = () => {
               )}
 
               <form onSubmit={handleSubmit}>
+                
                 {/* Recipe Images Section */}
                 <div className="mb-4">
                   <label className="form-label fw-bold">Recipe Images</label>

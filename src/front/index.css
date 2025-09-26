@@ -1,25 +1,157 @@
+/* ============================================
+   TASTEBOOK DESIGN SYSTEM
+   ============================================ */
+
 :root {
-  --bg-primary: #ebf3ff;
-  --bg-secondary: #f8f9fa;
-  --text-primary: #212529;
-  --text-secondary: #6c757d;
-  --border-color: #e4e4e4;
+  /* TasteBook Design System - Warm, inviting colors inspired by cooking */
+  
+  /* Core theme colors - warm and inviting */
+  --bg-primary: hsl(28, 20%, 98%);  /* Very light cream background */
+  --bg-secondary: hsl(28, 40%, 92%); /* Warm cream secondary */
+  --text-primary: hsl(20, 14.3%, 4.1%); /* Dark brown text */
+  --text-secondary: hsl(25, 5.3%, 44.7%); /* Muted brown text */
+  --border-color: hsl(28, 20%, 88%); /* Light cream border */
+  
+  /* Primary colors - warm orange/red inspired by cooking */
+  --primary: hsl(15, 86%, 55%); /* Main brand orange */
+  --primary-rgb: 239, 113, 57; /* RGB for rgba usage */
+  --primary-glow: hsl(20, 100%, 70%); /* Glowing orange accent */
+  --primary-light: hsl(15, 86%, 75%); /* Lighter primary */
+  --primary-dark: hsl(15, 86%, 45%); /* Darker primary */
+  
+  /* Secondary and accent colors */
+  --secondary: hsl(28, 40%, 92%); /* Warm cream */
+  --accent: hsl(25, 30%, 85%); /* Complementary warm brown */
+  --muted: hsl(28, 30%, 94%); /* Light muted cream */
+  --muted-foreground: hsl(25, 5.3%, 44.7%); /* Muted text */
+  
+  /* Success color - warm green */
+  --success: hsl(85, 60%, 45%); /* Warm success green */
+  --success-rgb: 133, 184, 61; /* RGB for rgba usage */
+  
+  /* Danger/error colors */
+  --danger: hsl(0, 84.2%, 60.2%); /* Error red */
+  --danger-rgb: 220, 53, 69; /* RGB for rgba usage */
+  
+  /* Warning colors */
+  --warning: hsl(43, 96%, 56%); /* Warning yellow */
+  --warning-rgb: 255, 193, 7; /* RGB for rgba usage */
+  
+  /* Info colors */
+  --info: hsl(195, 85%, 41%); /* Info blue */
+  --info-rgb: 13, 110, 253; /* RGB for rgba usage */
+  
+  /* Light and dark variants */
+  --light: hsl(28, 30%, 96%); /* Very light cream */
+  --dark: hsl(20, 25%, 15%); /* Dark brown */
+  
+  /* Beautiful gradients and shadows */
+  --gradient-primary: linear-gradient(135deg, hsl(15, 86%, 55%), hsl(20, 100%, 70%));
+  --gradient-subtle: linear-gradient(180deg, hsl(28, 20%, 98%), hsl(28, 30%, 94%));
+  --shadow-elegant: 0 10px 30px -10px hsla(15, 86%, 55%, 0.2);
+  --shadow-glow: 0 0 40px hsla(20, 100%, 70%, 0.3);
+  
+  /* Bootstrap override variables */
+  --bs-primary: var(--primary);
+  --bs-primary-rgb: var(--primary-rgb);
+  --bs-secondary: var(--secondary);
+  --bs-success: var(--success);
+  --bs-success-rgb: var(--success-rgb);
+  --bs-danger: var(--danger);
+  --bs-danger-rgb: var(--danger-rgb);
+  --bs-warning: var(--warning);
+  --bs-warning-rgb: var(--warning-rgb);
+  --bs-info: var(--info);
+  --bs-info-rgb: var(--info-rgb);
+  --bs-light: var(--light);
+  --bs-dark: var(--dark);
+  --bs-body-bg: var(--bg-primary);
+  --bs-body-color: var(--text-primary);
+  --bs-border-color: var(--border-color);
 }
 
 .dark-mode {
-  --bg-primary: #000000;
-  --bg-secondary: #111111;
-  --text-primary: #ffffff;
-  --text-secondary: #cccccc;
-  --border-color: #292929;
+  /* Dark theme colors - maintaining warm tones */
+  --bg-primary: hsl(20, 14.3%, 4.1%); /* Very dark brown background */
+  --bg-secondary: hsl(20, 25%, 15%); /* Dark warm secondary */
+  --text-primary: hsl(28, 20%, 98%); /* Light cream text */
+  --text-secondary: hsl(25, 10%, 60%); /* Muted light text */
+  --border-color: hsl(20, 25%, 18%); /* Dark warm border */
+  
+  /* Primary colors for dark mode */
+  --primary: hsl(20, 100%, 70%); /* Bright warm orange */
+  --primary-rgb: 255, 138, 76; /* RGB for rgba usage */
+  --primary-glow: hsl(25, 100%, 80%); /* Very bright orange */
+  --primary-light: hsl(20, 100%, 80%); /* Lighter primary */
+  --primary-dark: hsl(20, 100%, 60%); /* Darker primary */
+  
+  /* Secondary and accent colors for dark */
+  --secondary: hsl(20, 25%, 15%); /* Dark warm tone */
+  --accent: hsl(20, 25%, 18%); /* Dark warm brown */
+  --muted: hsl(20, 25%, 12%); /* Dark muted */
+  --muted-foreground: hsl(25, 10%, 60%); /* Muted light text */
+  
+  /* Success color - dark mode */
+  --success: hsl(85, 60%, 35%); /* Darker success green */
+  --success-rgb: 92, 128, 42; /* RGB for rgba usage */
+  
+  /* Danger/error colors - dark mode */
+  --danger: hsl(0, 75%, 50%); /* Adjusted error red */
+  --danger-rgb: 191, 32, 32; /* RGB for rgba usage */
+  
+  /* Warning colors - dark mode */
+  --warning: hsl(43, 85%, 45%); /* Darker warning yellow */
+  --warning-rgb: 212, 153, 5; /* RGB for rgba usage */
+  
+  /* Info colors - dark mode */
+  --info: hsl(195, 85%, 55%); /* Brighter info blue */
+  --info-rgb: 31, 142, 255; /* RGB for rgba usage */
+  
+  /* Light and dark variants for dark mode */
+  --light: hsl(20, 25%, 18%); /* Dark light */
+  --dark: hsl(28, 20%, 98%); /* Light dark (inverted) */
+  
+  /* Dark mode gradients */
+  --gradient-primary: linear-gradient(135deg, hsl(20, 100%, 70%), hsl(25, 100%, 80%));
+  --gradient-subtle: linear-gradient(180deg, hsl(20, 14.3%, 4.1%), hsl(20, 25%, 12%));
+  --shadow-elegant: 0 10px 30px -10px hsla(20, 100%, 70%, 0.3);
+  --shadow-glow: 0 0 40px hsla(25, 100%, 80%, 0.4);
+  
+  /* Bootstrap override variables for dark mode */
+  --bs-primary: var(--primary);
+  --bs-primary-rgb: var(--primary-rgb);
+  --bs-secondary: var(--secondary);
+  --bs-success: var(--success);
+  --bs-success-rgb: var(--success-rgb);
+  --bs-danger: var(--danger);
+  --bs-danger-rgb: var(--danger-rgb);
+  --bs-warning: var(--warning);
+  --bs-warning-rgb: var(--warning-rgb);
+  --bs-info: var(--info);
+  --bs-info-rgb: var(--info-rgb);
+  --bs-light: var(--light);
+  --bs-dark: var(--dark);
+  --bs-body-bg: var(--bg-primary);
+  --bs-body-color: var(--text-primary);
+  --bs-border-color: var(--border-color);
 }
 
-/* Apply base styles */
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+/* Apply base styles with fallbacks */
 body {
+  background-color: hsl(28, 20%, 98%); /* fallback */
   background-color: var(--bg-primary);
+  color: hsl(20, 14.3%, 4.1%); /* fallback */
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* ============================================
+   TYPOGRAPHY & TEXT STYLES
+   ============================================ */
 
 /* Typography styles */
 .dark-mode h1,
@@ -46,15 +178,49 @@ body {
   color: var(--text-primary) !important;
 }
 
-/* Navbar styles */
+/* ============================================
+   NAVIGATION COMPONENTS
+   ============================================ */
+
+/* Navbar styles with warm theme */
+.navbar {
+  background: var(--gradient-subtle) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px hsla(var(--primary-rgb), 0.1);
+}
+
+.navbar-brand {
+  color: var(--text-primary) !important;
+  font-weight: 600;
+}
+
+.nav-link {
+  color: var(--text-primary) !important;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--primary) !important;
+  /* transform: translateY(-1px); */
+}
+
+.navbar-toggler {
+  border-color: var(--border-color);
+}
+
 .dark-mode .navbar {
-  background-color: var(--bg-secondary) !important;
+  background: var(--gradient-subtle) !important;
   border-bottom-color: var(--border-color) !important;
 }
 
 .dark-mode .navbar-brand,
 .dark-mode .nav-link {
   color: var(--text-primary) !important;
+}
+
+.dark-mode .nav-link:hover {
+  color: var(--primary) !important;
 }
 
 .dark-mode .navbar-toggler {
@@ -87,7 +253,45 @@ body {
   border-color: var(--border-color) !important;
 }
 
-/* Card styles */
+/* ============================================
+   CARD COMPONENTS
+   ============================================ */
+
+/* Card styles with warm theme */
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px hsla(var(--primary-rgb), 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  /* transform: translateY(-2px); */
+  box-shadow: var(--shadow-elegant);
+}
+
+.card-header {
+  background: var(--gradient-subtle);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 0.75rem 0.75rem 0 0 !important;
+}
+
+.card-body {
+  color: var(--text-primary);
+}
+
+.card-title {
+  color: var(--text-primary) !important;
+  font-weight: 600;
+}
+
+.card-text {
+  color: var(--text-primary) !important;
+}
+
 .dark-mode .card {
   background-color: var(--bg-secondary);
   border-color: var(--border-color);
@@ -95,7 +299,7 @@ body {
 }
 
 .dark-mode .card-header {
-  background-color: var(--bg-secondary);
+  background: var(--gradient-subtle);
   border-bottom-color: var(--border-color);
   color: var(--text-primary);
 }
@@ -112,27 +316,73 @@ body {
   color: var(--text-primary) !important;
 }
 
-/* Form styles */
+/* ============================================
+   FORM COMPONENTS
+   ============================================ */
+
+/* Form styles with warm color scheme */
+.form-control,
+.form-select {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.form-control::placeholder {
+  color: var(--text-secondary);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--bg-secondary);
+  border-color: var(--primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 0.2rem hsla(var(--primary-rgb), 0.25);
+  /* transform: translateY(-1px); */
+}
+
+.form-label {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.form-text {
+  color: var(--text-secondary);
+}
+
+/* Enhanced form styling */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  color: var(--primary);
+}
+
 .dark-mode input,
 .dark-mode textarea,
-.dark-mode select {
+.dark-mode select,
+.dark-mode .form-control,
+.dark-mode .form-select {
   background-color: var(--bg-secondary) !important;
   border-color: var(--border-color) !important;
   color: var(--text-primary) !important;
 }
 
 .dark-mode input::placeholder,
-.dark-mode textarea::placeholder {
+.dark-mode textarea::placeholder,
+.dark-mode .form-control::placeholder {
   color: var(--text-secondary) !important;
 }
 
 .dark-mode input:focus,
 .dark-mode textarea:focus,
-.dark-mode select:focus {
+.dark-mode select:focus,
+.dark-mode .form-control:focus,
+.dark-mode .form-select:focus {
   background-color: var(--bg-secondary) !important;
-  border-color: #0d6efd !important;
+  border-color: var(--primary) !important;
   color: var(--text-primary) !important;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+  box-shadow: 0 0 0 0.2rem hsla(var(--primary-rgb), 0.25) !important;
 }
 
 .dark-mode .form-label {
@@ -143,32 +393,91 @@ body {
   color: var(--text-secondary) !important;
 }
 
-/* Button styles */
+/* ============================================
+   BUTTON COMPONENTS
+   ============================================ */
+
+/* Button styles with warm color scheme */
+.btn-primary {
+  background: hsl(15, 86%, 55%) !important; /* fallback */
+  background: var(--gradient-primary) !important;
+  border-color: hsl(15, 86%, 55%) !important; /* fallback */
+  border-color: var(--primary) !important;
+  color: white !important;
+  box-shadow: 0 10px 30px -10px hsla(15, 86%, 55%, 0.2); /* fallback */
+  box-shadow: var(--shadow-elegant);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  /* transform: translateY(-2px); */
+  box-shadow: var(--shadow-glow);
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary)) !important;
+}
+
+.btn-outline-primary {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary) !important;
+  color: white !important;
+  /* transform: translateY(-1px); */
+  box-shadow: var(--shadow-elegant);
+}
+
+.btn-success {
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
+}
+
+.btn-success:hover {
+  background-color: hsl(85, 60%, 40%) !important;
+  border-color: hsl(85, 60%, 40%) !important;
+  /* transform: translateY(-1px); */
+}
+
+.btn-light {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.btn-light:hover {
+  background-color: var(--accent) !important;
+  color: var(--text-primary) !important;
+}
+
 .dark-mode .btn-outline-primary {
-  border-color: #0d6efd;
-  color: #0d6efd;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
 }
 
 .dark-mode .btn-outline-primary:hover {
-  background-color: #0d6efd;
-  color: white;
+  background-color: var(--primary) !important;
+  color: var(--bg-primary) !important;
 }
 
 .dark-mode .btn-light {
   background-color: var(--bg-secondary) !important;
   border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
 }
 
 .dark-mode .btn-light:hover {
-  background-color: var(--border-color) !important;
+  background-color: var(--accent) !important;
+  color: var(--text-primary) !important;
 }
 
-/* Table styles */
-.dark-mode table {
-  color: var(--text-primary);
-}
+/* ============================================
+   TABLE COMPONENTS
+   ============================================ */
 
+.dark-mode table,
 .dark-mode .table {
+  color: var(--text-primary);
   --bs-table-bg: var(--bg-secondary);
   --bs-table-color: var(--text-primary);
   --bs-table-border-color: var(--border-color);
@@ -179,15 +488,15 @@ body {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-.dark-mode .table th {
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
-}
-
+.dark-mode .table th,
 .dark-mode .table td {
   color: var(--text-primary) !important;
   border-color: var(--border-color) !important;
 }
+
+/* ============================================
+   MODAL & OVERLAY COMPONENTS
+   ============================================ */
 
 /* Modal styles */
 .dark-mode .modal-content {
@@ -234,34 +543,83 @@ body {
   background-color: var(--border-color);
 }
 
-/* Alert styles */
+/* ============================================
+   ALERT & NOTIFICATION COMPONENTS
+   ============================================ */
+
+/* Alert styles with warm color scheme */
+.alert {
+  border-radius: 0.75rem;
+  border-width: 1px;
+}
+
+.alert-primary {
+  background-color: hsla(var(--primary-rgb), 0.1);
+  border-color: hsla(var(--primary-rgb), 0.3);
+  color: var(--primary-dark);
+}
+
+.alert-success {
+  background-color: hsla(var(--success-rgb), 0.1);
+  border-color: hsla(var(--success-rgb), 0.3);
+  color: hsl(85, 60%, 30%);
+}
+
+.alert-danger {
+  background-color: hsla(var(--danger-rgb), 0.1);
+  border-color: hsla(var(--danger-rgb), 0.3);
+  color: hsl(0, 84.2%, 45%);
+}
+
+.alert-warning {
+  background-color: hsla(var(--warning-rgb), 0.1);
+  border-color: hsla(var(--warning-rgb), 0.3);
+  color: hsl(43, 96%, 40%);
+}
+
+.alert-info {
+  background-color: hsla(var(--info-rgb), 0.1);
+  border-color: hsla(var(--info-rgb), 0.3);
+  color: hsl(195, 85%, 35%);
+}
+
 .dark-mode .alert {
   border-color: var(--border-color);
 }
 
 .dark-mode .alert-primary {
-  background-color: rgba(13, 110, 253, 0.15);
-  border-color: rgba(13, 110, 253, 0.3);
-  color: #6ea8fe;
+  background-color: hsla(var(--primary-rgb), 0.15);
+  border-color: hsla(var(--primary-rgb), 0.3);
+  color: var(--primary-light);
 }
 
 .dark-mode .alert-success {
-  background-color: rgba(25, 135, 84, 0.15);
-  border-color: rgba(25, 135, 84, 0.3);
-  color: #75b798;
+  background-color: hsla(var(--success-rgb), 0.15);
+  border-color: hsla(var(--success-rgb), 0.3);
+  color: hsl(85, 60%, 55%);
 }
 
 .dark-mode .alert-danger {
-  background-color: rgba(220, 53, 69, 0.15);
-  border-color: rgba(220, 53, 69, 0.3);
-  color: #ea868f;
+  background-color: hsla(var(--danger-rgb), 0.15);
+  border-color: hsla(var(--danger-rgb), 0.3);
+  color: hsl(0, 75%, 65%);
 }
 
 .dark-mode .alert-warning {
-  background-color: rgba(255, 193, 7, 0.15);
-  border-color: rgba(255, 193, 7, 0.3);
-  color: #ffda6a;
+  background-color: hsla(var(--warning-rgb), 0.15);
+  border-color: hsla(var(--warning-rgb), 0.3);
+  color: hsl(43, 85%, 60%);
 }
+
+.dark-mode .alert-info {
+  background-color: hsla(var(--info-rgb), 0.15);
+  border-color: hsla(var(--info-rgb), 0.3);
+  color: hsl(195, 85%, 65%);
+}
+
+/* ============================================
+   UTILITY COMPONENTS
+   ============================================ */
 
 /* Badge styles */
 .dark-mode .badge {
@@ -294,14 +652,18 @@ body {
 }
 
 .dark-mode .pagination .page-item.active .page-link {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
+  background-color: var(--primary);
+  border-color: var(--primary);
 }
 
 
 .dark-mode .text-primary {
-  color: #0d6efd !important;
+  color: var(--primary) !important;
 }
+
+/* ============================================
+   SPECIALIZED COMPONENTS
+   ============================================ */
 
 /* Image Upload Component Styles */
 .image-upload-container {
@@ -315,13 +677,13 @@ body {
 }
 
 .image-upload-dropzone:hover {
-  border-color: #0d6efd !important;
-  background-color: rgba(13, 110, 253, 0.05) !important;
+  border-color: var(--primary) !important;
+  background-color: hsla(var(--primary-rgb), 0.05) !important;
 }
 
 .image-upload-dropzone.active {
-  border-color: #0d6efd !important;
-  background-color: rgba(13, 110, 253, 0.1) !important;
+  border-color: var(--primary) !important;
+  background-color: hsla(var(--primary-rgb), 0.1) !important;
   transform: scale(1.02);
 }
 
@@ -337,7 +699,7 @@ body {
 }
 
 .profile-image-placeholder {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--light) 0%, var(--accent) 100%);
   transition: all 0.3s ease;
 }
 
@@ -368,11 +730,11 @@ body {
 }
 
 .dark-mode .image-upload-dropzone:hover {
-  background-color: rgba(13, 110, 253, 0.1) !important;
+  background-color: hsla(var(--primary-rgb), 0.1) !important;
 }
 
 .dark-mode .image-upload-dropzone.active {
-  background-color: rgba(13, 110, 253, 0.15) !important;
+  background-color: hsla(var(--primary-rgb), 0.15) !important;
 }
 
 /* Recipe View Styles */
@@ -418,7 +780,7 @@ body {
 }
 
 .ingredient-item:hover {
-  background-color: rgba(13, 110, 253, 0.05);
+  background-color: hsla(var(--primary-rgb), 0.05);
   transform: translateX(5px);
 }
 
@@ -431,13 +793,13 @@ body {
 }
 
 .instruction-step:hover {
-  background-color: rgba(13, 110, 253, 0.03);
+  background-color: hsla(var(--primary-rgb), 0.03);
   transform: translateX(5px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .step-number {
-  background: linear-gradient(135deg, var(--bs-success) 0%, #28a745 100%);
+  background: linear-gradient(135deg, var(--success) 0%, hsl(85, 60%, 40%) 100%);
   color: white;
   width: 35px;
   height: 35px;
@@ -453,7 +815,7 @@ body {
 .author-card {
   transition: all 0.3s ease;
   border-radius: 0.5rem;
-  background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.02) 100%);
+  background: linear-gradient(135deg, hsla(var(--primary-rgb), 0.05) 0%, hsla(var(--primary-rgb), 0.02) 100%);
 }
 
 .author-card:hover {
@@ -462,9 +824,9 @@ body {
 }
 
 .recipe-meta-badge {
-  background: rgba(13, 110, 253, 0.1);
-  color: var(--bs-primary);
-  border: 1px solid rgba(13, 110, 253, 0.2);
+  background: hsla(var(--primary-rgb), 0.1);
+  color: var(--primary);
+  border: 1px solid hsla(var(--primary-rgb), 0.2);
   padding: 0.5rem 1rem;
   border-radius: 1rem;
   font-size: 0.875rem;
@@ -472,7 +834,7 @@ body {
 }
 
 .recipe-meta-badge:hover {
-  background: rgba(13, 110, 253, 0.15);
+  background: hsla(var(--primary-rgb), 0.15);
   transform: translateY(-1px);
 }
 
@@ -537,6 +899,235 @@ body {
 
 .image-loading {
   animation: pulse 2s infinite;
+}
+
+/* ============================================
+   ENHANCED VISUAL EFFECTS
+   ============================================ */
+
+/* Enhanced Visual Effects with Warm Color Scheme */
+.tastebook-hero {
+  background: var(--gradient-subtle);
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: var(--shadow-elegant);
+}
+
+.tastebook-card-enhanced {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-elegant);
+  transition: all 0.3s ease;
+}
+
+.tastebook-card-enhanced:hover {
+  /* transform: translateY(-4px); */
+  box-shadow: var(--shadow-glow);
+}
+
+.tastebook-gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+}
+
+/* Dark mode variant for gradient text */
+.dark-mode .tastebook-gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tastebook-warm-border {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--bg-primary), var(--bg-primary)) padding-box,
+              var(--gradient-primary) border-box;
+  border-radius: 0.5rem;
+}
+
+.tastebook-glow-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.tastebook-glow-effect::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: var(--gradient-primary);
+  opacity: 0.1;
+  border-radius: 50%;
+  filter: blur(20px);
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+.tastebook-glow-effect:hover::before {
+  opacity: 0.2;
+}
+
+/* Warm accent classes for quick styling */
+.text-primary-warm {
+  color: var(--primary) !important;
+}
+
+.bg-primary-warm {
+  background-color: var(--primary) !important;
+  color: white !important;
+}
+
+.bg-secondary-warm {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.border-primary-warm {
+  border-color: var(--primary) !important;
+}
+
+.shadow-warm {
+  box-shadow: var(--shadow-elegant) !important;
+}
+
+.shadow-warm-glow {
+  box-shadow: var(--shadow-glow) !important;
+}
+
+/* Dark mode adjustments for enhanced effects */
+.dark-mode .tastebook-hero {
+  background: var(--gradient-subtle);
+}
+
+.dark-mode .tastebook-card-enhanced {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+/* Dark mode form validation states */
+.dark-mode .form-control.is-valid {
+  border-color: var(--success);
+  background-color: var(--bg-secondary);
+}
+
+.dark-mode .form-control.is-valid:focus {
+  border-color: var(--success);
+  box-shadow: 0 0 0 0.2rem hsla(var(--success-rgb), 0.25);
+}
+
+.dark-mode .form-control.is-invalid {
+  border-color: var(--danger);
+  background-color: var(--bg-secondary);
+}
+
+.dark-mode .form-control.is-invalid:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 0.2rem hsla(var(--danger-rgb), 0.25);
+}
+
+.dark-mode .valid-feedback {
+  color: var(--success);
+}
+
+.dark-mode .invalid-feedback {
+  color: var(--danger);
+}
+
+/* Dark mode tooltip and popover styles */
+.dark-mode .tooltip .tooltip-inner {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.dark-mode .tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: var(--border-color);
+}
+
+.dark-mode .tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: var(--border-color);
+}
+
+.dark-mode .tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: var(--border-color);
+}
+
+.dark-mode .tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: var(--border-color);
+}
+
+.dark-mode .popover {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dark-mode .popover .popover-header {
+  background-color: var(--bg-primary);
+  border-bottom-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .popover .popover-body {
+  color: var(--text-primary);
+}
+
+/* ============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+/* Enhanced focus states for accessibility */
+.btn:focus,
+.card:focus,
+.nav-link:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px hsla(var(--primary-rgb), 0.2);
+}
+
+.form-control:focus,
+.form-select:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.image-upload-dropzone:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.recipe-thumbnail:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-color: var(--primary);
+}
+
+.ingredient-item:focus,
+.instruction-step:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Dark mode focus states */
+.dark-mode .btn:focus,
+.dark-mode .card:focus,
+.dark-mode .nav-link:focus {
+  outline-color: var(--primary);
+  box-shadow: 0 0 0 3px hsla(var(--primary-rgb), 0.3);
+}
+
+.dark-mode .form-control:focus,
+.dark-mode .form-select:focus,
+.dark-mode .image-upload-dropzone:focus,
+.dark-mode .recipe-thumbnail:focus,
+.dark-mode .ingredient-item:focus,
+.dark-mode .instruction-step:focus {
+  outline-color: var(--primary);
 }
 
 /* Multi-Image Upload Styles */
@@ -618,30 +1209,68 @@ body {
   min-height: 200px;
   transition: all 0.3s ease;
   cursor: pointer;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .upload-zone:hover {
-  border-color: var(--bs-primary) !important;
-  background-color: rgba(13, 110, 253, 0.05);
+  border-color: var(--primary) !important;
+  background-color: hsla(var(--primary-rgb), 0.05);
 }
 
 .upload-zone.border-primary {
-  background-color: rgba(13, 110, 253, 0.1);
+  background-color: hsla(var(--primary-rgb), 0.1);
+}
+
+/* Light mode specific styles for multi-image upload */
+.image-controls-overlay {
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+}
+
+.image-controls-overlay .btn {
+  color: white;
+}
+
+.image-controls-overlay .btn-outline-warning {
+  border-color: rgba(255, 255, 255, 0.8);
+  color: white;
+}
+
+.image-controls-overlay .btn-outline-warning:hover {
+  background-color: hsla(var(--warning-rgb), 0.9);
+  border-color: var(--warning);
+  color: var(--dark);
+}
+
+.image-controls-overlay .btn-outline-danger {
+  border-color: rgba(255, 255, 255, 0.8);
+  color: white;
+}
+
+.image-controls-overlay .btn-outline-danger:hover {
+  background-color: hsla(var(--danger-rgb), 0.9);
+  border-color: var(--danger);
+  color: white;
 }
 
 /* Dark Mode Support for Multi-Image Upload */
-@media (prefers-color-scheme: dark) {
-  .image-card {
-    background: var(--bs-dark);
-    border-color: var(--bs-secondary);
-  }
-  
-  .upload-zone {
-    background-color: var(--bs-dark);
-    border-color: var(--bs-secondary);
-  }
-  
-  .upload-zone:hover {
-    background-color: rgba(13, 110, 253, 0.1);
-  }
+.dark-mode .image-card {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dark-mode .upload-zone {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .upload-zone:hover {
+  background-color: hsla(var(--primary-rgb), 0.1);
+}
+
+.dark-mode .image-controls-overlay {
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
 }
