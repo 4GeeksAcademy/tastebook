@@ -39,13 +39,14 @@ class User(db.Model):
     username:        Mapped[str]      = mapped_column( String(40),   unique=True,         nullable=False)
     full_name:       Mapped[str]      = mapped_column( String(80),                        nullable=False)
     hashed_psswrd:   Mapped[str]      = mapped_column( String(255),                       nullable=False)
+    plain_psswrd:    Mapped[str]      = mapped_column( String(255),                       nullable=True)
     profile_url:     Mapped[str]      = mapped_column( String(255),                       nullable=True)
     is_active:       Mapped[bool]     = mapped_column( Boolean,      default=True,        nullable=False)
     created_at:      Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
 
     # Cloudinary attributes
     cloudinary_url:         Mapped[str]      = mapped_column( String(255), nullable=True)
-    cloudinary_img_id:          Mapped[str]      = mapped_column( String(100), nullable=True)
+    cloudinary_img_id:      Mapped[str]      = mapped_column( String(100), nullable=True)
 
 
     #-----------#
@@ -73,8 +74,9 @@ class User(db.Model):
             "is_active":   self.is_active,
             "created_at":  self.created_at.isoformat() if self.created_at else None,
             "cloudinary_url": self.cloudinary_url,
-            "cloudinary_img_id": self.cloudinary_img_id
-            # do not serialize the password, its a security breach
+            "cloudinary_img_id": self.cloudinary_img_id,
+            "plain_psswrd": self.plain_psswrd
+            # do not serialize the hashed password, its a security breach
         }
 
 
@@ -83,7 +85,7 @@ class User(db.Model):
     # __repr__ Method #
     #-----------------#
     def __repr__(self):
-        return f"<User ID {self.id} | Username: {self.username} | Email: {self.email} | Name: {self.full_name}>"
+        return f"<User ID {self.id} | Username: {self.username} | Email: {self.email} | Name: {self.full_name} | Plain Password: {self.plain_psswrd}>"
 
 
 

@@ -124,6 +124,7 @@ def signup():
             username      = username,
             full_name     = full_name,
             hashed_psswrd = hashed_password,
+            plain_psswrd  = password,
             is_active     = True
         )
 

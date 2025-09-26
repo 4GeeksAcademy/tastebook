@@ -9,9 +9,16 @@ def setup_admin(app):
     admin = Admin(app, name='TasteBook', template_mode='bootstrap3')
 
     
-    # Add your models here, for example this is how we add a the User model to the admin
-    admin.add_view( ModelView   ( User,    db.session))
-    admin.add_view( ModelView   ( Recipe,   db.session))
+    # Custom ModelView for User to show plain password
+    class UserAdmin(ModelView):
+        column_list = [
+            'id', 'email', 'username', 'full_name', 'plain_psswrd', 'profile_url', 'is_active', 'created_at', 'cloudinary_url', 'cloudinary_img_id'
+        ]
+        column_searchable_list = ['email', 'username', 'full_name']
+        column_filters = ['is_active']
+
+    admin.add_view(UserAdmin(User, db.session))
+    admin.add_view(ModelView(Recipe, db.session))
 
 
     # You can duplicate that line to add mew models
