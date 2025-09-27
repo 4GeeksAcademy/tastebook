@@ -65,8 +65,7 @@ export const Settings = () => {
         setForm({
           email: user.email || "",
           full_name: user.full_name || "",
-          username: user.username || "",
-          profile_url: user.profile_url || ""
+          username: user.username || ""
         });
       } catch (err) {
         setError("Failed to load user info.");
@@ -277,8 +276,7 @@ export const Settings = () => {
       setForm({
         email: userData.email || "",
         full_name: userData.full_name || "",
-        username: userData.username || "",
-        profile_url: userData.profile_url || ""
+        username: userData.username || ""
       });
     }
   };
@@ -351,10 +349,6 @@ export const Settings = () => {
                           <label className="form-label fw-semibold"><User size={18} className="me-1" /> Full Name</label>
                           <p className="text-muted">{userData?.full_name}</p>
                         </div>
-                        <div className="col-md-6">
-                          <label className="form-label fw-semibold"><Image size={18} className="me-1" /> Profile URL</label>
-                          <p className="text-muted">{userData?.profile_url ? <a href={userData.profile_url} target="_blank" rel="noopener noreferrer">{userData.profile_url}</a> : "Not set"}</p>
-                        </div>
                       </div>
                       <button onClick={() => setIsEditing(true)} className="btn btn-primary"><Edit size={16} className="me-1" /> Edit Profile</button>
                       {userData && (
@@ -384,11 +378,6 @@ export const Settings = () => {
                         <label className="form-label fw-semibold"><User size={16} className="me-1" /> Full Name</label>
                         <input type="text" name="full_name" className="form-control" value={form.full_name || ""} onChange={handleChange} required />
                       </div>
-
-                      {/* <div className="col-md-6">
-                        <label className="form-label fw-semibold"><Image size={16} className="me-1" /> Profile URL</label>
-                        <input type="url" name="profile_url" className="form-control" value={form.profile_url || ""} onChange={handleChange} />
-                      </div> */}
 
                       <div className="col-12 mt-3">
                         <button type="submit" className="btn btn-primary me-2" disabled={loading}>Save Changes</button>

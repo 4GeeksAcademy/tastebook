@@ -312,7 +312,6 @@ def get_user_private_profile():
     "full_name":   "New Full Name",       // optional
     "username":    "new_username",        // optional
     "email":       "new@email.com",       // optional
-    "profile_url": "https://...",         // optional
 
     "current_password": "old_password",   // optional
     "password":         "new_password"    // optional
@@ -356,10 +355,6 @@ def update_user_private_profile():
             if existing_user:
                 return jsonify({"msg": "This email is already registered."}), 400
             user.email = data["email"]
-
-        if "profile_url" in data:
-            user.profile_url = data["profile_url"]  ##### CHECK LATER
-
 
         # Password change handling
         if 'password' in data:
@@ -729,7 +724,7 @@ def create_new_recipe():
             'user_id':     user.id,
             'username':    user.username,
             'full_name':   user.full_name,
-            'profile_url': user.profile_url
+            'cloudinary_url': user.cloudinary_url
         }
         
         return jsonify({
@@ -770,7 +765,6 @@ def get_single_recipe(recipe_id):
                 'user_id': author.id,
                 'username': author.username,
                 'full_name': author.full_name,
-                'profile_url': author.profile_url,
                 'cloudinary_url': author.cloudinary_url
             }
         else:
@@ -779,7 +773,6 @@ def get_single_recipe(recipe_id):
                 'user_id': recipe.author_id,
                 'username': 'Unknown',
                 'full_name': 'Unknown User',
-                'profile_url': None,
                 'cloudinary_url': None
             }
         

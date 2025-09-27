@@ -13,7 +13,7 @@ def setup_admin(app):
     # Custom ModelView for User to show plain password
     class UserAdmin(ModelView):
         column_list = [
-            'id', 'email', 'username', 'full_name', 'plain_psswrd', 'profile_url', 'is_active', 'created_at', 'cloudinary_url', 'cloudinary_img_id'
+            'id', 'email', 'username', 'full_name', 'plain_psswrd', 'is_active', 'created_at', 'cloudinary_url', 'cloudinary_img_id'
         ]
         column_searchable_list = [
                   'email', 'username', 'full_name']
