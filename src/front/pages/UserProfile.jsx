@@ -10,7 +10,9 @@ import {
   Clock,
   Eye,
   Edit,
-  Globe
+  Globe,
+  UserPlus,
+  UserMinus
 } from "lucide-react";
 import { EditDescriptionModal } from "../components/EditDescriptionModal";
 import { COUNTRIES } from "../assets/data/countriesData";
@@ -24,6 +26,11 @@ export const UserProfile = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followMessage, setFollowMessage] = useState("");
+  const [showFollowMessage, setShowFollowMessage] = useState(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const token = localStorage.getItem("token");
@@ -108,6 +115,13 @@ export const UserProfile = () => {
     fetchCurrentUser();
   }, [token, backendUrl]);
 
+  // Check follow status when profile and current user are loaded
+  useEffect(() => {
+    if (userProfile && currentUser) {
+      checkFollowStatus();
+    }
+  }, [userProfile, currentUser]);
+
   const loadMoreRecipes = () => {
     if (userProfile && userProfile.pagination.has_more) {
       const newOffset = userProfile.recipes.length;
@@ -149,6 +163,109 @@ export const UserProfile = () => {
       // You could add error handling here if needed
     } finally {
       setUpdateLoading(false);
+    }
+  };
+
+  // Check follow status when profile loads
+  const checkFollowStatus = async () => {
+    if (!token || !userProfile || !currentUser || currentUser.username === userProfile.username) {
+      console.log("Skipping follow status check:", { 
+        hasToken: !!token, 
+        hasUserProfile: !!userProfile, 
+        hasCurrentUser: !!currentUser,
+        isSameUser: currentUser?.username === userProfile?.username 
+      });
+      return;
+    }
+
+    console.log("Checking follow status for user_id:", userProfile.user_id);
+
+    try {
+      const response = await fetch(`${backendUrl}/api/follow/status/${userProfile.user_id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log("Follow status response:", response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Follow status data:", data);
+        setIsFollowing(data.is_following);
+        setFollowersCount(data.followers_count);
+      } else {
+        const errorData = await response.json();
+        console.error("Error checking follow status:", response.status, response.statusText, errorData);
+      }
+    } catch (error) {
+      console.error("Error checking follow status:", error);
+    }
+  };
+
+  // Handle follow/unfollow
+  const handleFollowToggle = async () => {
+    if (!token || !userProfile || followLoading) {
+      console.log("Cannot toggle follow:", { hasToken: !!token, hasUserProfile: !!userProfile, followLoading });
+      return;
+    }
+
+    console.log(`${isFollowing ? 'Unfollowing' : 'Following'} user:`, userProfile.user_id);
+    setFollowLoading(true);
+
+    try {
+      const method = isFollowing ? 'DELETE' : 'POST';
+      const response = await fetch(`${backendUrl}/api/follow/${userProfile.user_id}`, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log("Follow toggle response:", response.status);
+      const data = await response.json();
+      console.log("Follow toggle data:", data);
+
+      if (response.ok) {
+        setIsFollowing(data.is_following);
+        setFollowersCount(data.followers_count);
+        
+        // Update userProfile stats
+        setUserProfile(prev => ({
+          ...prev,
+          stats: {
+            ...prev.stats,
+            followers_count: data.followers_count
+          }
+        }));
+
+        // Show success message
+        const message = data.is_following 
+          ? `You are now following ${userProfile.username}` 
+          : `You have unfollowed ${userProfile.username}`;
+        setFollowMessage(message);
+        setShowFollowMessage(true);
+        
+        // Hide message after 3 seconds
+        setTimeout(() => {
+          setShowFollowMessage(false);
+        }, 1500);
+      } else {
+        console.error("Follow/unfollow error:", data.error);
+        
+        // Show error message
+        setFollowMessage(data.error || "Failed to update follow status");
+        setShowFollowMessage(true);
+        setTimeout(() => {
+          setShowFollowMessage(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -331,14 +448,37 @@ export const UserProfile = () => {
 
                     </div>
                       
-                      {/* Future: Follow/Unfollow Button */}
-                      {/* 
-                      <div className="mt-4">
-                        <button className="btn btn-primary w-100">
-                          Follow
-                        </button>
-                      </div>
-                      */}
+                      {/* Follow/Unfollow Button */}
+                      {currentUser && currentUser.username !== userProfile.username && (
+                        <div className="mt-4">
+                          <button 
+                            className={`btn w-100 ${isFollowing ? 'btn-outline-danger' : 'btn-primary'}`}
+                            onClick={handleFollowToggle}
+                            disabled={followLoading}
+                          >
+                            {followLoading ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                                {isFollowing ? 'Unfollowing...' : 'Following...'}
+                              </>
+                            ) : (
+                              <>
+                                {isFollowing ? (
+                                  <>
+                                    <UserMinus size={16} className="me-1" />
+                                    Unfollow
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserPlus size={16} className="me-1" />
+                                    Follow
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
 
                     </div>
                   </div>
@@ -348,6 +488,22 @@ export const UserProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Follow Success/Error Message */}
+      {showFollowMessage && (
+        <div className="row mb-3">
+          <div className="col-12">
+            <div className={`alert ${followMessage.includes('unfollowed') || followMessage.includes('following') ? 'alert-success' : 'alert-danger'} alert-dismissible fade show`} role="alert">
+              <strong>{followMessage}</strong>
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={() => setShowFollowMessage(false)}
+              ></button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Recipes Section */}
       <div className="row">

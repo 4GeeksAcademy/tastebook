@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import os
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Recipe, RecipeImage
+from api.models import db, User, Recipe, RecipeImage, Follow
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
@@ -47,10 +47,6 @@ cloudinary.config(
 )
 ##################################################
 
-
-
-
-
 #############################################
 ## Example endpoint
 @api.route('/hello', methods=['POST', 'GET'])
@@ -63,6 +59,34 @@ def handle_hello():
     return jsonify(response_body), 200
 #############################################
 
+####################################################################################
+
+############################################
+#######     PRIVATE SITE TESTING     #######
+############################################
+""" How to add Access_Token in header in Postman:
+    - Go to "Authorization" tab
+    - Choose "Bearer Token" in dropdown
+    - Paste token WITHOUT QUOTES
+"""
+
+@api.route('/testing-private', methods=['GET'])
+@jwt_required()
+def private_route():
+
+    current_user_id = get_jwt_identity()
+
+    user = User.query.get(current_user_id)
+
+    if not user:
+        return jsonify({ "msg": "User not found." }), 404
+    
+    return jsonify({
+        "msg": f"Welcome {user.email}!",
+        "user": user.serialize()
+    }), 200
+
+####################################################################################
 
 
 
@@ -227,34 +251,7 @@ def handle_login():
         return jsonify({'error': str(e)}), 500
     
 
-####################################################################################
 
-############################################
-#######     PRIVATE SITE TESTING     #######
-############################################
-""" How to add Access_Token in header in Postman:
-    - Go to "Authorization" tab
-    - Choose "Bearer Token" in dropdown
-    - Paste token WITHOUT QUOTES
-"""
-
-@api.route('/testing-private', methods=['GET'])
-@jwt_required()
-def private_route():
-
-    current_user_id = get_jwt_identity()
-
-    user = User.query.get(current_user_id)
-
-    if not user:
-        return jsonify({ "msg": "User not found." }), 404
-    
-    return jsonify({
-        "msg": f"Welcome {user.email}!",
-        "user": user.serialize()
-    }), 200
-
-####################################################################################
 
 
 
@@ -385,7 +382,7 @@ def update_user_private_profile():
 
 
 ############################################
-#######      UPDATE USER DESCRIPTION #######
+#######   UPDATE USER DESCRIPTION    #######
 ############################################
 """ JSON request body to update user description:
 {
@@ -461,7 +458,7 @@ def get_all_users():
         search = request.args.get('search', '', type=str).strip()
         country = request.args.get('country', '', type=str).strip()
         region = request.args.get('region', '', type=str).strip()
-        sort_by = request.args.get('sort_by', 'created_at', type=str)  # created_at, recipes_count, username
+        sort_by = request.args.get('sort_by', 'created_at', type=str)  # created_at, recipes_count, followers_count, username
         sort_order = request.args.get('sort_order', 'desc', type=str)  # asc, desc
         
         # Ensure reasonable limits
@@ -501,6 +498,13 @@ def get_all_users():
                 query = query.order_by(db.func.count(Recipe.id).desc())
             else:
                 query = query.order_by(db.func.count(Recipe.id).asc())
+        elif sort_by == 'followers_count':
+            # Count followers for each user and sort by count
+            query = query.outerjoin(Follow, User.id == Follow.followed_id).group_by(User.id)
+            if sort_order == 'desc':
+                query = query.order_by(db.func.count(Follow.id).desc())
+            else:
+                query = query.order_by(db.func.count(Follow.id).asc())
         elif sort_by == 'username':
             if sort_order == 'desc':
                 query = query.order_by(User.username.desc())
@@ -527,9 +531,9 @@ def get_all_users():
                 'country': user.country,
                 'cloudinary_url': user.cloudinary_url,
                 'created_at': user.created_at.isoformat() if user.created_at else None,
-                'recipes_count': len(user.recipes)
-                # TODO: Add followers_count when follower system is implemented
-                # 'followers_count': len(user.followers) if hasattr(user, 'followers') else 0
+                'recipes_count': len(user.recipes),
+                'followers_count': len(user.follower_relationships),
+                'following_count': len(user.following_relationships)
             }
             users_data.append(user_data)
         
@@ -601,7 +605,7 @@ def get_user_public_profile(username):
         
         # Build user profile data
         profile_data = {
-            'id': user.id,
+            'user_id': user.id,  # Changed from 'id' to 'user_id' for consistency
             'username': user.username,
             'full_name': user.full_name,
             'description': user.description,
@@ -610,8 +614,8 @@ def get_user_public_profile(username):
             'created_at': user.created_at.isoformat() if user.created_at else None,
             'stats': {
                 'recipes_count': total_recipes,
-                'followers_count': 0,  # TODO: Implement when follower system is added
-                'following_count': 0,  # TODO: Implement when follower system is added
+                'followers_count': len(user.follower_relationships),
+                'following_count': len(user.following_relationships),
                 'total_likes': 0,      # TODO: Implement when like system is added
             },
             'recipes': recipes_data,
@@ -630,6 +634,152 @@ def get_user_public_profile(username):
         
     except Exception as e:
         return jsonify({"error": "Error fetching user profile", "details": str(e)}), 500
+
+
+############################################
+#######         FOLLOW USER          #######
+############################################
+@api.route('/follow/<int:user_id>', methods=['POST'])
+@jwt_required()
+def follow_user(user_id):
+    """
+    Follow a user. Creates a new follow relationship.
+    """
+    try:
+        # Get current user ID from token
+        current_user_id = get_jwt_identity()
+        
+        # Prevent users from following themselves
+        if current_user_id == user_id:
+            return jsonify({"error": "You cannot follow yourself"}), 400
+        
+        # Check if target user exists
+        target_user = User.query.get(user_id)
+        if not target_user:
+            return jsonify({"error": "User not found"}), 404
+        
+        # Check if already following
+        existing_follow = Follow.query.filter_by(
+            follower_id=current_user_id,
+            followed_id=user_id
+        ).first()
+        
+        if existing_follow:
+            return jsonify({"error": "You are already following this user"}), 400
+        
+        # Create new follow relationship
+        new_follow = Follow(
+            follower_id=current_user_id,
+            followed_id=user_id
+        )
+        
+        db.session.add(new_follow)
+        db.session.commit()
+        
+        # Get updated counts
+        followers_count = Follow.query.filter_by(followed_id=user_id).count()
+        following_count = Follow.query.filter_by(follower_id=current_user_id).count()
+        
+        return jsonify({
+            "msg": f"You are now following {target_user.username}",
+            "follow_id": new_follow.id,
+            "followers_count": followers_count,
+            "following_count": following_count,
+            "is_following": True
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Error following user", "details": str(e)}), 500
+
+
+############################################
+#######       UNFOLLOW USER          #######
+############################################
+@api.route('/follow/<int:user_id>', methods=['DELETE'])
+@jwt_required()
+def unfollow_user(user_id):
+    """
+    Unfollow a user. Removes the follow relationship.
+    """
+    try:
+        # Get current user ID from token
+        current_user_id = get_jwt_identity()
+        
+        # Check if target user exists
+        target_user = User.query.get(user_id)
+        if not target_user:
+            return jsonify({"error": "User not found"}), 404
+        
+        # Find the follow relationship
+        follow_relationship = Follow.query.filter_by(
+            follower_id=current_user_id,
+            followed_id=user_id
+        ).first()
+        
+        if not follow_relationship:
+            return jsonify({"error": "You are not following this user"}), 400
+        
+        # Remove the follow relationship
+        db.session.delete(follow_relationship)
+        db.session.commit()
+        
+        # Get updated counts
+        followers_count = Follow.query.filter_by(followed_id=user_id).count()
+        following_count = Follow.query.filter_by(follower_id=current_user_id).count()
+        
+        return jsonify({
+            "msg": f"You have unfollowed {target_user.username}",
+            "followers_count": followers_count,
+            "following_count": following_count,
+            "is_following": False
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Error unfollowing user", "details": str(e)}), 500
+
+
+############################################
+#######      CHECK FOLLOW STATUS     #######
+############################################
+@api.route('/follow/status/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_follow_status(user_id):
+    """
+    Check if the current user is following a specific user.
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        
+        # Check if target user exists
+        target_user = User.query.get(user_id)
+        if not target_user:
+            return jsonify({"error": "User not found"}), 404
+        
+        # Check follow status
+        is_following = Follow.query.filter_by(
+            follower_id=current_user_id,
+            followed_id=user_id
+        ).first() is not None
+        
+        # Get follow counts
+        followers_count = Follow.query.filter_by(followed_id=user_id).count()
+        following_count = Follow.query.filter_by(follower_id=user_id).count()
+        
+        return jsonify({
+            "is_following": is_following,
+            "followers_count": followers_count,
+            "following_count": following_count,
+            "target_user": {
+                "user_id": target_user.id,
+                "username": target_user.username,
+                "full_name": target_user.full_name
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": "Error checking follow status", "details": str(e)}), 500
 
 
 ######################################################################################################
@@ -973,8 +1123,15 @@ def reset_password(token):
 
 
 
+######################################################################################################
+
+
+
+
+#######################################################
 #######################################################
 ########              CLOUDINARY               ########
+#######################################################
 #######################################################
 
 

@@ -61,6 +61,22 @@ class User(db.Model):
         cascade="all, delete-orphan"
     )
 
+    # One-to-many relationship with Follow (follower) --> shows all users this user is following
+    following_relationships: Mapped[List["Follow"]] = relationship(
+        "Follow",
+        foreign_keys="Follow.follower_id",
+        back_populates="follower",
+        cascade="all, delete-orphan"
+    )
+
+    # One-to-many relationship with Follow (followed) --> shows all users following this user
+    follower_relationships: Mapped[List["Follow"]] = relationship(
+        "Follow",
+        foreign_keys="Follow.followed_id", 
+        back_populates="followed",
+        cascade="all, delete-orphan"
+    )
+
 
     #---------------#
     # Serialization #
@@ -78,10 +94,26 @@ class User(db.Model):
             "cloudinary_url":    self.cloudinary_url,
             "cloudinary_img_id": self.cloudinary_img_id,
             
+            # Social network metrics
+            "followers_count":   len(self.follower_relationships),
+            "following_count":   len(self.following_relationships),
+            
             "plain_psswrd":      self.plain_psswrd # THIS IS FOR TESTING PURPOSES
             # do not serialize the hashed password, its a security breach
         }
 
+
+    #-----------------#
+    # Helper Methods  #
+    #-----------------#
+    
+    def is_following(self, user):
+        """Check if this user is following another user"""
+        return any(follow.followed_id == user.id for follow in self.following_relationships)
+    
+    def is_followed_by(self, user):
+        """Check if this user is followed by another user"""
+        return any(follow.follower_id == user.id for follow in self.follower_relationships)
 
 
     #-----------------#
@@ -237,5 +269,77 @@ class RecipeImage(db.Model):
     #-----------------#
     def __repr__(self):
         return f"<RecipeImage ID {self.id} | Recipe ID: {self.recipe_id} | Primary: {self.is_primary}>"
+
+
+
+############################################
+##########         FOLLOW        ###########
+############################################
+
+class Follow(db.Model):
+    __tablename__ = "follow"
+
+    #------------#
+    # Attributes #
+    #------------#
+
+    # Primary Key
+    id:          Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
+
+    # Foreign Keys
+    follower_id: Mapped[int] = mapped_column( Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    followed_id: Mapped[int] = mapped_column( Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+
+    # Remaining Attributes
+    created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
+
+
+    #-------------------#
+    # Table Constraints #
+    #-------------------#
+    __table_args__ = (
+        # Prevent users from following themselves
+        CheckConstraint("follower_id != followed_id", name='check_no_self_follow'),
+        # Each follow relationship should be unique (no duplicate follows)
+        UniqueConstraint('follower_id', 'followed_id', name='unique_follow_relationship')
+    )
+
+
+    #-----------#
+    # Relations #
+    #-----------#
+
+    # Many-to-one relationship with User (follower) --> shows who is doing the following
+    follower: Mapped["User"] = relationship(
+        "User",
+        foreign_keys=[follower_id],
+        back_populates="following_relationships"
+    )
+
+    # Many-to-one relationship with User (followed) --> shows who is being followed
+    followed: Mapped["User"] = relationship(
+        "User", 
+        foreign_keys=[followed_id],
+        back_populates="follower_relationships"
+    )
+
+
+    #---------------#
+    # Serialization #
+    #---------------#
+    def serialize(self):
+        return {
+            "follow_id":   self.id,
+            "follower_id": self.follower_id,
+            "followed_id": self.followed_id,
+            "created_at":  self.created_at.isoformat() if self.created_at else None
+        }
+
+
+    #-----------------#
+    # __repr__ Method #
+    #-----------------#
+    def __repr__(self):
+        return f"<Follow ID {self.id} | Follower: {self.follower_id} | Followed: {self.followed_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
 
 

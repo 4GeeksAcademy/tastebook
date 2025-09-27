@@ -195,19 +195,15 @@ export const Users = () => {
                       Username
                       {getSortIcon("username")}
                     </button>
-                    {/* Future followers sort - commented for now */}
-                    {/* 
                     <button
                       type="button"
                       className={`btn ${sortBy === "followers_count" ? "btn-primary" : "btn-outline-primary"}`}
                       onClick={() => handleSortChange("followers_count")}
-                      disabled
                     >
-                      <Users size={16} className="me-1" />
+                      <UsersIcon size={16} className="me-1" />
                       Most Followers
                       {getSortIcon("followers_count")}
                     </button>
-                    */}
                   </div>
                 </div>
               </form>
@@ -291,13 +287,11 @@ export const Users = () => {
                           </div>
                           <div className="col-6">
                             <div className="d-flex flex-column">
-                              {/* Future followers count */}
-                              <span className="fw-bold text-secondary h5 mb-0">-</span>
+                              <span className="fw-bold text-secondary h5 mb-0">{user.followers_count || 0}</span>
                               <small className="text-muted">
                                 <UsersIcon size={14} className="me-1" />
                                 Followers
                               </small>
-                              {/* <span className="fw-bold text-secondary h5 mb-0">{user.followers_count || 0}</span> */}
                             </div>
                           </div>
                         </div>
