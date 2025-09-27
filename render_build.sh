@@ -5,8 +5,8 @@ set -o errexit
 npm install
 npm run build
 
-# "pip install pipenv &&" fue añadido porque Render NO reconocía el comando "pipenv",
-# supongo que fue por alguna actualización del entorno de Render.
+# "pip install pipenv &&" was added because Render did NOT recognize the "pipenv" command,
+# I suppose it was due to some update in the Render environment.
 pip install pipenv && pipenv install
 
 pipenv run upgrade
