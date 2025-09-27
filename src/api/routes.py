@@ -479,7 +479,81 @@ def get_all_users():
         return jsonify({"error": "Error fetching users", "details": str(e)}), 500
 
 
-# Write "User public profile" right here
+############################################
+#######      USER PUBLIC PROFILE    #######
+############################################
+@api.route('/user/<string:username>', methods=['GET'])
+def get_user_public_profile(username):
+    """
+    Get public profile information for a specific user by username.
+    Returns user details, stats, and their recipes.
+    """
+    try:
+        # Find user by username
+        user = User.query.filter_by(username=username, is_active=True).first()
+        
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        
+        # Get user's recipes with pagination
+        limit = request.args.get('limit', 12, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        limit = min(limit, 50)  # Max 50 recipes per request
+        
+        # Get recipes ordered by creation date (newest first)
+        recipes_query = Recipe.query.filter_by(author_id=user.id).order_by(Recipe.created_at.desc())
+        total_recipes = recipes_query.count()
+        recipes = recipes_query.offset(offset).limit(limit).all()
+        
+        # Serialize recipes with their primary images
+        recipes_data = []
+        for recipe in recipes:
+            recipe_data = recipe.serialize()
+            
+            # Add primary image
+            primary_image = RecipeImage.query.filter_by(
+                recipe_id=recipe.id, 
+                is_primary=True
+            ).first()
+            
+            if not primary_image:
+                # If no primary image, get the first image
+                primary_image = RecipeImage.query.filter_by(
+                    recipe_id=recipe.id
+                ).order_by(RecipeImage.display_order).first()
+            
+            recipe_data['primary_image'] = primary_image.serialize() if primary_image else None
+            recipes_data.append(recipe_data)
+        
+        # Build user profile data
+        profile_data = {
+            'id': user.id,
+            'username': user.username,
+            'full_name': user.full_name,
+            'cloudinary_url': user.cloudinary_url,
+            'created_at': user.created_at.isoformat() if user.created_at else None,
+            'stats': {
+                'recipes_count': total_recipes,
+                'followers_count': 0,  # TODO: Implement when follower system is added
+                'following_count': 0,  # TODO: Implement when follower system is added
+                'total_likes': 0,      # TODO: Implement when like system is added
+            },
+            'recipes': recipes_data,
+            'pagination': {
+                'total': total_recipes,
+                'limit': limit,
+                'offset': offset,
+                'has_more': offset + limit < total_recipes
+            }
+        }
+        
+        return jsonify({
+            "msg": "User profile retrieved successfully",
+            "user": profile_data
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": "Error fetching user profile", "details": str(e)}), 500
 
 
 ######################################################################################################

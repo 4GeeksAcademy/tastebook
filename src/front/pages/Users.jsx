@@ -295,13 +295,9 @@ export const Users = () => {
 
                       {/* Card Footer - View Profile Button */}
                       <div className="card-footer bg-transparent border-0 pt-0">
-                        {/* Future: Link to user profile page */}
-                        <button className="btn btn-outline-primary btn-sm w-100" disabled>
+                        <Link to={`/user/${user.username}`} className="btn btn-outline-primary btn-sm w-100">
                           View Profile
-                        </button>
-                        {/* <Link to={`/user/${user.username}`} className="btn btn-outline-primary btn-sm w-100">
-                          View Profile
-                        </Link> */}
+                        </Link>
                       </div>
                     </div>
                   </div>

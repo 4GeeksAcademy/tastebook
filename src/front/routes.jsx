@@ -24,6 +24,7 @@ import { Settings } from "./pages/Settings";
 import { CreateRecipe } from "./pages/CreateRecipe";
 import { Recipe } from "./pages/Recipe";
 import { Users } from "./pages/Users";
+import { UserProfile } from "./pages/UserProfile";
 
 
 
@@ -51,6 +52,7 @@ export const router = createBrowserRouter(
         <Route path= "/new-recipe" element={<CreateRecipe />} />
         <Route path= "/recipe/:id" element={<Recipe />} />
         <Route path= "/users" element={<Users />} />
+        <Route path= "/user/:username" element={<UserProfile />} />
  
         <Route path= "/demo" element={<Demo />} />
         <Route path= "/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
