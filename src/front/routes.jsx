@@ -23,6 +23,7 @@ import { ResetPassword } from "./pages/ResetPassword";
 import { Settings } from "./pages/Settings";
 import { CreateRecipe } from "./pages/CreateRecipe";
 import { Recipe } from "./pages/Recipe";
+import { Users } from "./pages/Users";
 
 
 
@@ -49,6 +50,7 @@ export const router = createBrowserRouter(
         <Route path= "/settings" element={<Settings />} />
         <Route path= "/new-recipe" element={<CreateRecipe />} />
         <Route path= "/recipe/:id" element={<Recipe />} />
+        <Route path= "/users" element={<Users />} />
  
         <Route path= "/demo" element={<Demo />} />
         <Route path= "/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}

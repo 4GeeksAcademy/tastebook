@@ -99,6 +99,11 @@ export const Navbar = () => {
 					<span className="fw-bold">Tastebook</span>
 				</Link>
 
+				{/* Users Link */}
+				<Link to="/users" className="nav-link text-decoration-none fw-semibold text-primary">
+					Users
+				</Link>
+
 				{/* Toggler (mobile) */}
 				<button
 					className="navbar-toggler"

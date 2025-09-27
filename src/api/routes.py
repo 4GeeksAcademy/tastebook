@@ -384,7 +384,103 @@ def update_user_private_profile():
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Error updating profile.", 'error': str(e)}), 500
+
+
     
+######################################################################################################
+
+
+############################################
+#######        GET ALL USERS         #######
+############################################
+@api.route('/users', methods=['GET'])
+def get_all_users():
+    """
+    Get all users with basic information and recipe counts.
+    Supports pagination with limit and offset parameters.
+    Supports search by username and sorting by recipe count.
+    """
+    try:
+        # Get pagination parameters
+        limit = request.args.get('limit', 20, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        
+        # Get search parameters
+        search = request.args.get('search', '', type=str).strip()
+        sort_by = request.args.get('sort_by', 'created_at', type=str)  # created_at, recipes_count, username
+        sort_order = request.args.get('sort_order', 'desc', type=str)  # asc, desc
+        
+        # Ensure reasonable limits
+        limit = min(limit, 100)  # Max 100 users per request
+        
+        # Start with base query for active users only
+        query = User.query.filter(User.is_active == True)
+        
+        # Apply search filter if provided
+        if search:
+            query = query.filter(User.username.ilike(f'%{search}%'))
+        
+        # Apply sorting
+        if sort_by == 'recipes_count':
+            # Count recipes for each user and sort by count
+            query = query.outerjoin(Recipe).group_by(User.id)
+            if sort_order == 'desc':
+                query = query.order_by(db.func.count(Recipe.id).desc())
+            else:
+                query = query.order_by(db.func.count(Recipe.id).asc())
+        elif sort_by == 'username':
+            if sort_order == 'desc':
+                query = query.order_by(User.username.desc())
+            else:
+                query = query.order_by(User.username.asc())
+        else:  # default to created_at
+            if sort_order == 'desc':
+                query = query.order_by(User.created_at.desc())
+            else:
+                query = query.order_by(User.created_at.asc())
+        
+        # Get total count for pagination (before applying limit/offset)
+        total_count = query.count()
+        
+        # Apply pagination
+        users = query.offset(offset).limit(limit).all()
+        
+        users_data = []
+        for user in users:
+            user_data = {
+                'id': user.id,
+                'username': user.username,
+                'full_name': user.full_name,
+                'cloudinary_url': user.cloudinary_url,
+                'created_at': user.created_at.isoformat() if user.created_at else None,
+                'recipes_count': len(user.recipes)
+                # TODO: Add followers_count when follower system is implemented
+                # 'followers_count': len(user.followers) if hasattr(user, 'followers') else 0
+            }
+            users_data.append(user_data)
+        
+        return jsonify({
+            "msg": "Users retrieved successfully",
+            "users": users_data,
+            "pagination": {
+                "total": total_count,
+                "limit": limit,
+                "offset": offset,
+                "has_more": offset + limit < total_count
+            },
+            "filters": {
+                "search": search,
+                "sort_by": sort_by,
+                "sort_order": sort_order
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": "Error fetching users", "details": str(e)}), 500
+
+
+# Write "User public profile" right here
+
 
 ######################################################################################################
 
