@@ -1083,8 +1083,13 @@ def upload_recipe_image(recipe_id):
     
     if not recipe:
         return jsonify({'error': 'Recipe not found.'}), 404
-    
-    if recipe.author_id != int(user_id):
+
+    try:
+        user_id_int = int(user_id)
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Invalid user ID.'}), 400
+
+    if recipe.author_id != user_id_int:
         return jsonify({'error': 'Recipe not found or unauthorized.'}), 404
 
     if 'image' not in request.files:
@@ -1166,10 +1171,10 @@ def upload_temp_recipe_image():
 # =============================
 @api.route('/recipe/<int:recipe_id>/associate-temp-images', methods=['POST'])
 @jwt_required()
-def associate_temp_images_with_recipe(recipe_id):
-    """
-    Associates temporary images with a recipe by creating RecipeImage records.
-    Expects JSON with 'temp_images' array containing temp image data.
+    user_id = get_jwt_identity()
+    recipe = Recipe.query.get(recipe_id)
+    if not recipe or recipe.author_id != int(user_id):
+        return jsonify({'error': 'Recipe not found or unauthorized.'}), 404
     """
     user_id = get_jwt_identity()
     recipe = Recipe.query.get(recipe_id)
