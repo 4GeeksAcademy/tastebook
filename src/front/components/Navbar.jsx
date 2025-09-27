@@ -84,8 +84,13 @@ export const Navbar = () => {
 		navigate("/");
 	};
 
+
 	const handleAvatarClick = () => {
-		navigate("/settings");
+		if (userData?.username) {
+			navigate(`/user/${userData.username}`);
+		} else {
+			navigate("/users");
+		}
 	};
 
 	
