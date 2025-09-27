@@ -41,6 +41,7 @@ class User(db.Model):
     plain_psswrd:    Mapped[str]      = mapped_column( String(255),                       nullable=True)
     hashed_psswrd:   Mapped[str]      = mapped_column( String(255),                       nullable=False)
     profile_url:     Mapped[str]      = mapped_column( String(255),                       nullable=True)
+    description:     Mapped[str]      = mapped_column( Text,                              nullable=True)
     is_active:       Mapped[bool]     = mapped_column( Boolean,      default=True,        nullable=False)
     created_at:      Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
 
@@ -71,6 +72,7 @@ class User(db.Model):
             "username":    self.username,
             "full_name":   self.full_name,
             "profile_url": self.profile_url,
+            "description": self.description,
             "is_active":   self.is_active,
             "created_at":  self.created_at.isoformat() if self.created_at else None,
             "cloudinary_url":    self.cloudinary_url,

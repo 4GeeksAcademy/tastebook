@@ -8,8 +8,10 @@ import {
   Heart, 
   MapPin,
   Clock,
-  Eye
+  Eye,
+  Edit
 } from "lucide-react";
+import { EditDescriptionModal } from "../components/EditDescriptionModal";
 
 export const UserProfile = () => {
   const { username } = useParams();
@@ -17,8 +19,12 @@ export const UserProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [loadingMore, setLoadingMore] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const token = localStorage.getItem("token");
 
   const fetchUserProfile = async (offset = 0, isLoadMore = false) => {
     if (!backendUrl) {
@@ -68,10 +74,79 @@ export const UserProfile = () => {
     }
   }, [username]);
 
+  // Fetch current user info to check if they're the profile owner
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (!token || !backendUrl) {
+        setCurrentUser(null);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${backendUrl}/api/settings`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentUser(data.current_user);
+        } else {
+          setCurrentUser(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+        setCurrentUser(null);
+      }
+    };
+
+    fetchCurrentUser();
+  }, [token, backendUrl]);
+
   const loadMoreRecipes = () => {
     if (userProfile && userProfile.pagination.has_more) {
       const newOffset = userProfile.recipes.length;
       fetchUserProfile(newOffset, true);
+    }
+  };
+
+  const handleDescriptionUpdate = async (newDescription) => {
+    if (!token || !backendUrl) {
+      return;
+    }
+
+    setUpdateLoading(true);
+
+    try {
+      const response = await fetch(`${backendUrl}/api/user/description`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ description: newDescription })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update the user profile with the new description
+        setUserProfile(prev => ({
+          ...prev,
+          description: newDescription
+        }));
+        setIsEditModalOpen(false);
+      } else {
+        throw new Error(data.error || "Failed to update description");
+      }
+    } catch (error) {
+      console.error("Error updating description:", error);
+      // You could add error handling here if needed
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -162,53 +237,87 @@ export const UserProfile = () => {
                         </span>
                       </div>
 
-                      {/* Future: Location, Bio, etc. */}
-                      {/* 
-                      <div className="d-flex align-items-center mb-3">
-                        <MapPin size={18} className="text-muted me-2" />
-                        <span className="text-muted">Location</span>
+                      {/* User Description */}
+                      <div className="mb-3">
+                        {userProfile.description ? (
+                          <div className="d-flex align-items-start">
+                            {currentUser && currentUser.username === userProfile.username && (
+                              <button
+                                className="btn btn-link text-muted p-1 me-2"
+                                onClick={() => setIsEditModalOpen(true)}
+                                title="Edit description"
+                              >
+                                <Edit size={16} />
+                              </button>
+                            )}
+                            <p className="text-muted mb-0 flex-grow-1" style={{ whiteSpace: 'pre-wrap' }}>
+                              {userProfile.description}
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            {currentUser && currentUser.username === userProfile.username ? (
+                              <button
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => setIsEditModalOpen(true)}
+                              >
+                                <Edit size={16} className="me-1" />
+                                Add a description
+                              </button>
+                            ) : (
+                              <p className="text-muted fst-italic">
+                                This user hasn't added a description yet.
+                              </p>
+                            )}
+                          </>
+                        )}
                       </div>
-                      <p className="text-muted mb-3">Bio goes here...</p>
-                      */}
                     </div>
 
                     {/* Stats */}
                     <div className="col-lg-4">
                       <div className="row text-center">
+
+                        {/* Recipes Count */}
                         <div className="col-4">
                           <div className="d-flex flex-column">
                             <span className="fw-bold text-primary display-6 mb-0">
                               {userProfile.stats.recipes_count}
                             </span>
                             <small className="text-muted">
-                              <ChefHat size={16} className="me-1" />
+                              <ChefHat size={14} className="me-1" />
                               Recipes
                             </small>
                           </div>
                         </div>
+
+                        {/* Followers Count */}
                         <div className="col-4">
                           <div className="d-flex flex-column">
                             <span className="fw-bold text-secondary display-6 mb-0">
                               {userProfile.stats.followers_count}
                             </span>
                             <small className="text-muted">
-                              <UsersIcon size={16} className="me-1" />
+                              <UsersIcon size={14} className="me-1" />
                               Followers
                             </small>
                           </div>
                         </div>
+
+                        {/* Likes Count */}
                         <div className="col-4">
                           <div className="d-flex flex-column">
                             <span className="fw-bold text-warning display-6 mb-0">
                               {userProfile.stats.total_likes}
                             </span>
                             <small className="text-muted">
-                              <Heart size={16} className="me-1" />
+                              <Heart size={14} className="me-1" />
                               Likes
                             </small>
                           </div>
                         </div>
-                      </div>
+
+                    </div>
                       
                       {/* Future: Follow/Unfollow Button */}
                       {/* 
@@ -218,6 +327,7 @@ export const UserProfile = () => {
                         </button>
                       </div>
                       */}
+
                     </div>
                   </div>
                 </div>
@@ -359,6 +469,15 @@ export const UserProfile = () => {
           )}
         </div>
       </div>
+
+      {/* Edit Description Modal */}
+      <EditDescriptionModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        currentDescription={userProfile?.description || ""}
+        onSave={handleDescriptionUpdate}
+        loading={updateLoading}
+      />
 
       {/* Custom Styles */}
       <style jsx>{`

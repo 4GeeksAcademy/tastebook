@@ -386,6 +386,60 @@ def update_user_private_profile():
         return jsonify({"message": "Error updating profile.", 'error': str(e)}), 500
 
 
+############################################
+#######      UPDATE USER DESCRIPTION #######
+############################################
+""" JSON request body to update user description:
+{
+    "description": "Your new description text here"
+}
+"""
+@api.route('/user/description', methods=['PUT'])
+@jwt_required()
+def update_user_description():
+    """
+    Update the description for the authenticated user.
+    """
+    try:
+        # Get authenticated user ID from token
+        user_id = get_jwt_identity()
+        
+        # Find user in database
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        
+        # Get request data
+        data = request.get_json()
+        if not data or 'description' not in data:
+            return jsonify({"error": "Description field is required"}), 400
+        
+        # Update description (can be empty string to clear it)
+        new_description = data['description'].strip() if data['description'] else None
+
+        # Validate description length
+        if new_description and len(new_description) > 500:
+            return jsonify({"error": "Description must not exceed 500 characters."}), 400
+
+        user.description = new_description
+        
+        # Save to database
+        db.session.commit()
+        
+        return jsonify({
+            "msg": "Description updated successfully",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "description": user.description
+            }
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Error updating description", "details": str(e)}), 500
+
+
     
 ######################################################################################################
 
@@ -530,6 +584,7 @@ def get_user_public_profile(username):
             'id': user.id,
             'username': user.username,
             'full_name': user.full_name,
+            'description': user.description,
             'cloudinary_url': user.cloudinary_url,
             'created_at': user.created_at.isoformat() if user.created_at else None,
             'stats': {
