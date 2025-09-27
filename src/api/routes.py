@@ -355,6 +355,9 @@ def update_user_private_profile():
             if existing_user:
                 return jsonify({"msg": "This email is already registered."}), 400
             user.email = data["email"]
+        
+        if "country" in data:
+            user.country = data["country"]
 
         # Password change handling
         if 'password' in data:
@@ -456,6 +459,8 @@ def get_all_users():
         
         # Get search parameters
         search = request.args.get('search', '', type=str).strip()
+        country = request.args.get('country', '', type=str).strip()
+        region = request.args.get('region', '', type=str).strip()
         sort_by = request.args.get('sort_by', 'created_at', type=str)  # created_at, recipes_count, username
         sort_order = request.args.get('sort_order', 'desc', type=str)  # asc, desc
         
@@ -468,6 +473,25 @@ def get_all_users():
         # Apply search filter if provided
         if search:
             query = query.filter(User.username.ilike(f'%{search}%'))
+        
+        # Apply country filter if provided
+        if country:
+            query = query.filter(User.country == country)
+            
+        # Apply region filter if provided (requires importing the regions mapping)
+        if region:
+            # Define region to countries mapping (simplified version for backend)
+            region_countries = {
+                'north_america': ['US', 'CA', 'MX', 'GT', 'BZ', 'SV', 'HN', 'NI', 'CR', 'PA'],
+                'south_america': ['AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'GY', 'PY', 'PE', 'SR', 'UY', 'VE'],
+                'europe': ['AD', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IS', 'IE', 'IT', 'LV', 'LI', 'LT', 'LU', 'MT', 'MC', 'NL', 'NO', 'PL', 'PT', 'RO', 'SM', 'SK', 'SI', 'ES', 'SE', 'CH', 'GB', 'VA'],
+                'asia': ['AF', 'AM', 'AZ', 'BH', 'BD', 'BT', 'BN', 'KH', 'CN', 'GE', 'IN', 'ID', 'IR', 'IQ', 'IL', 'JP', 'JO', 'KZ', 'KW', 'KG', 'LA', 'LB', 'MY', 'MV', 'MN', 'MM', 'NP', 'KP', 'OM', 'PK', 'PS', 'PH', 'QA', 'SA', 'SG', 'KR', 'LK', 'SY', 'TW', 'TJ', 'TH', 'TL', 'TR', 'TM', 'AE', 'UZ', 'VN', 'YE'],
+                'africa': ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CV', 'CM', 'CF', 'TD', 'KM', 'CG', 'CD', 'DJ', 'EG', 'GQ', 'ER', 'SZ', 'ET', 'GA', 'GM', 'GH', 'GN', 'GW', 'CI', 'KE', 'LS', 'LR', 'LY', 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW', 'ST', 'SN', 'SC', 'SL', 'SO', 'ZA', 'SS', 'SD', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW'],
+                'oceania': ['AU', 'FJ', 'KI', 'MH', 'FM', 'NR', 'NZ', 'PW', 'PG', 'WS', 'SB', 'TO', 'TV', 'VU']
+            }
+            
+            if region in region_countries:
+                query = query.filter(User.country.in_(region_countries[region]))
         
         # Apply sorting
         if sort_by == 'recipes_count':
@@ -500,6 +524,7 @@ def get_all_users():
                 'id': user.id,
                 'username': user.username,
                 'full_name': user.full_name,
+                'country': user.country,
                 'cloudinary_url': user.cloudinary_url,
                 'created_at': user.created_at.isoformat() if user.created_at else None,
                 'recipes_count': len(user.recipes)
@@ -580,6 +605,7 @@ def get_user_public_profile(username):
             'username': user.username,
             'full_name': user.full_name,
             'description': user.description,
+            'country': user.country,
             'cloudinary_url': user.cloudinary_url,
             'created_at': user.created_at.isoformat() if user.created_at else None,
             'stats': {

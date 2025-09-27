@@ -40,7 +40,8 @@ class User(db.Model):
     full_name:       Mapped[str]      = mapped_column( String(80),                        nullable=False)
     plain_psswrd:    Mapped[str]      = mapped_column( String(255),                       nullable=True)
     hashed_psswrd:   Mapped[str]      = mapped_column( String(255),                       nullable=False)
-    description:     Mapped[str]      = mapped_column( Text,                              nullable=True)
+    description:     Mapped[str]      = mapped_column( Text,                            nullable=True)
+    country:         Mapped[str]      = mapped_column( String(100),                     nullable=True)
     is_active:       Mapped[bool]     = mapped_column( Boolean,      default=True,        nullable=False)
     created_at:      Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
 
@@ -71,6 +72,7 @@ class User(db.Model):
             "username":    self.username,
             "full_name":   self.full_name,
             "description": self.description,
+            "country":     self.country,
             "is_active":   self.is_active,
             "created_at":  self.created_at.isoformat() if self.created_at else None,
             "cloudinary_url":    self.cloudinary_url,

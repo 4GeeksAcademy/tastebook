@@ -9,9 +9,11 @@ import {
   MapPin,
   Clock,
   Eye,
-  Edit
+  Edit,
+  Globe
 } from "lucide-react";
 import { EditDescriptionModal } from "../components/EditDescriptionModal";
+import { COUNTRIES } from "../assets/data/countriesData";
 
 export const UserProfile = () => {
   const { username } = useParams();
@@ -230,12 +232,22 @@ export const UserProfile = () => {
                       <p className="text-muted mb-3 fs-5">@{userProfile.username}</p>
                       
                       {/* Member Since */}
-                      <div className="d-flex align-items-center mb-3">
+                      <div className="d-flex align-items-center mb-2">
                         <Calendar size={18} className="text-muted me-2" />
                         <span className="text-muted">
                           Member since {formatDate(userProfile.created_at)}
                         </span>
                       </div>
+
+                      {/* Country */}
+                      {userProfile.country && (
+                        <div className="d-flex align-items-center mb-3">
+                          <Globe size={18} className="text-muted me-2" />
+                          <span className="text-muted">
+                            {COUNTRIES.find(c => c.code === userProfile.country)?.name || userProfile.country}
+                          </span>
+                        </div>
+                      )}
 
                       {/* User Description */}
                       <div className="mb-3">

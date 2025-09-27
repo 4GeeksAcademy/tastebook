@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Users as UsersIcon, ChefHat, Calendar, Filter, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Users as UsersIcon, ChefHat, Calendar, Filter, ArrowUpDown, ArrowUp, ArrowDown, Globe } from "lucide-react";
+import { REGIONS, COUNTRIES } from "../assets/data/countriesData";
 
 export const Users = () => {
   const [users, setUsers] = useState([]);
@@ -9,6 +10,7 @@ export const Users = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [regionFilter, setRegionFilter] = useState("");
   const [pagination, setPagination] = useState({
     total: 0,
     limit: 20,
@@ -18,7 +20,7 @@ export const Users = () => {
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const fetchUsers = async (search = "", sort_by = "created_at", sort_order = "desc", offset = 0) => {
+  const fetchUsers = async (search = "", sort_by = "created_at", sort_order = "desc", offset = 0, region = "") => {
     if (!backendUrl) {
       setError("Backend URL not configured.");
       return;
@@ -39,6 +41,10 @@ export const Users = () => {
         params.append('search', search.trim());
       }
 
+      if (region) {
+        params.append('region', region);
+      }
+
       const response = await fetch(`${backendUrl}/api/users?${params}`);
       const data = await response.json();
 
@@ -57,13 +63,13 @@ export const Users = () => {
   };
 
   useEffect(() => {
-    fetchUsers(searchTerm, sortBy, sortOrder, 0);
-  }, [sortBy, sortOrder]);
+    fetchUsers(searchTerm, sortBy, sortOrder, 0, regionFilter);
+  }, [sortBy, sortOrder, regionFilter]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     setPagination(prev => ({ ...prev, offset: 0 }));
-    fetchUsers(searchTerm, sortBy, sortOrder, 0);
+    fetchUsers(searchTerm, sortBy, sortOrder, 0, regionFilter);
   };
 
   const handleSearchInputChange = (e) => {
@@ -71,7 +77,7 @@ export const Users = () => {
     // Trigger search automatically if search term is cleared
     if (e.target.value === "") {
       setPagination(prev => ({ ...prev, offset: 0 }));
-      fetchUsers("", sortBy, sortOrder, 0);
+      fetchUsers("", sortBy, sortOrder, 0, regionFilter);
     }
   };
 
@@ -89,7 +95,7 @@ export const Users = () => {
 
   const loadMore = () => {
     const newOffset = pagination.offset + pagination.limit;
-    fetchUsers(searchTerm, sortBy, sortOrder, newOffset);
+    fetchUsers(searchTerm, sortBy, sortOrder, newOffset, regionFilter);
     setPagination(prev => ({ ...prev, offset: newOffset }));
   };
 
@@ -122,7 +128,7 @@ export const Users = () => {
           <div className="card shadow-sm mb-4">
             <div className="card-body">
               <form onSubmit={handleSearch} className="row g-3">
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <label className="form-label fw-semibold">
                     <Search size={16} className="me-1" />
                     Search by username
@@ -141,27 +147,26 @@ export const Users = () => {
                   </div>
                 </div>
                 
-                {/* Future region filter - commented for now */}
-                {/* 
                 <div className="col-md-4">
                   <label className="form-label fw-semibold">
-                    <Filter size={16} className="me-1" />
+                    <Globe size={16} className="me-1" />
                     Filter by region
                   </label>
-                  <select className="form-select" disabled>
+                  <select 
+                    className="form-select" 
+                    value={regionFilter} 
+                    onChange={(e) => setRegionFilter(e.target.value)}
+                  >
                     <option value="">All regions</option>
-                    <option value="north_america">North America</option>
-                    <option value="europe">Europe</option>
-                    <option value="asia">Asia</option>
-                    <option value="south_america">South America</option>
-                    <option value="africa">Africa</option>
-                    <option value="oceania">Oceania</option>
+                    {Object.entries(REGIONS).map(([key, region]) => (
+                      <option key={key} value={key}>
+                        {region.name}
+                      </option>
+                    ))}
                   </select>
-                  <small className="text-muted">Region filtering coming soon!</small>
                 </div>
-                */}
                 
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <label className="form-label fw-semibold">Sort by</label>
                   <div className="btn-group d-flex" role="group">
                     <button
@@ -260,7 +265,18 @@ export const Users = () => {
 
                         {/* User Info */}
                         <h5 className="card-title mb-1">{user.full_name}</h5>
-                        <p className="text-muted mb-2">@{user.username}</p>
+                        <p className="text-muted mb-1">@{user.username}</p>
+                        
+                        {/* Country Info */}
+                        <div className="text-muted mb-2 d-flex align-items-center justify-content-center">
+                          <Globe size={14} className="me-1" />
+                          <small>
+                            {user.country 
+                              ? (COUNTRIES.find(c => c.code === user.country)?.name || user.country)
+                              : '-'
+                            }
+                          </small>
+                        </div>
 
                         {/* Stats */}
                         <div className="row text-center mb-3">

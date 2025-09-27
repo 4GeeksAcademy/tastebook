@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { User, KeyRound, Mail, BookOpenText, Image, Edit, X, Camera } from "lucide-react";
+import { User, KeyRound, Mail, BookOpenText, Image, Edit, X, Camera, Globe } from "lucide-react";
 import ImageUpload from "../components/ImageUpload";
+import { COUNTRIES } from "../assets/data/countriesData";
 
 export const Settings = () => {
   const [userData, setUserData] = useState(null);
@@ -65,7 +66,8 @@ export const Settings = () => {
         setForm({
           email: user.email || "",
           full_name: user.full_name || "",
-          username: user.username || ""
+          username: user.username || "",
+          country: user.country || ""
         });
       } catch (err) {
         setError("Failed to load user info.");
@@ -276,7 +278,8 @@ export const Settings = () => {
       setForm({
         email: userData.email || "",
         full_name: userData.full_name || "",
-        username: userData.username || ""
+        username: userData.username || "",
+        country: userData.country || ""
       });
     }
   };
@@ -350,6 +353,12 @@ export const Settings = () => {
                           <p className="text-muted">{userData?.full_name}</p>
                         </div>
                       </div>
+                      <div className="row mb-3">
+                        <div className="col-md-6">
+                          <label className="form-label fw-semibold"><Globe size={18} className="me-1" /> Country</label>
+                          <p className="text-muted">{userData?.country ? COUNTRIES.find(c => c.code === userData.country)?.name || userData.country : 'Not specified'}</p>
+                        </div>
+                      </div>
                       <button onClick={() => setIsEditing(true)} className="btn btn-primary"><Edit size={16} className="me-1" /> Edit Profile</button>
                       {userData && (
                         <div className="mt-4">
@@ -377,6 +386,18 @@ export const Settings = () => {
                       <div className="col-md-6">
                         <label className="form-label fw-semibold"><User size={16} className="me-1" /> Full Name</label>
                         <input type="text" name="full_name" className="form-control" value={form.full_name || ""} onChange={handleChange} required />
+                      </div>
+
+                      <div className="col-md-6">
+                        <label className="form-label fw-semibold"><Globe size={16} className="me-1" /> Country</label>
+                        <select name="country" className="form-select" value={form.country || ""} onChange={handleChange}>
+                          <option value="">Select a country</option>
+                          {COUNTRIES.map(country => (
+                            <option key={country.code} value={country.code}>
+                              {country.name}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       <div className="col-12 mt-3">
