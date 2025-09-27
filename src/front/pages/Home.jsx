@@ -47,7 +47,12 @@ export const Home = () => {
 								<p className="lead mb-4">
 									Your place to discover and share delicious recipes.
 								</p>
-
+								<div className="d-flex gap-3 justify-content-center justify-content-lg-start">
+									<Link to="/all-recipes" className="btn btn-primary btn-lg">
+										<i className="fas fa-search me-2"></i>
+										Browse All Recipes
+									</Link>
+								</div>
 							</div>
 							<div className="col-lg-6 text-center">
 								<img
@@ -62,17 +67,17 @@ export const Home = () => {
 						{/* Placeholder Cards for Features */}
 						<div className="row row-cols-1 row-cols-md-3 g-4 mt-3">
 							<div className="col">
-								<div className="card h-100 shadow border-0">
-
-									<div className="card-body text-center">
-										<div className="mb-3">
-											<i className="bi bi-search display-5 text-primary"></i>
+								<Link to="/all-recipes" className="text-decoration-none">
+									<div className="card h-100 shadow border-0 card-hover">
+										<div className="card-body text-center">
+											<div className="mb-3">
+												<i className="bi bi-search display-5 text-primary"></i>
+											</div>
+											<h5 className="card-title">Explore recipes</h5>
+											<p className="card-text">Search among hundreds of recipes and find your next favorite meal.</p>
 										</div>
-										<h5 className="card-title">Explore recipes</h5>
-										<p className="card-text">Search among hundreds of recipes and find your next favorite meal.</p>
 									</div>
-
-								</div>
+								</Link>
 							</div>
 							<div className="col">
 

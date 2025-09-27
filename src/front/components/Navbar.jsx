@@ -104,10 +104,15 @@ export const Navbar = () => {
 					<span className="fw-bold">Tastebook</span>
 				</Link>
 
-				{/* Users Link */}
-				<Link to="/users" className="nav-link text-decoration-none fw-semibold text-primary">
-					Users
-				</Link>
+				{/* Navigation Links */}
+				<div className="d-flex gap-3">
+					<Link to="/all-recipes" className="nav-link text-decoration-none fw-semibold text-primary">
+						All Recipes
+					</Link>
+					<Link to="/users" className="nav-link text-decoration-none fw-semibold text-primary">
+						Users
+					</Link>
+				</div>
 
 				{/* Toggler (mobile) */}
 				<button

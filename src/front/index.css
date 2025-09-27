@@ -267,9 +267,10 @@ body {
   transition: all 0.3s ease;
 }
 
-.card:hover {
-  /* transform: translateY(-2px); */
-  box-shadow: var(--shadow-elegant);
+.card:hover,
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px hsla(var(--primary-rgb), 0.15);
 }
 
 .card-header {

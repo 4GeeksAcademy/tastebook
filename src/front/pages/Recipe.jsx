@@ -56,9 +56,16 @@ export const Recipe = () => {
       setLoading(true);
       setError(null);
 
+      // Validate recipe ID
+      if (!id || isNaN(parseInt(id))) {
+        throw new Error('Invalid recipe ID');
+      }
+
       // Ensure we have a backend URL
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
       const apiUrl = `${backendUrl}/api/recipe/${id}`;
+      
+      console.log('Fetching recipe from:', apiUrl); // Debug log
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -69,13 +76,12 @@ export const Recipe = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setRecipe(data.recipe);
+        console.log('Recipe data received:', data); // Debug log
         
-        // Temporary debugging - remove this after testing
-        if (data.recipe.images && data.recipe.images.length > 0) {
-          console.log('✅ Images found in API response:', data.recipe.images);
+        if (data.recipe) {
+          setRecipe(data.recipe);
         } else {
-          console.log('❌ No images found in API response');
+          throw new Error('Recipe data is missing from response');
         }
         
         // Set primary image as selected, or first image if no primary
@@ -219,10 +225,15 @@ export const Recipe = () => {
       {/* Header with back button */}
       <div className="row mb-4">
         <div className="col-md-6">
-          <Link to="/" className="btn btn-outline-primary">
-            <ArrowLeft size={16} className="me-2" />
-            Back to Recipes
-          </Link>
+          <div className="d-flex gap-2">
+            <Link to="/all-recipes" className="btn btn-outline-primary">
+              <ArrowLeft size={16} className="me-2" />
+              Back to All Recipes
+            </Link>
+            <Link to="/" className="btn btn-outline-secondary">
+              Home
+            </Link>
+          </div>
         </div>
         <div className="col-md-6 d-flex justify-content-md-end mt-2 mt-md-0">
           <button 
@@ -318,12 +329,21 @@ export const Recipe = () => {
                         className="img-fluid w-100"
                         style={{ height: '400px', objectFit: 'cover' }}
                         onError={(e) => {
-                          console.error('Image failed to load:', e.target.src);
-                          // Try to show a placeholder or hide the image
-                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+PC9zdmc+';
+                          console.error('Main image failed to load:', e.target.src);
+                          // Replace with placeholder
+                          e.target.style.display = 'none';
+                          e.target.nextElementSibling.style.display = 'flex';
                         }}
                       />
-                    ) : (
+                    ) : null}
+                    {/* Error fallback for main image */}
+                    <div className="d-none align-items-center justify-content-center bg-light" style={{ height: '400px' }}>
+                      <div className="text-center">
+                        <Camera size={48} className="text-muted mb-2" />
+                        <p className="text-muted">Image failed to load</p>
+                      </div>
+                    </div>
+                    {(!displayImage || !displayImage.url) && (
                       <div className="d-flex align-items-center justify-content-center bg-light" style={{ height: '400px' }}>
                         <div className="text-center">
                           <Camera size={48} className="text-muted mb-2" />
@@ -358,6 +378,8 @@ export const Recipe = () => {
                                 className="img-thumbnail w-100 h-100"
                                 style={{ objectFit: 'cover' }}
                                 onError={(e) => {
+                                  console.error('Thumbnail failed to load:', e.target.src);
+                                  e.target.style.opacity = '0.5';
                                   e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjEwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1nPC90ZXh0Pjwvc3ZnPg==';
                                 }}
                               />

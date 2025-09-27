@@ -636,6 +636,9 @@ def get_user_public_profile(username):
         return jsonify({"error": "Error fetching user profile", "details": str(e)}), 500
 
 
+######################################################################################################
+
+
 ############################################
 #######         FOLLOW USER          #######
 ############################################
@@ -978,22 +981,38 @@ def get_all_recipes():
         # Get pagination parameters
         limit = request.args.get('limit', 20, type=int)
         offset = request.args.get('offset', 0, type=int)
-        
-        # Ensure reasonable limits
-        limit = min(limit, 100)  # Max 100 recipes per request
-        
-        # Get recipes with pagination
-        recipes_query = Recipe.query.order_by(Recipe.created_at.desc()).offset(offset).limit(limit)
-        recipes = recipes_query.all()
-        
-        # Get total count for pagination
-        total_count = Recipe.query.count()
-        
+        limit = min(limit, 100)
+
+        # Future-proof filter parameters
+        category = request.args.get('category')
+        dietary = request.args.get('dietary')
+        max_cooking_time = request.args.get('max_cooking_time', type=int)
+        min_likes = request.args.get('min_likes', type=int)
+        search = request.args.get('search')
+
+        # Start query
+        query = Recipe.query
+
+        # Example: Add filters (expand as models support these fields)
+        # if category:
+        #     query = query.filter(Recipe.category == category)
+        # if dietary:
+        #     query = query.filter(Recipe.dietary == dietary)
+        # if max_cooking_time:
+        #     query = query.filter(Recipe.cooking_time <= max_cooking_time)
+        # if min_likes:
+        #     query = query.filter(Recipe.likes >= min_likes)
+        if search:
+            query = query.filter(Recipe.title.ilike(f"%{search}%"))
+
+        # Order and paginate
+        query = query.order_by(Recipe.created_at.desc())
+        total_count = query.count()
+        recipes = query.offset(offset).limit(limit).all()
+
         recipes_data = []
         for recipe in recipes:
             recipe_data = recipe.serialize()
-            
-            # Add author information
             author = User.query.get(recipe.author_id)
             if author:
                 recipe_data['author'] = {
@@ -1002,23 +1021,17 @@ def get_all_recipes():
                     'full_name': author.full_name,
                     'cloudinary_url': author.cloudinary_url
                 }
-            
-            # Add primary image
             primary_image = RecipeImage.query.filter_by(
                 recipe_id=recipe.id, 
                 is_primary=True
             ).first()
-            
             if not primary_image:
-                # If no primary image, get the first image
                 primary_image = RecipeImage.query.filter_by(
                     recipe_id=recipe.id
                 ).order_by(RecipeImage.display_order).first()
-            
             recipe_data['primary_image'] = primary_image.serialize() if primary_image else None
-            
             recipes_data.append(recipe_data)
-        
+
         return jsonify({
             "msg": "Recipes retrieved successfully",
             "recipes": recipes_data,
@@ -1029,7 +1042,6 @@ def get_all_recipes():
                 "has_more": offset + limit < total_count
             }
         }), 200
-        
     except Exception as e:
         return jsonify({"error": "Error fetching recipes", "details": str(e)}), 500
 
