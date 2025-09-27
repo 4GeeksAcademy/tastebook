@@ -48,8 +48,8 @@
   /* Beautiful gradients and shadows */
   --gradient-primary: linear-gradient(135deg, hsl(15, 86%, 55%), hsl(20, 100%, 70%));
   --gradient-subtle: linear-gradient(180deg, hsl(28, 20%, 98%), hsl(28, 30%, 94%));
-  --shadow-elegant: 0 10px 30px -10px hsla(15, 86%, 55%, 0.2);
-  --shadow-glow: 0 0 40px hsla(20, 100%, 70%, 0.3);
+  /* --shadow-elegant: 0 10px 30px -10px hsla(15, 86%, 55%, 0.2); */
+  /* --shadow-glow: 0 0 40px hsla(20, 100%, 70%, 0.3); */
   
   /* Bootstrap override variables */
   --bs-primary: var(--primary);
@@ -73,10 +73,10 @@
 .dark-mode {
   /* Dark theme colors - maintaining warm tones */
   --bg-primary: hsl(20, 14.3%, 4.1%); /* Very dark brown background */
-  --bg-secondary: hsl(20, 25%, 15%); /* Dark warm secondary */
+  --bg-secondary: hsl(0, 0%, 7%); /* Dark warm secondary */
   --text-primary: hsl(28, 20%, 98%); /* Light cream text */
-  --text-secondary: hsl(25, 10%, 60%); /* Muted light text */
-  --border-color: hsl(20, 25%, 18%); /* Dark warm border */
+  --text-secondary: hsl(0, 0%, 20%); /* Muted light text */
+  --border-color: hsl(0, 0%, 16%); /* Dark warm border */
   
   /* Primary colors for dark mode */
   --primary: hsl(20, 100%, 70%); /* Bright warm orange */
@@ -114,8 +114,8 @@
   /* Dark mode gradients */
   --gradient-primary: linear-gradient(135deg, hsl(20, 100%, 70%), hsl(25, 100%, 80%));
   --gradient-subtle: linear-gradient(180deg, hsl(20, 14.3%, 4.1%), hsl(20, 25%, 12%));
-  --shadow-elegant: 0 10px 30px -10px hsla(20, 100%, 70%, 0.3);
-  --shadow-glow: 0 0 40px hsla(25, 100%, 80%, 0.4);
+  /* --shadow-elegant: 0 10px 30px -10px hsla(20, 100%, 70%, 0.3); */
+  /* --shadow-glow: 0 0 40px hsla(25, 100%, 80%, 0.4); */
   
   /* Bootstrap override variables for dark mode */
   --bs-primary: var(--primary);
@@ -404,7 +404,7 @@ body {
   border-color: hsl(15, 86%, 55%) !important; /* fallback */
   border-color: var(--primary) !important;
   color: white !important;
-  box-shadow: 0 10px 30px -10px hsla(15, 86%, 55%, 0.2); /* fallback */
+  box-shadow: 0 10px 30px -10px hsla(239, 89%, 49%, 0.2); /* fallback */
   box-shadow: var(--shadow-elegant);
   transition: all 0.3s ease;
 }
