@@ -969,6 +969,116 @@ def get_single_recipe(recipe_id):
 
 
 ############################################
+#######       UPDATE RECIPE          #######
+############################################
+""" JSON request body to UPDATE RECIPE:
+{
+    "title":       "Updated Recipe Title",
+    "description": "Updated description",
+    "ingredients": [
+        {
+            "quantity":    2.5,
+            "unit":       "cups",
+            "ingredient": "updated ingredient"
+        }
+    ],
+    "instructions": [
+        "Updated instruction 1",
+        "Updated instruction 2"
+    ]
+}
+"""
+
+@api.route('/recipe/<int:recipe_id>', methods=['PUT'])
+@jwt_required()
+def update_recipe(recipe_id):
+    """
+    Update an existing recipe. Only the recipe author can update their recipe.
+    """
+    try:
+        # Get authenticated user ID
+        current_user_id = get_jwt_identity()
+        
+        # Find the recipe
+        recipe = Recipe.query.get(recipe_id)
+        if not recipe:
+            return jsonify({"error": "Recipe not found"}), 404
+        
+        # Check if user is the author of the recipe
+        if recipe.author_id != int(current_user_id):
+            return jsonify({"error": "You are not authorized to update this recipe"}), 403
+        
+        # Get request data
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ["title", "ingredients", "instructions"]
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"error": f"The field '{field}' is required."}), 400
+        
+        # Validate ingredients structure
+        ingredients = data.get('ingredients')
+        if not isinstance(ingredients, list) or len(ingredients) == 0:
+            return jsonify({"error": "Ingredients must be a non-empty array."}), 400
+        
+        for i, ingredient in enumerate(ingredients):
+            if not isinstance(ingredient, dict):
+                return jsonify({"error": f"Ingredient {i+1} must be an object."}), 400
+            
+            required_ingredient_fields = ["quantity", "unit", "ingredient"]
+            for field in required_ingredient_fields:
+                if field not in ingredient:
+                    return jsonify({"error": f"Ingredient {i+1} is missing field '{field}'."}), 400
+            
+            try:
+                # Validate quantity is a number
+                float(ingredient['quantity'])
+            except (ValueError, TypeError):
+                return jsonify({"error": f"Ingredient {i+1} quantity must be a number."}), 400
+
+        # Validate instructions structure
+        instructions = data.get('instructions')
+        if not isinstance(instructions, list) or len(instructions) == 0:
+            return jsonify({"error": "Instructions must be a non-empty array."}), 400
+        
+        for i, instruction in enumerate(instructions):
+            if not isinstance(instruction, str) or not instruction.strip():
+                return jsonify({"error": f"Instruction {i+1} must be a non-empty string."}), 400
+
+        # Update recipe fields
+        recipe.title = data["title"][:100]  # Ensure maximum length
+        recipe.description = data.get("description", "")  # Optional field
+        recipe.ingredients = ingredients
+        recipe.instructions = instructions
+        
+        # Save to database
+        db.session.commit()
+        
+        # Prepare response with author info
+        recipe_response = recipe.serialize()
+        
+        # Get author information
+        author = User.query.get(recipe.author_id)
+        if author:
+            recipe_response['author'] = {
+                'user_id': author.id,
+                'username': author.username,
+                'full_name': author.full_name,
+                'cloudinary_url': author.cloudinary_url
+            }
+        
+        return jsonify({
+            "msg": "Recipe updated successfully.",
+            "recipe": recipe_response
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Error updating recipe.", "details": str(e)}), 500
+
+
+############################################
 #######        GET ALL RECIPES       #######
 ############################################
 @api.route('/recipes', methods=['GET'])

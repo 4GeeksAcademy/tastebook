@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Clock, Users, ChefHat, Calendar, ArrowLeft, Camera, User, ExternalLink, Share2 } from 'lucide-react';
+import { Clock, Users, ChefHat, Calendar, ArrowLeft, Camera, User, ExternalLink, Share2, Edit } from 'lucide-react';
 
 export const Recipe = () => {
   const { id } = useParams();
@@ -9,9 +9,11 @@ export const Recipe = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     fetchRecipe();
+    fetchCurrentUser();
   }, [id]);
 
   useEffect(() => {
@@ -48,6 +50,29 @@ export const Recipe = () => {
       } catch (clipboardError) {
         console.log('Error copying to clipboard:', clipboardError);
       }
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/settings`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentUser(data.current_user);
+      }
+    } catch (error) {
+      console.error('Error fetching current user:', error);
     }
   };
 
@@ -102,6 +127,10 @@ export const Recipe = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const isRecipeOwner = () => {
+    return currentUser && recipe && currentUser.user_id === recipe.author?.user_id;
   };
 
   const formatDate = (dateString) => {
@@ -230,9 +259,16 @@ export const Recipe = () => {
               <ArrowLeft size={16} className="me-2" />
               Back to All Recipes
             </Link>
-            <Link to="/" className="btn btn-outline-secondary">
-              Home
-            </Link>
+            {isRecipeOwner() ? (
+              <Link to={`/recipe/${id}/modify`} className="btn btn-warning">
+                <Edit size={16} className="me-2" />
+                Modify Recipe
+              </Link>
+            ) : (
+              <Link to="/" className="btn btn-outline-secondary">
+                Home
+              </Link>
+            )}
           </div>
         </div>
         <div className="col-md-6 d-flex justify-content-md-end mt-2 mt-md-0">
