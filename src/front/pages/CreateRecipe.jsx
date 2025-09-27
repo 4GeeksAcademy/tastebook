@@ -13,15 +13,42 @@ export const CreateRecipe = () => {
   
   const [images, setImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageUploading, setImageUploading] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: '', type: '' });
+  const [countdown, setCountdown] = useState(null);
+  const [countdownInterval, setCountdownInterval] = useState(null);
+  const [createdRecipeId, setCreatedRecipeId] = useState(null);
 
   const navigate = useNavigate();
 
-  // Show alert with auto-dismiss
+  // Show alert without auto-dismiss
   const showAlert = (message, type = 'success') => {
     setAlert({ show: true, message, type });
-    setTimeout(() => setAlert({ show: false, message: '', type: '' }), 5000);
+  };
+
+  // Start countdown timer
+  const startCountdown = (seconds, callback) => {
+    setCountdown(seconds);
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setCountdownInterval(null);
+          callback();
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    setCountdownInterval(interval);
+  };
+
+  // Clear countdown
+  const clearCountdown = () => {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      setCountdownInterval(null);
+    }
+    setCountdown(null);
   };
 
   const handleInputChange = (e) => {
@@ -84,77 +111,24 @@ export const CreateRecipe = () => {
     }
   };
 
-  // Image upload handler
+  // Image upload handler - Just store files for later upload
   const handleImageUpload = async (file) => {
-    setImageUploading(true);
-    
-    // Add temporary image with preview
-    const tempImage = {
-      id: `temp-${Date.now()}`,
+    // Add image file with preview for display
+    const fileImage = {
+      id: `file-${Date.now()}`,
       file,
       preview: URL.createObjectURL(file),
-      uploading: true,
-      is_primary: false // No image is primary by default
+      is_primary: false
     };
     
-    setImages(prev => [...prev, tempImage]);
-    
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('is_primary', 'false'); // Never set as primary by default
-      
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/recipe/temp/upload-image`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        // Update the temporary image with the actual data
-        setImages(prev => prev.map(img => 
-          img.id === tempImage.id 
-            ? { ...data.image, uploading: false }
-            : img
-        ));
-        showAlert('Image uploaded successfully!');
-      } else {
-        // Remove the temporary image on error
-        setImages(prev => prev.filter(img => img.id !== tempImage.id));
-        showAlert('Failed to upload image', 'danger');
-      }
-    } catch (error) {
-      console.error('Image upload error:', error);
-      setImages(prev => prev.filter(img => img.id !== tempImage.id));
-      showAlert('Error uploading image', 'danger');
-    } finally {
-      setImageUploading(false);
-    }
+    setImages(prev => [...prev, fileImage]);
+    // Remove alert - no need to notify user for every image added
   };
 
   // Image delete handler
   const handleImageDelete = async (imageId) => {
-    const imageToDelete = images.find(img => img.id === imageId);
-    if (!imageToDelete) return;
-
-    // If it's a temporary image, just remove from state
-    if (typeof imageId === 'string' && imageId.startsWith('temp-')) {
-      setImages(prev => prev.filter(img => img.id !== imageId));
-      return;
-    }
-
-    try {
-      // For uploaded images, we'll need to store them temporarily and delete when recipe is saved
-      // For now, just remove from the display
-      setImages(prev => prev.filter(img => img.id !== imageId));
-      showAlert('Image removed');
-    } catch (error) {
-      console.error('Image delete error:', error);
-      showAlert('Error removing image', 'danger');
-    }
+    setImages(prev => prev.filter(img => img.id !== imageId));
+    // Remove alert - no need to notify user for every image removed
   };
 
   // Set primary image handler
@@ -163,7 +137,7 @@ export const CreateRecipe = () => {
       ...img,
       is_primary: img.id === imageId
     })));
-    showAlert('Primary image updated');
+    // Remove alert - no need to notify user for primary image change
   };
 
   // Image reorder handler
@@ -176,37 +150,42 @@ export const CreateRecipe = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Clear any existing alerts and countdown
+    setAlert({ show: false, message: '', type: '' });
+    clearCountdown();
     setIsSubmitting(true);
 
-    // Validate form
-    if (!formData.title.trim()) {
-      showAlert('Please enter a recipe title', 'danger');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (formData.ingredients.some(ing => !ing.ingredient.trim())) {
-      showAlert('Please fill in all ingredient names', 'danger');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (formData.instructions.some(inst => !inst.trim())) {
-      showAlert('Please fill in all instruction steps', 'danger');
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Validate that if there are images, at least one is set as primary
-    if (images.length > 0 && !images.some(img => img.is_primary)) {
-      showAlert('Please select a primary image from your uploaded images', 'danger');
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
+      // Validate form
+      if (!formData.title.trim()) {
+        showAlert('Please enter a recipe title', 'danger');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (formData.ingredients.some(ing => !ing.ingredient.trim())) {
+        showAlert('Please fill in all ingredient names', 'danger');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (formData.instructions.some(inst => !inst.trim())) {
+        showAlert('Please fill in all instruction steps', 'danger');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate that if there are images, at least one is set as primary
+      if (images.length > 0 && !images.some(img => img.is_primary)) {
+        showAlert('Please select a primary image by clicking the star on one of your images', 'danger');
+        setIsSubmitting(false);
+        return;
+      }
+
       const token = localStorage.getItem('token');
       
+      // Create the recipe first
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/recipe`, {
         method: 'POST',
         headers: {
@@ -216,32 +195,97 @@ export const CreateRecipe = () => {
         body: JSON.stringify(formData)
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const recipeId = data.recipe.recipe_id;
-        
-        // If we have images that need to be associated with the recipe
-        if (images.length > 0) {
-          showAlert('Recipe created successfully! Processing images...', 'success');
-          
-          // For temp images, we'll need to re-upload them with the actual recipe ID
-          // For now, let's redirect and handle images later
-          setTimeout(() => {
-            navigate(`/recipe/${recipeId}`);
-          }, 2000);
-        } else {
-          showAlert('Recipe created successfully!', 'success');
-          setTimeout(() => {
-            navigate(`/recipe/${recipeId}`);
-          }, 1500);
-        }
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
         showAlert(errorData.msg || 'Failed to create recipe', 'danger');
+        setIsSubmitting(false);
+        return;
       }
+
+      const data = await response.json();
+      const recipeId = data.recipe.recipe_id;
+      setCreatedRecipeId(recipeId);
+      
+      console.log('✅ Recipe created successfully:', { recipeId, authorId: data.recipe.author_id });
+      
+      // If we have images, upload them - STOP EVERYTHING if any image fails
+      if (images.length > 0) {
+        showAlert(`Recipe created! Uploading ${images.length} image${images.length > 1 ? 's' : ''}...`, 'info');
+        
+        // Add a small delay to ensure database transaction is fully committed
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Upload images one by one to better handle errors
+        for (let i = 0; i < images.length; i++) {
+          const img = images[i];
+          const imageFormData = new FormData();
+          imageFormData.append('image', img.file);
+          imageFormData.append('is_primary', img.is_primary ? 'true' : 'false');
+          
+          console.log(`📤 Uploading image ${i + 1}/${images.length} for recipe ${recipeId}...`);
+          
+          // Retry logic for image upload (handles timing issues)
+          let uploadResponse;
+          let uploadSuccess = false;
+          const maxRetries = 3;
+          
+          for (let retry = 0; retry < maxRetries; retry++) {
+            if (retry > 0) {
+              console.log(`🔄 Retrying image upload ${i + 1}, attempt ${retry + 1}/${maxRetries}...`);
+              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 500 * retry));
+            }
+            
+            uploadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/recipe/${recipeId}/upload-image`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              },
+              body: imageFormData
+            });
+            
+            if (uploadResponse.ok) {
+              uploadSuccess = true;
+              break;
+            }
+            
+            // If it's the last retry, we'll handle the error below
+            if (retry === maxRetries - 1) {
+              break;
+            }
+          }
+          
+          if (!uploadSuccess) {
+            const errorData = await uploadResponse.json().catch(() => ({}));
+            console.error('❌ Image upload failed after retries:', {
+              status: uploadResponse.status,
+              statusText: uploadResponse.statusText,
+              errorData,
+              recipeId,
+              imageIndex: i + 1
+            });
+            const errorMessage = `Failed to upload image ${i + 1} after ${maxRetries} attempts: ${errorData.error || `HTTP ${uploadResponse.status} - ${uploadResponse.statusText}`}`;
+            showAlert(`❌ ${errorMessage}. Recipe creation stopped.`, 'danger');
+            setIsSubmitting(false);
+            return; // STOP - do not continue if any image fails
+          }
+          
+          console.log(`✅ Image ${i + 1} uploaded successfully`);
+        }
+        
+        // All images uploaded successfully
+        showAlert(`✅ Recipe created successfully with ${images.length} image${images.length > 1 ? 's' : ''}!`, 'success');
+      } else {
+        // No images to upload
+        showAlert('✅ Recipe created successfully!', 'success');
+      }
+
+      // Start countdown to navigate
+      startCountdown(20, () => navigate(`/recipe/${recipeId}`));
+      
     } catch (error) {
       console.error('Submit error:', error);
-      showAlert('Error creating recipe', 'danger');
+      showAlert(`❌ Error creating recipe: ${error.message}`, 'danger');
     } finally {
       setIsSubmitting(false);
     }
@@ -265,18 +309,6 @@ export const CreateRecipe = () => {
 
             <div className="card-body">
 
-              {/* Alert */}
-              {alert.show && (
-                <div className={`alert alert-${alert.type} alert-dismissible fade show`} role="alert">
-                  {alert.message}
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setAlert({ show: false, message: '', type: '' })}
-                  ></button>
-                </div>
-              )}
-
               <form onSubmit={handleSubmit}>
                 
                 {/* Recipe Images Section */}
@@ -288,7 +320,7 @@ export const CreateRecipe = () => {
                     onImageDelete={handleImageDelete}
                     onSetPrimary={handleSetPrimary}
                     onReorder={handleImageReorder}
-                    loading={imageUploading}
+                    loading={false}
                     maxImages={8}
                     className="mb-3"
                   />
@@ -438,11 +470,48 @@ export const CreateRecipe = () => {
                   ))}
                 </div>
 
+                {/* Alert near submit button */}
+                {alert.show && (
+                  <div className={`alert alert-${alert.type} alert-dismissible fade show mb-3`} role="alert">
+                    {alert.message}
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => {
+                        setAlert({ show: false, message: '', type: '' });
+                        clearCountdown();
+                      }}
+                    ></button>
+                  </div>
+                )}
+
+                {/* Countdown display */}
+                {countdown !== null && (
+                  <div className="alert alert-info mb-3 d-flex align-items-center justify-content-between">
+                    <span>Redirecting to your new recipe in {countdown} seconds...</span>
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary btn-sm"
+                      onClick={() => {
+                        clearCountdown();
+                        if (createdRecipeId) {
+                          navigate(`/recipe/${createdRecipeId}`);
+                        }
+                      }}
+                    >
+                      Go Now
+                    </button>
+                  </div>
+                )}
+
                 {/* Submit Button */}
                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
                   <button
                     type="button"
-                    onClick={() => navigate('/')}
+                    onClick={() => {
+                      clearCountdown();
+                      navigate('/');
+                    }}
                     className="btn btn-outline-secondary me-md-2"
                     disabled={isSubmitting}
                   >
@@ -451,7 +520,7 @@ export const CreateRecipe = () => {
                   <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={isSubmitting || imageUploading}
+                    disabled={isSubmitting || countdown !== null}
                   >
                     {isSubmitting ? (
                       <>

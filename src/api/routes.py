@@ -1080,7 +1080,11 @@ def upload_recipe_image(recipe_id):
     """
     user_id = get_jwt_identity()
     recipe = Recipe.query.get(recipe_id)
-    if not recipe or recipe.author_id != user_id:
+    
+    if not recipe:
+        return jsonify({'error': 'Recipe not found.'}), 404
+    
+    if recipe.author_id != int(user_id):
         return jsonify({'error': 'Recipe not found or unauthorized.'}), 404
 
     if 'image' not in request.files:
@@ -1155,6 +1159,65 @@ def upload_temp_recipe_image():
         
         return jsonify({'msg': 'Temporary image uploaded.', 'image': temp_image}), 200
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# =============================
+#   ASSOCIATE TEMP IMAGES WITH RECIPE
+# =============================
+@api.route('/recipe/<int:recipe_id>/associate-temp-images', methods=['POST'])
+@jwt_required()
+def associate_temp_images_with_recipe(recipe_id):
+    """
+    Associates temporary images with a recipe by creating RecipeImage records.
+    Expects JSON with 'temp_images' array containing temp image data.
+    """
+    user_id = get_jwt_identity()
+    recipe = Recipe.query.get(recipe_id)
+    if not recipe or recipe.author_id != user_id:
+        return jsonify({'error': 'Recipe not found or unauthorized.'}), 404
+
+    data = request.get_json()
+    if not data or 'temp_images' not in data:
+        return jsonify({'error': 'Missing temp_images array.'}), 400
+
+    temp_images = data['temp_images']
+    
+    # Debug logging
+    print(f"🔄 Associating {len(temp_images)} temp images with recipe {recipe_id}")
+    for i, img in enumerate(temp_images):
+        print(f"  Image {i}: url={img.get('url', 'missing')[:50]}..., image_id={img.get('image_id', 'missing')}, is_primary={img.get('is_primary', False)}")
+    
+    try:
+        created_images = []
+        
+        for idx, temp_img in enumerate(temp_images):
+            # Validate required fields
+            if not temp_img.get('url'):
+                raise ValueError(f"Missing 'url' for image {idx}")
+            if not temp_img.get('image_id'):
+                raise ValueError(f"Missing 'image_id' for image {idx}")
+            
+            # Create RecipeImage record
+            new_image = RecipeImage(
+                recipe_id=recipe_id,
+                url=temp_img['url'],
+                image_id=temp_img['image_id'],
+                is_primary=temp_img.get('is_primary', False),
+                display_order=idx
+            )
+            db.session.add(new_image)
+            created_images.append(new_image)
+            print(f"✅ Created RecipeImage for image {idx}: {new_image}")
+        
+        db.session.commit()
+        
+        return jsonify({
+            'msg': 'Temporary images associated with recipe successfully.',
+            'images': [img.serialize() for img in created_images]
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 # =============================
