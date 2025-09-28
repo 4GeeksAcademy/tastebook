@@ -70,7 +70,6 @@ def handle_hello():
     - Choose "Bearer Token" in dropdown
     - Paste token WITHOUT QUOTES
 """
-
 @api.route('/testing-private', methods=['GET'])
 @jwt_required()
 def private_route():
