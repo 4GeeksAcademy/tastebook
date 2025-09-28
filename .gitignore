@@ -1,6 +1,8 @@
 # ignore all files starting with .
 .*
 
+copilot-instructions.md
+
 # track this file .gitignore (i.e. do NOT ignore it)
 !.gitignore
 !.github
@@ -83,5 +85,3 @@ __pycache__/
 
 
 
-
-copilot-instructions.md
