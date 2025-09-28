@@ -17,6 +17,10 @@ export const THEMES = {
     original: {
         name: "Original",
         cssPath: "/themes/original.css"
+    },
+    recipes: {
+        name: "Recipes",
+        cssPath: "/themes/recipes.css"
     }
 };
 
