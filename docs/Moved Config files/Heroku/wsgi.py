@@ -1,6 +1,7 @@
 
 
 # THIS FILE WAS IN THE "/src" DIRECTORY
+# and is not only needed for Heroku but also for Render.com !!!
 
 
 # This file was created to run the application on heroku using gunicorn.
