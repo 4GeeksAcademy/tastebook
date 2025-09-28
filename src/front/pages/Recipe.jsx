@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Clock, Users, ChefHat, Calendar, ArrowLeft, Camera, User, ExternalLink, Share2, Edit } from 'lucide-react';
 import CommentSection from '../components/CommentSection';
+import { LikeButton } from '../components/LikeButton';
 
 export const Recipe = () => {
   const { id } = useParams();
@@ -289,7 +290,15 @@ export const Recipe = () => {
         <div className="col-lg-8">
           {/* Recipe Title and Info */}
           <div className="mb-4">
-            <h1 className="display-5 fw-bold mb-3">{recipe.title}</h1>
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <h1 className="display-5 fw-bold mb-0">{recipe.title}</h1>
+              <LikeButton 
+                recipeId={recipe.recipe_id}
+                initialLikeCount={recipe.like_count || 0}
+                initialIsLiked={recipe.is_liked_by_user || false}
+                size="large"
+              />
+            </div>
             
             {/* Recipe Meta Information */}
             <div className="d-flex flex-wrap gap-3 mb-3">

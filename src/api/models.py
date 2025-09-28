@@ -84,6 +84,13 @@ class User(db.Model):
         cascade="all, delete-orphan"
     )
 
+    # One-to-many relationship with Like --> shows all recipe likes by this user
+    recipe_likes: Mapped[List["Like"]] = relationship(
+        "Like",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
     # One-to-many relationship with CommentLike --> shows all comment likes by this user
     comment_likes: Mapped[List["CommentLike"]] = relationship(
         "CommentLike",
@@ -220,11 +227,38 @@ class Recipe(db.Model):
         cascade="all, delete-orphan"
     )
 
+    # One-to-many relationship with Like --> shows all likes for this recipe
+    likes: Mapped[List["Like"]] = relationship(
+        "Like",
+        back_populates="recipe",
+        cascade="all, delete-orphan"
+    )
+
+
+    #-----------------#
+    # Helper Methods  #
+    #-----------------#
+    
+    @property
+    def like_count(self) -> int:
+        """Get the total number of likes for this recipe"""
+        return len(self.likes)
+    
+    def is_liked_by(self, user_id: int) -> bool:
+        """Check if a specific user has liked this recipe"""
+        return any(like.user_id == user_id for like in self.likes)
+
 
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self):
+    def serialize(self, current_user_id=None):
+        """
+        Serialize recipe data
+        
+        Args:
+            current_user_id: ID of the current user to check if they liked the recipe
+        """
         return {
             "recipe_id":    self.id,
             "author_id":    self.author_id,
@@ -232,7 +266,11 @@ class Recipe(db.Model):
             "description":  self.description,
             "ingredients":  self.ingredients,   # Will serialize as JSON automatically
             "instructions": self.instructions,  # Will serialize as JSON automatically
-            "created_at":   self.created_at.isoformat() if self.created_at else None
+            "created_at":   self.created_at.isoformat() if self.created_at else None,
+            "like_count":   self.like_count,
+            
+            # Current user interaction status
+            "is_liked_by_user": self.is_liked_by(current_user_id) if current_user_id else False,
         }
 
 
@@ -513,6 +551,74 @@ class Comment(db.Model):
     def __repr__(self):
         content_preview = self.content[:50] + "..." if len(self.content) > 50 else self.content
         return f"<Comment ID {self.id} | Recipe: {self.recipe_id} | Author: {self.user_id} | Content: '{content_preview}' | Likes: {self.like_count}>"
+
+
+
+############################################
+##########      RECIPE LIKE      ###########
+############################################
+
+class Like(db.Model):
+    __tablename__ = "like"
+
+    #------------#
+    # Attributes #
+    #------------#
+
+    # Primary Key
+    id:          Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
+
+    # Foreign Keys
+    user_id:     Mapped[int] = mapped_column( Integer, ForeignKey("user.id",   ondelete="CASCADE"), nullable=False)
+    recipe_id:   Mapped[int] = mapped_column( Integer, ForeignKey("recipe.id", ondelete="CASCADE"), nullable=False)
+
+    # Timestamp
+    created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
+
+
+    #-------------------#
+    # Table Constraints #
+    #-------------------#
+    __table_args__ = (
+        # Each user can only like a recipe once
+        UniqueConstraint('user_id', 'recipe_id', name='unique_user_recipe_like'),
+    )
+
+
+    #-----------#
+    # Relations #
+    #-----------#
+
+    # Many-to-one relationship with User --> shows who liked the recipe
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="recipe_likes"
+    )
+
+    # Many-to-one relationship with Recipe --> shows which recipe was liked
+    recipe: Mapped["Recipe"] = relationship(
+        "Recipe",
+        back_populates="likes"
+    )
+
+
+    #---------------#
+    # Serialization #
+    #---------------#
+    def serialize(self):
+        return {
+            "like_id":    self.id,
+            "user_id":    self.user_id,
+            "recipe_id":  self.recipe_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
+
+
+    #-----------------#
+    # __repr__ Method #
+    #-----------------#
+    def __repr__(self):
+        return f"<Like ID {self.id} | User: {self.user_id} | Recipe: {self.recipe_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
 
 
 

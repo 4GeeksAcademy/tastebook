@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat, Moon, Sun, Cog, DoorOpen, FilePlus } from "lucide-react";
+import { ChefHat, Moon, Sun, Cog, DoorOpen, FilePlus, Heart } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 
 
@@ -188,6 +188,10 @@ export const Navbar = () => {
 							<>
 								<Link to="/new-recipe" className="btn btn-link text-success text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="New Recipe">
 									<FilePlus size={22} />
+								</Link>
+
+								<Link to="/liked-recipes" className="btn btn-link text-danger text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Liked Recipes">
+									<Heart size={22} />
 								</Link>
 
 								<Link to="/settings" className="btn btn-link text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Settings">

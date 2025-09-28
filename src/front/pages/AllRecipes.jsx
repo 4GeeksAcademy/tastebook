@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Grid3X3, List, X, RotateCcw, User, Utensils } from 'lucide-react';
+import { LikeIcon } from '../components/LikeButton';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
@@ -111,8 +112,8 @@ export const AllRecipes = () => {
     // Recipe Card Component
     const RecipeCard = ({ recipe }) => (
         <div className={`card recipe-card h-100 ${view === 'list' ? 'd-flex flex-row' : ''}`}>
-            <Link to={`/recipe/${recipe.recipe_id}`} className="text-decoration-none text-reset h-100">
-                <div className={`${view === 'list' ? 'col-md-4 p-0' : ''}`}>
+            <div className={`${view === 'list' ? 'col-md-4 p-0' : ''}`}>
+                <Link to={`/recipe/${recipe.recipe_id}`} className="text-decoration-none">
                     <div className={`position-relative overflow-hidden ${view === 'list' ? 'h-100' : ''}`} style={{ height: view === 'grid' ? '220px' : '200px' }}>
                         {recipe.primary_image ? (
                             <img 
@@ -128,8 +129,10 @@ export const AllRecipes = () => {
                             </div>
                         )}
                     </div>
-                </div>
-                <div className={`card-body d-flex flex-column ${view === 'list' ? 'col-md-8' : ''}`}>
+                </Link>
+            </div>
+            <div className={`card-body d-flex flex-column ${view === 'list' ? 'col-md-8' : ''}`}>
+                <Link to={`/recipe/${recipe.recipe_id}`} className="text-decoration-none text-reset">
                     <h5 className="card-title recipe-card-title mb-2 lh-sm" style={{ 
                         display: '-webkit-box', 
                         WebkitLineClamp: 2, 
@@ -151,7 +154,9 @@ export const AllRecipes = () => {
                             }
                         </p>
                     )}
-                    <div className="mt-auto d-flex justify-content-between align-items-center">
+                </Link>
+                <div className="mt-auto">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
                         <div className="d-flex align-items-center">
                             {recipe.author?.cloudinary_url ? (
                                 <img 
@@ -173,8 +178,19 @@ export const AllRecipes = () => {
                             {new Date(recipe.created_at).toLocaleDateString()}
                         </small>
                     </div>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <LikeIcon 
+                            recipeId={recipe.recipe_id}
+                            initialLikeCount={recipe.like_count || 0}
+                            initialIsLiked={recipe.is_liked_by_user || false}
+                            size={16}
+                        />
+                        <small className="text-muted">
+                            {recipe.ingredients?.length || 0} ingredients
+                        </small>
+                    </div>
                 </div>
-            </Link>
+            </div>
         </div>
     );
 
