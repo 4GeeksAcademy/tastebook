@@ -15,7 +15,7 @@ import {
   UserMinus
 } from "lucide-react";
 import { EditDescriptionModal } from "../components/EditDescriptionModal";
-import { COUNTRIES } from "../assets/data/countriesData";
+import { COUNTRIES, CountryFlag } from "../assets/data/countriesData.jsx";
 
 export const UserProfile = () => {
   const { username } = useParams();
@@ -360,8 +360,9 @@ export const UserProfile = () => {
                       {userProfile.country && (
                         <div className="d-flex align-items-center mb-3">
                           <Globe size={18} className="text-muted me-2" />
-                          <span className="text-muted">
+                          <span className="text-muted d-flex align-items-center">
                             {COUNTRIES.find(c => c.code === userProfile.country)?.name || userProfile.country}
+                            <CountryFlag countryCode={userProfile.country} size={18} className="ms-2" />
                           </span>
                         </div>
                       )}

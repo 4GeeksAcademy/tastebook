@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Users as UsersIcon, ChefHat, Calendar, Filter, ArrowUpDown, ArrowUp, ArrowDown, Globe } from "lucide-react";
-import { REGIONS, COUNTRIES } from "../assets/data/countriesData";
+import { REGIONS, COUNTRIES, CountryFlag } from "../assets/data/countriesData.jsx";
 
 export const Users = () => {
   const [users, setUsers] = useState([]);
@@ -266,11 +266,13 @@ export const Users = () => {
                         {/* Country Info */}
                         <div className="text-muted mb-2 d-flex align-items-center justify-content-center">
                           <Globe size={14} className="me-1" />
-                          <small>
-                            {user.country 
-                              ? (COUNTRIES.find(c => c.code === user.country)?.name || user.country)
-                              : '-'
-                            }
+                          <small className="d-flex align-items-center">
+                            {user.country ? (
+                              <>
+                                {COUNTRIES.find(c => c.code === user.country)?.name || user.country}
+                                <CountryFlag countryCode={user.country} size={14} className="ms-1" />
+                              </>
+                            ) : '-'}
                           </small>
                         </div>
 

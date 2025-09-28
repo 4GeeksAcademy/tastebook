@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { User, KeyRound, Mail, BookOpenText, Image, Edit, X, Camera, Globe } from "lucide-react";
 import ImageUpload from "../components/ImageUpload";
-import { COUNTRIES } from "../assets/data/countriesData";
+import { COUNTRIES, CountryFlag } from "../assets/data/countriesData.jsx";
 
 export const Settings = () => {
   const [userData, setUserData] = useState(null);
@@ -356,7 +356,14 @@ export const Settings = () => {
                       <div className="row mb-3">
                         <div className="col-md-6">
                           <label className="form-label fw-semibold"><Globe size={18} className="me-1" /> Country</label>
-                          <p className="text-muted">{userData?.country ? COUNTRIES.find(c => c.code === userData.country)?.name || userData.country : 'Not specified'}</p>
+                          <p className="text-muted">
+                            {userData?.country ? (
+                              <span className="d-flex align-items-center">
+                                {COUNTRIES.find(c => c.code === userData.country)?.name || userData.country}
+                                <CountryFlag countryCode={userData.country} size={18} className="ms-2" />
+                              </span>
+                            ) : 'Not specified'}
+                          </p>
                         </div>
                       </div>
                       <button onClick={() => setIsEditing(true)} className="btn btn-primary"><Edit size={16} className="me-1" /> Edit Profile</button>
@@ -398,6 +405,13 @@ export const Settings = () => {
                             </option>
                           ))}
                         </select>
+                        {form.country && (
+                          <div className="mt-2 d-flex align-items-center">
+                            <small className="text-muted me-2">Selected:</small>
+                            <CountryFlag countryCode={form.country} size={16} className="me-2" />
+                            <small className="text-muted">{COUNTRIES.find(c => c.code === form.country)?.name}</small>
+                          </div>
+                        )}
                       </div>
 
                       <div className="col-12 mt-3">

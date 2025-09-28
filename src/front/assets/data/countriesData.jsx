@@ -247,17 +247,19 @@ export const getCountriesByRegion = (regionKey) => {
 export const CountryFlag = ({ countryCode, size = 16, className = "" }) => {
   if (!countryCode) return null;
   
-  return React.createElement(ReactCountryFlag, {
-    countryCode: countryCode,
-    svg: true,
-    style: {
-      width: `${size}px`,
-      height: `${size * 0.75}px`, // Maintain aspect ratio for flags
-      borderRadius: '2px'
-    },
-    className: className,
-    title: getCountryNameByCode(countryCode)
-  });
+  return (
+    <ReactCountryFlag
+      countryCode={countryCode}
+      svg
+      style={{
+        width: `${size}px`,
+        height: `${size * 0.75}px`, // Maintain aspect ratio for flags
+        borderRadius: '2px'
+      }}
+      className={className}
+      title={getCountryNameByCode(countryCode)}
+    />
+  );
 };
 
 // Helper function to get flag emoji for a country code (fallback option)
