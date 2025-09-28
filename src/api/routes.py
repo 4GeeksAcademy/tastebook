@@ -235,11 +235,9 @@ def handle_login():
             return jsonify({"error": "User has been deactivated"}), 401
 
 
-        # Generate access token (with expiration)
-        access_token = create_access_token(
-            identity=str(user.id),  # User identity (you can use ID or email)
-            expires_delta=timedelta(hours=24)  # Token expiration
-        )
+        # Generate access token (expiration set globally in app.py)
+        access_token = create_access_token(identity=str(user.id))  # User identity (you can use ID or email)
+
 
         return jsonify({
             "msg": "Login successful.",

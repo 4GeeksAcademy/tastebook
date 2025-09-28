@@ -8,7 +8,7 @@ from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_jwt_extended import JWTManager
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from api.utils import APIException, generate_sitemap
 from api.models import db
@@ -35,7 +35,7 @@ app.url_map.strict_slashes = False
 app.config["JWT_SECRET_KEY"] = "a3f5c8d9e7b1c4a6d2f8e9b7a1c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c2"
 
 # Caducidad del token
-# app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=24)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 
 # Inicializa JWTManager con la aplicación Flask
 jwt = JWTManager(app)
