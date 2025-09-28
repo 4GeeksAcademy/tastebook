@@ -34,6 +34,16 @@ app.url_map.strict_slashes = False
 # Configuración de la clave secreta para JWT
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 
+"""
+Run this in a Python shell to generate a new key:
+
+python3 -c "import secrets; print(secrets.token_hex(32))"
+
+And set it in the .env file as JWT_SECRET_KEY instead of the hardcoded value,
+or use in your Render dashboard for the JWT_SECRET_KEY environment variable
+instead of using the same one from your development environment.
+"""
+
 # Caducidad del token
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 
@@ -42,8 +52,10 @@ jwt = JWTManager(app)
 ############################################################################
 
 
-############################################################################
 
+
+
+############################################################################
 ### DATABASE CONFIGURATION ###
 
 db_url = os.getenv("DATABASE_URL")
