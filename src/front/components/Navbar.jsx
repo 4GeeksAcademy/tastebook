@@ -105,11 +105,11 @@ export const Navbar = () => {
 				</Link>
 
 				{/* Navigation Links */}
-				<div className="d-flex gap-3">
-					<Link to="/all-recipes" className="nav-link text-decoration-none fw-semibold text-primary">
+				<div className="d-flex gap-3 ms-4">
+					<Link to="/all-recipes" className="nav-link text-decoration-none fw-semibold text-secondary">
 						All Recipes
 					</Link>
-					<Link to="/users" className="nav-link text-decoration-none fw-semibold text-primary">
+					<Link to="/users" className="nav-link text-decoration-none fw-semibold text-secondary">
 						Users
 					</Link>
 				</div>
