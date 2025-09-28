@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Twitter, Github, Mail } from "lucide-react";
+import { Twitter, Github, Mail, Palette, Settings } from "lucide-react";
+import MiniThemeSelector from "./MiniThemeSelector";
 
 export const Footer = () => {
 
@@ -18,12 +19,47 @@ export const Footer = () => {
 
 					{/* Social */}
 					<div className="col-md-6 text-center text-md-end">
+
+						{/* Theme Dropdown */}
+						<div className="dropdown d-inline-block me-2">
+							<button 
+								className="btn btn-link text-muted p-0 border-0" 
+								type="button" 
+								id="themeDropdown" 
+								data-bs-toggle="dropdown" 
+								aria-expanded="false"
+								title="Theme settings"
+								style={{ background: 'none' }}
+							>
+								<Palette size={16} strokeWidth={2} />
+							</button>
+							<div className="dropdown-menu dropdown-menu-end p-3" aria-labelledby="themeDropdown" style={{ minWidth: '250px' }}>
+								<MiniThemeSelector />
+								<hr className="my-2" />
+								<div className="text-center">
+									<Link 
+										to="/theme" 
+										className="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center gap-1"
+										style={{ fontSize: '0.75rem' }}
+									>
+										<Settings size={14} strokeWidth={2} />
+										Theme Settings
+									</Link>
+								</div>
+							</div>
+						</div>
+
+
 						<a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-muted me-2">
 							<Twitter size={16} strokeWidth={2} />
 						</a>
+
+
 						<a href="https://github.com" target="_blank" rel="noreferrer" className="text-muted me-2">
 							<Github size={16} strokeWidth={2} />
 						</a>
+
+
 						<a href="mailto:contact@yourapp.com" className="text-muted">
 							<Mail size={16} strokeWidth={2} />
 						</a>

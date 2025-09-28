@@ -59,7 +59,7 @@ export const Home = () => {
 									src={food}
 									alt="Food"
 									className="img-fluid rounded shadow-sm border border-2 border-primary"
-									style={{ maxWidth: 260 }}
+									style={{ maxWidth: 300 }}
 								/>
 							</div>
 						</div>

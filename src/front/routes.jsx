@@ -27,6 +27,7 @@ import { ModifyRecipe } from "./pages/ModifyRecipe";
 import { Recipe } from "./pages/Recipe";
 import { Users } from "./pages/Users";
 import { UserProfile } from "./pages/UserProfile";
+import { Theme } from "./pages/Theme";
 
 
 
@@ -51,11 +52,15 @@ export const router = createBrowserRouter(
         <Route path= "/reset-password/:token" element={<ResetPassword />} />
 
         <Route path= "/settings" element={<Settings />} />
+  
         <Route path= "/new-recipe" element={<CreateRecipe />} />
         <Route path= "/recipe/:id" element={<Recipe />} />
         <Route path= "/recipe/:id/modify" element={<ModifyRecipe />} />
         <Route path= "/users" element={<Users />} />
         <Route path= "/user/:username" element={<UserProfile />} />
+
+
+        <Route path= "/theme" element={<Theme />} />
  
         <Route path= "/demo" element={<Demo />} />
         <Route path= "/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}

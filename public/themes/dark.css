@@ -1,0 +1,48 @@
+/* Dark theme: variables for dark mode */
+:root {
+  --bg-primary: hsl(20, 14.3%, 4.1%);
+  --bg-secondary: hsl(0, 0%, 7%);
+  --text-primary: hsl(28, 20%, 98%);
+  --text-secondary: hsl(0, 0%, 20%);
+  --border-color: hsl(0, 0%, 16%);
+  --primary: hsl(20, 100%, 70%);
+  --primary-rgb: 255, 138, 76;
+  --primary-glow: hsl(25, 100%, 80%);
+  --primary-light: hsl(20, 100%, 80%);
+  --primary-dark: hsl(20, 100%, 60%);
+  --secondary: hsl(20, 25%, 15%);
+  --accent: hsl(20, 25%, 18%);
+  --muted: hsl(20, 25%, 12%);
+  --muted-foreground: hsl(25, 10%, 60%);
+  --success: hsl(85, 60%, 35%);
+  --success-rgb: 92, 128, 42;
+  --danger: hsl(0, 75%, 50%);
+  --danger-rgb: 191, 32, 32;
+  --warning: hsl(43, 85%, 45%);
+  --warning-rgb: 212, 153, 5;
+  --info: hsl(195, 85%, 55%);
+  --info-rgb: 31, 142, 255;
+  --light: hsl(20, 25%, 18%);
+  --dark: hsl(28, 20%, 98%);
+  --gradient-primary: linear-gradient(135deg, hsl(20, 100%, 70%), hsl(25, 100%, 80%));
+  --gradient-subtle: linear-gradient(180deg, hsl(20, 14.3%, 4.1%), hsl(20, 25%, 12%));
+  --bs-primary: var(--primary);
+  --bs-primary-rgb: var(--primary-rgb);
+  --bs-secondary: var(--secondary);
+  --bs-success: var(--success);
+  --bs-success-rgb: var(--success-rgb);
+  --bs-danger: var(--danger);
+  --bs-danger-rgb: var(--danger-rgb);
+  --bs-warning: var(--warning);
+  --bs-warning-rgb: var(--warning-rgb);
+  --bs-info: var(--info);
+  --bs-info-rgb: var(--info-rgb);
+  --bs-light: var(--light);
+  --bs-dark: var(--dark);
+  --bs-body-bg: var(--bg-primary);
+  --bs-body-color: var(--text-primary);
+  --bs-border-color: var(--border-color);
+}
+
+/* Base styles to ensure body uses variables in dark */
+body { background-color: var(--bg-primary); color: var(--text-primary); }
