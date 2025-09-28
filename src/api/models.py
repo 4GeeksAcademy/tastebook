@@ -77,6 +77,20 @@ class User(db.Model):
         cascade="all, delete-orphan"
     )
 
+    # One-to-many relationship with Comment --> shows all comments created by this user
+    comments: Mapped[List["Comment"]] = relationship(
+        "Comment",
+        back_populates="author",
+        cascade="all, delete-orphan"
+    )
+
+    # One-to-many relationship with CommentLike --> shows all comment likes by this user
+    comment_likes: Mapped[List["CommentLike"]] = relationship(
+        "CommentLike",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
 
     #---------------#
     # Serialization #
@@ -195,6 +209,13 @@ class Recipe(db.Model):
     # One-to-many relationship with RecipeImage --> shows all images associated with this recipe
     images: Mapped[List["RecipeImage"]] = relationship(
         "RecipeImage",
+        back_populates="recipe",
+        cascade="all, delete-orphan"
+    )
+
+    # One-to-many relationship with Comment --> shows all comments for this recipe
+    comments: Mapped[List["Comment"]] = relationship(
+        "Comment",
         back_populates="recipe",
         cascade="all, delete-orphan"
     )
@@ -341,5 +362,224 @@ class Follow(db.Model):
     #-----------------#
     def __repr__(self):
         return f"<Follow ID {self.id} | Follower: {self.follower_id} | Followed: {self.followed_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
+
+
+
+############################################
+##########        COMMENT        ###########
+############################################
+
+class Comment(db.Model):
+    __tablename__ = "comment"
+
+    #------------#
+    # Attributes #
+    #------------#
+
+    # Primary Key
+    id:              Mapped[int]      = mapped_column( Integer,      primary_key=True,                     autoincrement=True)
+
+    # Foreign Keys
+    user_id:         Mapped[int]      = mapped_column( Integer,      ForeignKey("user.id",   ondelete="CASCADE"),  nullable=False)
+    recipe_id:       Mapped[int]      = mapped_column( Integer,      ForeignKey("recipe.id", ondelete="CASCADE"),  nullable=False)
+    parent_comment_id: Mapped[Optional[int]] = mapped_column( Integer, ForeignKey("comment.id", ondelete="CASCADE"), nullable=True)
+
+    # Content and State Fields
+    content:         Mapped[str]      = mapped_column( Text,                              nullable=False)
+    date_created:    Mapped[date]     = mapped_column( Date,         default=func.current_date(),  nullable=False)
+    is_edited:       Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
+    is_pinned:       Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
+
+
+    #-------------------#
+    # Table Constraints #
+    #-------------------#
+    __table_args__ = (
+        # Ensure comment content is not empty
+        CheckConstraint("char_length(content) > 0", name='check_comment_content_not_empty'),
+        # Only one pinned comment per recipe (enforced in application logic)
+        # Prevent self-referencing at deeper than one level (enforced in application logic)
+    )
+
+
+    #-----------#
+    # Relations #
+    #-----------#
+
+    # Many-to-one relationship with User --> shows who created the comment
+    author: Mapped["User"] = relationship(
+        "User",
+        back_populates="comments"
+    )
+
+    # Many-to-one relationship with Recipe --> shows which recipe this comment belongs to
+    recipe: Mapped["Recipe"] = relationship(
+        "Recipe",
+        back_populates="comments"
+    )
+
+    # Self-referential relationship for nested comments (only one level deep)
+    # One-to-many relationship with Comment (parent) --> shows replies to this comment
+    replies: Mapped[List["Comment"]] = relationship(
+        "Comment",
+        foreign_keys=[parent_comment_id],
+        back_populates="parent_comment",
+        cascade="all, delete-orphan"
+    )
+
+    # Many-to-one relationship with Comment (parent) --> shows the parent comment if this is a reply
+    parent_comment: Mapped[Optional["Comment"]] = relationship(
+        "Comment",
+        foreign_keys=[parent_comment_id],
+        back_populates="replies",
+        remote_side=[id]
+    )
+
+    # One-to-many relationship with CommentLike --> shows all likes for this comment
+    likes: Mapped[List["CommentLike"]] = relationship(
+        "CommentLike",
+        back_populates="comment",
+        cascade="all, delete-orphan"
+    )
+
+
+    #-----------------#
+    # Helper Methods  #
+    #-----------------#
+    
+    @property
+    def like_count(self) -> int:
+        """Get the total number of likes for this comment"""
+        return len(self.likes)
+    
+    def is_liked_by(self, user_id: int) -> bool:
+        """Check if a specific user has liked this comment"""
+        return any(like.user_id == user_id for like in self.likes)
+    
+    @property
+    def replies_count(self) -> int:
+        """Get the total number of replies to this comment"""
+        return len(self.replies)
+
+
+    #---------------#
+    # Serialization #
+    #---------------#
+    def serialize(self, include_replies=True, current_user_id=None):
+        """
+        Serialize comment data
+        
+        Args:
+            include_replies: Whether to include nested replies (default: True)
+            current_user_id: ID of the current user to check if they liked the comment
+        """
+        serialized = {
+            "comment_id":       self.id,
+            "user_id":          self.user_id,
+            "recipe_id":        self.recipe_id,
+            "parent_comment_id": self.parent_comment_id,
+            "content":          self.content,
+            "date_created":     self.date_created.isoformat() if self.date_created else None,
+            "is_edited":        self.is_edited,
+            "is_pinned":        self.is_pinned,
+            "like_count":       self.like_count,
+            "replies_count":    self.replies_count,
+            
+            # Author information
+            "author": {
+                "user_id":          self.author.id,
+                "username":         self.author.username,
+                "full_name":        self.author.full_name,
+                "cloudinary_url":   self.author.cloudinary_url
+            } if self.author else None,
+            
+            # Current user interaction status
+            "is_liked_by_user": self.is_liked_by(current_user_id) if current_user_id else False,
+        }
+        
+        # Include replies if requested and this is not already a reply (prevent infinite nesting)
+        if include_replies and not self.parent_comment_id:
+            serialized["replies"] = [
+                reply.serialize(include_replies=False, current_user_id=current_user_id)
+                for reply in sorted(self.replies, key=lambda r: r.date_created)
+            ]
+        
+        return serialized
+
+
+    #-----------------#
+    # __repr__ Method #
+    #-----------------#
+    def __repr__(self):
+        content_preview = self.content[:50] + "..." if len(self.content) > 50 else self.content
+        return f"<Comment ID {self.id} | Recipe: {self.recipe_id} | Author: {self.user_id} | Content: '{content_preview}' | Likes: {self.like_count}>"
+
+
+
+############################################
+##########     COMMENT LIKE      ###########
+############################################
+
+class CommentLike(db.Model):
+    __tablename__ = "comment_like"
+
+    #------------#
+    # Attributes #
+    #------------#
+
+    # Primary Key
+    id:          Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
+
+    # Foreign Keys
+    user_id:     Mapped[int] = mapped_column( Integer, ForeignKey("user.id",    ondelete="CASCADE"), nullable=False)
+    comment_id:  Mapped[int] = mapped_column( Integer, ForeignKey("comment.id", ondelete="CASCADE"), nullable=False)
+
+    # Timestamp
+    created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
+
+
+    #-------------------#
+    # Table Constraints #
+    #-------------------#
+    __table_args__ = (
+        # Each user can only like a comment once
+        UniqueConstraint('user_id', 'comment_id', name='unique_user_comment_like'),
+    )
+
+
+    #-----------#
+    # Relations #
+    #-----------#
+
+    # Many-to-one relationship with User --> shows who liked the comment
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="comment_likes"
+    )
+
+    # Many-to-one relationship with Comment --> shows which comment was liked
+    comment: Mapped["Comment"] = relationship(
+        "Comment",
+        back_populates="likes"
+    )
+
+
+    #---------------#
+    # Serialization #
+    #---------------#
+    def serialize(self):
+        return {
+            "like_id":    self.id,
+            "user_id":    self.user_id,
+            "comment_id": self.comment_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
+
+
+    #-----------------#
+    # __repr__ Method #
+    #-----------------#
+    def __repr__(self):
+        return f"<CommentLike ID {self.id} | User: {self.user_id} | Comment: {self.comment_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
 
 

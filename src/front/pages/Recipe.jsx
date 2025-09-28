@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Clock, Users, ChefHat, Calendar, ArrowLeft, Camera, User, ExternalLink, Share2, Edit } from 'lucide-react';
+import CommentSection from '../components/CommentSection';
 
 export const Recipe = () => {
   const { id } = useParams();
@@ -499,6 +500,19 @@ export const Recipe = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Comments Section */}
+      <div className="row mt-5">
+        <div className="col-12">
+          <div className="border-top pt-4">
+            <CommentSection
+              recipeId={parseInt(id)}
+              currentUser={currentUser}
+              isRecipeOwner={isRecipeOwner()}
+            />
           </div>
         </div>
       </div>
