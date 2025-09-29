@@ -106,6 +106,19 @@ export const CollectionView = () => {
         </div>
       </div>
 
+      {collection.description && (
+        <div className="mb-4">
+          <div className="card border-0 bg-light">
+            <div className="card-body py-3 px-4">
+              <h6 className="text-muted mb-2 fw-semibold">Description</h6>
+              <p className="mb-0 text-dark" style={{ whiteSpace: 'pre-wrap' }}>
+                {collection.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
 
       <div className="row g-4">

@@ -2415,21 +2415,67 @@ def get_collection(collection_id):
         if not collection:
             return jsonify({"error": "Collection not found"}), 404
 
+        # DEBUG: Print collection info
+        print(f"🔍 DEBUG: Collection ID: {collection_id}")
+        print(f"🔍 DEBUG: Collection title: {collection.title}")
+        print(f"🔍 DEBUG: Collection owner_id: {collection.owner_id} (type: {type(collection.owner_id)})")
+        print(f"🔍 DEBUG: Collection is_public: {collection.is_public}")
+
         # If private, require owner or jwt
         if not collection.is_public:
+            print(f"🔍 DEBUG: Collection is private, checking authentication...")
+            
+            # Get current user ID from JWT if available
+            current_user_id = None
             try:
+                # Import JWT functions at the call site to avoid issues
+                from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+                
+                # Check if JWT is present in request
+                verify_jwt_in_request()
                 current_user_id = get_jwt_identity()
-                if not current_user_id or str(collection.owner_id) != str(current_user_id):
-                    return jsonify({"error": "Collection is private"}), 403
-            except:
+                print(f"🔍 DEBUG: JWT verification successful, current_user_id: {current_user_id} (type: {type(current_user_id)})")
+                
+            except Exception as jwt_error:
+                print(f"🔍 DEBUG: JWT Exception: {jwt_error}")
+                print(f"🔍 DEBUG: Exception type: {type(jwt_error)}")
                 return jsonify({"error": "Authentication required for private collection"}), 401
+            
+            if not current_user_id:
+                print(f"🔍 DEBUG: No current_user_id from JWT")
+                return jsonify({"error": "Collection is private"}), 403
+                
+            # Convert both to int for comparison
+            try:
+                collection_owner_int = int(collection.owner_id)
+                current_user_int = int(current_user_id)
+                
+                print(f"🔍 DEBUG: Comparison - collection.owner_id as int: {collection_owner_int}")
+                print(f"🔍 DEBUG: Comparison - current_user_id as int: {current_user_int}")
+                print(f"🔍 DEBUG: Are they equal? {collection_owner_int == current_user_int}")
+                
+                if collection_owner_int != current_user_int:
+                    print(f"🔍 DEBUG: User {current_user_int} is not owner {collection_owner_int}")
+                    return jsonify({"error": "Collection is private"}), 403
+                else:
+                    print(f"🔍 DEBUG: ✅ User {current_user_int} IS the owner!")
+                    
+            except (ValueError, TypeError) as convert_error:
+                print(f"🔍 DEBUG: Error converting IDs to int: {convert_error}")
+                return jsonify({"error": "Authentication error"}), 403
 
+        print(f"🔍 DEBUG: ✅ Access granted to collection {collection_id}")
+        
         include_recipes = request.args.get('include_recipes', 'false').lower() == 'true'
+        
+        # Get current user ID for serialization (if available)
         current_user_id = None
         try:
+            from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+            verify_jwt_in_request(optional=True)  # Optional check
             current_user_id = get_jwt_identity()
         except:
-            pass
+            pass  # No JWT token is fine for public collections
 
         return jsonify({
             "collection": collection.serialize(
@@ -2439,6 +2485,7 @@ def get_collection(collection_id):
         }), 200
 
     except Exception as e:
+        print(f"🔍 DEBUG: Outer exception in get_collection: {e}")
         return jsonify({"error": "Failed to retrieve collection", "details": str(e)}), 500
 
 

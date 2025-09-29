@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Plus } from 'lucide-react';
+import { X, Save, Plus, Trash } from 'lucide-react';
 
 export const CollectionModal = ({ 
   show, 
@@ -13,6 +13,7 @@ export const CollectionModal = ({
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState(null);
 
   const token = localStorage.getItem('token');
@@ -39,6 +40,7 @@ export const CollectionModal = ({
       setMessage(null);
       setLoading(false);
       setFetchingData(false);
+      setDeleting(false);
     }
   }, [show, mode, collectionId]);
 
@@ -143,8 +145,53 @@ export const CollectionModal = ({
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this collection? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeleting(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch(`${backendUrl}/api/collection/${collectionId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMessage({ 
+          type: 'success', 
+          text: data.msg || 'Collection deleted successfully!' 
+        });
+        
+        // Call success callback with deletion flag and close modal after a short delay
+        setTimeout(() => {
+          if (onSuccess) {
+            onSuccess(null, 'deleted');
+          }
+          onClose();
+        }, 1000);
+      } else {
+        const errorData = await response.json();
+        setMessage({ 
+          type: 'danger', 
+          text: errorData.error || 'Failed to delete collection' 
+        });
+      }
+    } catch (error) {
+      setMessage({ 
+        type: 'danger', 
+        text: 'Failed to delete collection' 
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleClose = () => {
-    if (!loading && !fetchingData) {
+    if (!loading && !fetchingData && !deleting) {
       onClose();
     }
   };
@@ -174,7 +221,7 @@ export const CollectionModal = ({
               type="button" 
               className="btn-close" 
               onClick={handleClose}
-              disabled={loading || fetchingData}
+              disabled={loading || fetchingData || deleting}
             ></button>
           </div>
 
@@ -212,7 +259,7 @@ export const CollectionModal = ({
                     placeholder="Enter collection title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    disabled={loading}
+                    disabled={loading || deleting}
                     required
                   />
                 </div>
@@ -228,7 +275,7 @@ export const CollectionModal = ({
                     placeholder="Describe your collection (optional)"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    disabled={loading}
+                    disabled={loading || deleting}
                   />
                 </div>
 
@@ -240,7 +287,7 @@ export const CollectionModal = ({
                       id="collectionPublic"
                       checked={isPublic}
                       onChange={(e) => setIsPublic(e.target.checked)}
-                      disabled={loading}
+                      disabled={loading || deleting}
                     />
                     <label className="form-check-label fw-semibold" htmlFor="collectionPublic">
                       Make collection public
@@ -259,43 +306,72 @@ export const CollectionModal = ({
           </div>
 
           <div className="modal-footer">
-            <button 
-              type="button" 
-              className="btn btn-secondary" 
-              onClick={handleClose}
-              disabled={loading || fetchingData}
-            >
-              Cancel
-            </button>
-            <button 
-              type="button" 
-              className="btn btn-primary" 
-              onClick={handleSave}
-              disabled={loading || fetchingData || !title.trim()}
-            >
-              {loading ? (
-                <>
-                  <div className="spinner-border spinner-border-sm me-2" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  {mode === 'create' ? 'Creating...' : 'Updating...'}
-                </>
-              ) : (
-                <>
-                  {mode === 'create' ? (
+            <div className="d-flex justify-content-between w-100">
+              <div>
+                {mode === 'edit' && (
+                  <button 
+                    type="button" 
+                    className="btn btn-outline-danger" 
+                    onClick={handleDelete}
+                    disabled={loading || fetchingData || deleting}
+                  >
+                    {deleting ? (
+                      <>
+                        <div className="spinner-border spinner-border-sm me-2" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash size={16} className="me-2" />
+                        Delete Collection
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+              
+              <div className="d-flex gap-2">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={handleClose}
+                  disabled={loading || fetchingData || deleting}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary" 
+                  onClick={handleSave}
+                  disabled={loading || fetchingData || deleting || !title.trim()}
+                >
+                  {loading ? (
                     <>
-                      <Plus size={16} className="me-2" />
-                      Create Collection
+                      <div className="spinner-border spinner-border-sm me-2" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                      {mode === 'create' ? 'Creating...' : 'Updating...'}
                     </>
                   ) : (
                     <>
-                      <Save size={16} className="me-2" />
-                      Save Changes
+                      {mode === 'create' ? (
+                        <>
+                          <Plus size={16} className="me-2" />
+                          Create Collection
+                        </>
+                      ) : (
+                        <>
+                          <Save size={16} className="me-2" />
+                          Save Changes
+                        </>
+                      )}
                     </>
                   )}
-                </>
-              )}
-            </button>
+                </button>
+              </div>
+            </div>
           </div>
 
         </div>

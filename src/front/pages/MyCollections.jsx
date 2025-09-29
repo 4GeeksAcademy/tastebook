@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import CollectionCard from '../components/CollectionCard';
 import CollectionModal from '../components/CollectionModal';
-import { PlusCircle, Edit, Trash, Search } from 'lucide-react';
+import { PlusCircle, Search } from 'lucide-react';
 
 export const MyCollections = () => {
   const navigate = useNavigate();
@@ -60,24 +60,10 @@ export const MyCollections = () => {
     fetchCollections();
   }, [search, visibilityFilter, sortBy, order]);
 
-  const handleDelete = async (collectionId) => {
-    if (!confirm('Are you sure you want to delete this collection?')) return;
-    try {
-      const resp = await fetch(`${backendUrl}/api/collection/${collectionId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await resp.json();
-      if (resp.ok) {
-        setMessage({ type: 'success', text: data.msg || 'Deleted' });
-        setCollections(prev => prev.filter(c => c.collection_id !== collectionId));
-      } else {
-        setMessage({ type: 'danger', text: data.error || 'Failed to delete' });
-      }
-    } catch (e) {
-      setMessage({ type: 'danger', text: 'Failed to delete collection' });
-    }
-    setTimeout(() => setMessage(null), 2500);
+  const handleEdit = (collectionId) => {
+    setModalMode('edit');
+    setEditingCollectionId(collectionId);
+    setShowModal(true);
   };
 
   const handleCreateNew = () => {
@@ -86,22 +72,21 @@ export const MyCollections = () => {
     setShowModal(true);
   };
 
-  const handleEdit = (collectionId) => {
-    setModalMode('edit');
-    setEditingCollectionId(collectionId);
-    setShowModal(true);
-  };
-
-  const handleModalSuccess = (updatedCollection) => {
+  const handleModalSuccess = (updatedCollection, action = null) => {
     // Refresh collections list
     fetchCollections();
     
     // Show success message
+    let successMessage = 'Collection updated successfully!';
+    if (action === 'deleted') {
+      successMessage = 'Collection deleted successfully!';
+    } else if (modalMode === 'create') {
+      successMessage = 'Collection created successfully!';
+    }
+    
     setMessage({ 
       type: 'success', 
-      text: modalMode === 'create' 
-        ? 'Collection created successfully!' 
-        : 'Collection updated successfully!' 
+      text: successMessage
     });
     setTimeout(() => setMessage(null), 3000);
   };
@@ -188,16 +173,11 @@ export const MyCollections = () => {
         <div className="row g-4">
           {collections.length > 0 ? collections.map(c => (
             <div key={c.collection_id} className="col-sm-6 col-lg-4 col-xl-3">
-              <CollectionCard collection={c} />
-              <div className="d-flex gap-2 mt-2">
-                <button 
-                  className="btn btn-outline-secondary btn-sm d-flex align-items-center"
-                  onClick={() => handleEdit(c.collection_id)}
-                >
-                  <Edit size={14} className="me-1" />Edit
-                </button>
-                <button className="btn btn-outline-danger btn-sm d-flex align-items-center" onClick={() => handleDelete(c.collection_id)}><Trash size={14} className="me-1" />Delete</button>
-              </div>
+              <CollectionCard 
+                collection={c} 
+                isPersonalCollection={true}
+                onEdit={handleEdit}
+              />
             </div>
           )) : (
             <div className="text-center py-5">
