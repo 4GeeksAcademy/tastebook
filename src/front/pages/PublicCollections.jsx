@@ -352,7 +352,7 @@ export const PublicCollections = () => {
                 {/* Search Type Dropdown */}
                 <div className="dropdown">
                   <button
-                    className="btn btn-outline-secondary dropdown-toggle d-flex align-items-center"
+                    className="btn btn-outline-secondary dropdown-toggle d-flex align-items-center rounded-0 rounded-start"
                     type="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
