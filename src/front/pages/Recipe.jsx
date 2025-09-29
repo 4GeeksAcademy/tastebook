@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Clock, Users, ChefHat, Calendar, ArrowLeft, Camera, User, ExternalLink, Share2, Edit } from 'lucide-react';
+import { Clock, Users, ChefHat, Calendar, ArrowLeft, Camera, User, ExternalLink, Share2, Edit, Bookmark } from 'lucide-react';
 import CommentSection from '../components/CommentSection';
 import { LikeButton } from '../components/LikeButton';
+import AddToCollectionModal from '../components/AddToCollectionModal';
 
 export const Recipe = () => {
   const { id } = useParams();
@@ -12,6 +13,9 @@ export const Recipe = () => {
   const [error, setError] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
+
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     fetchRecipe();
@@ -274,14 +278,28 @@ export const Recipe = () => {
           </div>
         </div>
         <div className="col-md-6 d-flex justify-content-md-end mt-2 mt-md-0">
-          <button 
-            onClick={handleShare}
-            className="btn btn-outline-secondary"
-            title="Share this recipe"
-          >
-            <Share2 size={16} className="me-2" />
-            Share Recipe
-          </button>
+          <div className="d-flex gap-2">
+            {/* Add to Collection Button (only for logged-in users) */}
+            {token && (
+              <button 
+                onClick={() => setShowCollectionModal(true)}
+                className="btn btn-outline-primary"
+                title="Add to collection"
+              >
+                <Bookmark size={16} className="me-2" />
+                Add to Collection
+              </button>
+            )}
+            
+            <button 
+              onClick={handleShare}
+              className="btn btn-outline-secondary"
+              title="Share this recipe"
+            >
+              <Share2 size={16} className="me-2" />
+              Share Recipe
+            </button>
+          </div>
         </div>
       </div>
 
@@ -525,6 +543,14 @@ export const Recipe = () => {
           </div>
         </div>
       </div>
+
+      {/* Add to Collection Modal */}
+      <AddToCollectionModal 
+        recipeId={parseInt(id)}
+        recipeName={recipe?.title || 'Recipe'}
+        show={showCollectionModal}
+        onClose={() => setShowCollectionModal(false)}
+      />
     </div>
   );
 };

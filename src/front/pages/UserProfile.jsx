@@ -12,10 +12,13 @@ import {
   Edit,
   Globe,
   UserPlus,
-  UserMinus
+  UserMinus,
+  Bookmark,
+  Lock
 } from "lucide-react";
 import { EditDescriptionModal } from "../components/EditDescriptionModal";
 import { COUNTRIES, CountryFlag } from "../assets/data/countriesData.jsx";
+import CollectionCard from "../components/CollectionCard";
 
 export const UserProfile = () => {
   const { username } = useParams();
@@ -31,8 +34,10 @@ export const UserProfile = () => {
   const [followersCount, setFollowersCount] = useState(0);
   const [followMessage, setFollowMessage] = useState("");
   const [showFollowMessage, setShowFollowMessage] = useState(false);
+  const [publicCollections, setPublicCollections] = useState([]);
+  const [collectionsLoading, setCollectionsLoading] = useState(false);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
   const token = localStorage.getItem("token");
 
   const fetchUserProfile = async (offset = 0, isLoadMore = false) => {
@@ -77,9 +82,32 @@ export const UserProfile = () => {
     }
   };
 
+  const fetchPublicCollections = async () => {
+    if (!backendUrl || !username) return;
+    
+    setCollectionsLoading(true);
+    try {
+      const response = await fetch(`${backendUrl}/api/user/${username}/collections`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setPublicCollections(data.collections || []);
+      } else {
+        console.error("Failed to fetch public collections:", data.error);
+        setPublicCollections([]);
+      }
+    } catch (error) {
+      console.error("Error fetching public collections:", error);
+      setPublicCollections([]);
+    } finally {
+      setCollectionsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (username) {
       fetchUserProfile(0, false);
+      fetchPublicCollections();
     }
   }, [username]);
 
@@ -505,6 +533,48 @@ export const UserProfile = () => {
           </div>
         </div>
       )}
+
+      {/* Collections Section */}
+      <div className="row mb-5">
+        <div className="col-12">
+          <div className="d-flex align-items-center justify-content-between mb-4">
+            <div className="d-flex align-items-center">
+              <Bookmark size={28} className="text-primary me-3" />
+              <h2 className="mb-0">Public Collections by {userProfile.full_name}</h2>
+            </div>
+            <span className="text-muted">
+              {publicCollections.length} collection{publicCollections.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {/* Collections Grid */}
+          {collectionsLoading ? (
+            <div className="text-center py-4">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading collections...</span>
+              </div>
+              <p className="mt-2 text-muted">Loading collections...</p>
+            </div>
+          ) : publicCollections.length > 0 ? (
+            <div className="row g-4 mb-4">
+              {publicCollections.map((collection) => (
+                <div key={collection.collection_id} className="col-sm-6 col-lg-4 col-xl-3">
+                  <CollectionCard collection={collection} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* No Collections State */
+            <div className="text-center py-4">
+              <Bookmark size={48} className="text-muted mb-3" />
+              <h5 className="text-muted">No Public Collections</h5>
+              <p className="text-muted">
+                {userProfile.full_name} hasn't created any public collections yet.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Recipes Section */}
       <div className="row">

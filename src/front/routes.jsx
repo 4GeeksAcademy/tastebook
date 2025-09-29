@@ -29,6 +29,9 @@ import { Recipe } from "./pages/Recipe";
 import { Users } from "./pages/Users";
 import { UserProfile } from "./pages/UserProfile";
 import { Theme } from "./pages/Theme";
+import { MyCollections } from "./pages/MyCollections";
+import { CollectionView } from "./pages/CollectionView";
+import { PublicCollections } from "./pages/PublicCollections";
 
 
 
@@ -59,6 +62,10 @@ export const router = createBrowserRouter(
         <Route path= "/recipe/:id/modify" element={<ModifyRecipe />} />
         <Route path= "/users" element={<Users />} />
         <Route path= "/user/:username" element={<UserProfile />} />
+
+        <Route path= "/my-collections" element={<MyCollections />} />
+        <Route path= "/collections" element={<PublicCollections />} />
+        <Route path= "/collection/:id" element={<CollectionView />} />
 
 
         <Route path= "/theme" element={<Theme />} />

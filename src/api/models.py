@@ -1,3 +1,5 @@
+from __future__ import annotations ## to allow forward references and then append Collection and CollectionRecipe models at the end of the file with relationships and serializations
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Boolean, DateTime, Date, ForeignKey, Integer, String, Text, JSON, func, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -40,8 +42,8 @@ class User(db.Model):
     full_name:       Mapped[str]      = mapped_column( String(80),                        nullable=False)
     plain_psswrd:    Mapped[str]      = mapped_column( String(255),                       nullable=True)
     hashed_psswrd:   Mapped[str]      = mapped_column( String(255),                       nullable=False)
-    description:     Mapped[str]      = mapped_column( Text,                            nullable=True)
-    country:         Mapped[str]      = mapped_column( String(100),                     nullable=True)
+    description:     Mapped[str]      = mapped_column( Text,                              nullable=True)
+    country:         Mapped[str]      = mapped_column( String(100),                       nullable=True)
     is_active:       Mapped[bool]     = mapped_column( Boolean,      default=True,        nullable=False)
     created_at:      Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
 
@@ -95,6 +97,13 @@ class User(db.Model):
     comment_likes: Mapped[List["CommentLike"]] = relationship(
         "CommentLike",
         back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    # One-to-many relationship with Collection --> shows all collections owned by this user
+    collections: Mapped[List["Collection"]] = relationship(
+        "Collection",
+        back_populates="owner",
         cascade="all, delete-orphan"
     )
 
@@ -230,6 +239,21 @@ class Recipe(db.Model):
     # One-to-many relationship with Like --> shows all likes for this recipe
     likes: Mapped[List["Like"]] = relationship(
         "Like",
+        back_populates="recipe",
+        cascade="all, delete-orphan"
+    )
+
+    # Many-to-many relationship with Collection via association table
+    # A recipe can belong to multiple collections and a collection can contain multiple recipes
+    collections: Mapped[List["Collection"]] = relationship(
+        "Collection",
+        secondary="collection_recipe",
+        back_populates="recipes"
+    )
+
+    # One-to-many relationship with CollectionRecipe association objects when direct access is needed
+    collection_recipes: Mapped[List["CollectionRecipe"]] = relationship(
+        "CollectionRecipe",
         back_populates="recipe",
         cascade="all, delete-orphan"
     )
@@ -418,8 +442,8 @@ class Comment(db.Model):
     id:              Mapped[int]      = mapped_column( Integer,      primary_key=True,                     autoincrement=True)
 
     # Foreign Keys
-    user_id:         Mapped[int]      = mapped_column( Integer,      ForeignKey("user.id",   ondelete="CASCADE"),  nullable=False)
-    recipe_id:       Mapped[int]      = mapped_column( Integer,      ForeignKey("recipe.id", ondelete="CASCADE"),  nullable=False)
+    user_id:         Mapped[int]      = mapped_column( Integer,        ForeignKey("user.id",   ondelete="CASCADE"),  nullable=False)
+    recipe_id:       Mapped[int]      = mapped_column( Integer,        ForeignKey("recipe.id", ondelete="CASCADE"),  nullable=False)
     parent_comment_id: Mapped[Optional[int]] = mapped_column( Integer, ForeignKey("comment.id", ondelete="CASCADE"), nullable=True)
 
     # Content and State Fields
@@ -687,5 +711,143 @@ class CommentLike(db.Model):
     #-----------------#
     def __repr__(self):
         return f"<CommentLike ID {self.id} | User: {self.user_id} | Comment: {self.comment_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
+
+
+############################################
+##########      COLLECTIONS       ###########
+############################################
+
+
+class CollectionRecipe(db.Model):
+    """Association table between Collection and Recipe.
+
+    This table allows a many-to-many relationship between collections and recipes.
+    We keep an explicit association object to allow ordering and additional metadata
+    (for example: position in collection, notes, or when it was added).
+    """
+
+    __tablename__ = "collection_recipe"
+
+    # Primary Key
+    id:         Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
+
+    # Foreign Keys
+    collection_id: Mapped[int] = mapped_column( Integer, ForeignKey("collection.id", ondelete="CASCADE"), nullable=False)
+    recipe_id:     Mapped[int] = mapped_column( Integer, ForeignKey("recipe.id",     ondelete="CASCADE"), nullable=False)
+
+    # Optional ordering / metadata
+    display_order: Mapped[int]      = mapped_column( Integer,  default=0,          nullable=False)
+    added_at:      Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
+
+    __table_args__ = (
+        # Prevent duplicate recipe entries in the same collection
+        UniqueConstraint('collection_id', 'recipe_id', name='unique_collection_recipe'),
+    )
+
+    # Relations back to parent objects
+    collection: Mapped["Collection"] = relationship(
+        "Collection",
+        back_populates="collection_recipes"
+    )
+
+    recipe: Mapped["Recipe"] = relationship(
+        "Recipe",
+        back_populates="collection_recipes"
+    )
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "collection_id": self.collection_id,
+            "recipe_id": self.recipe_id,
+            "display_order": self.display_order,
+            "added_at": self.added_at.isoformat() if self.added_at else None
+        }
+
+    def __repr__(self):
+        return f"<CollectionRecipe ID {self.id} | Collection: {self.collection_id} | Recipe: {self.recipe_id}>"
+
+
+
+class Collection(db.Model):
+    """User-created collection of recipes (similar to YouTube playlists).
+
+    A collection belongs to one user (owner) and can contain many recipes.
+    Collections can be public or private.
+    """
+
+    __tablename__ = "collection"
+
+    # Primary Key
+    id:        Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
+
+    # Foreign Key to User (owner)
+    owner_id:  Mapped[int] = mapped_column( Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+
+    # Attributes
+    title:         Mapped[str]           = mapped_column( String(120),                  nullable=False)
+    description:   Mapped[Optional[str]] = mapped_column( Text,                         nullable=True)
+    is_public:     Mapped[bool]          = mapped_column( Boolean,  default=False,      nullable=False)
+    created_at:    Mapped[datetime]      = mapped_column( DateTime, default=func.now(), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("char_length(title) > 0", name='check_collection_title_not_empty'),
+    )
+
+    # Relations
+    owner: Mapped["User"] = relationship(
+        "User",
+        back_populates="collections"
+    )
+
+    # Many-to-many with Recipe through CollectionRecipe association
+    recipes: Mapped[List["Recipe"]] = relationship(
+        "Recipe",
+        secondary="collection_recipe",
+        back_populates="collections",
+        viewonly=False
+    )
+
+    # One-to-many to association objects for ordering/metadata
+    collection_recipes: Mapped[List["CollectionRecipe"]] = relationship(
+        "CollectionRecipe",
+        back_populates="collection",
+        cascade="all, delete-orphan",
+        order_by="CollectionRecipe.display_order"
+    )
+
+    # Serialization
+    def serialize(self, include_recipes=False, current_user_id=None):
+        data = {
+            "collection_id": self.id,
+            "owner_id":      self.owner_id,
+            "title":         self.title,
+            "description":   self.description,
+            "is_public":     self.is_public,
+            "created_at":    self.created_at.isoformat() if self.created_at else None,
+            "owner": {
+                "user_id": self.owner.id,
+                "username": self.owner.username,
+                "cloudinary_url": self.owner.cloudinary_url
+            } if self.owner else None,
+            "recipe_count": len(self.collection_recipes)
+        }
+
+        if include_recipes:
+            # Include serialized recipes in the order defined by collection_recipes
+            data["recipes"] = [
+                {
+                    "collection_recipe_id": cr.id,
+                    "display_order": cr.display_order,
+                    "added_at": cr.added_at.isoformat() if cr.added_at else None,
+                    "recipe": cr.recipe.serialize(current_user_id=current_user_id) if cr.recipe else None
+                }
+                for cr in sorted(self.collection_recipes, key=lambda c: c.display_order)
+            ]
+
+        return data
+
+    def __repr__(self):
+        return f"<Collection ID {self.id} | Title: {self.title} | Owner: {self.owner_id} | Public: {self.is_public}>"
 
 
