@@ -2,6 +2,14 @@
 // Add/modify themes here and they'll be automatically available in all components
 
 export const THEMES = {
+    professional: {
+        name: "Professional",
+        cssPath: "/themes/professional.css"
+    },
+    main: {
+        name: "Main",
+        cssPath: "/themes/main.css"
+    },
     gradients: {
         name: "Gradients",
         cssPath: "/themes/gradients.css"
@@ -28,7 +36,7 @@ export const THEMES = {
 export const getThemeKeys = () => Object.keys(THEMES);
 export const getThemeName = (themeKey) => THEMES[themeKey]?.name || themeKey;
 export const getThemePath = (themeKey) => THEMES[themeKey]?.cssPath;
-export const getDefaultTheme = () => "light"; // You can change this default here
+export const getDefaultTheme = () => "dark"; // You can change this default here
 
 // Custom hook for theme management with synchronization
 import { useState, useEffect } from "react";

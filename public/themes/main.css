@@ -1,0 +1,1288 @@
+/* 
+ * Professional Main Theme - Inspired by GitHub's clean design
+ * Light and Dark modes with comprehensive Bootstrap component coverage
+ * No animations, transitions, or hover effects - clean and professional
+ */
+
+/* =============================================================================
+   CSS CUSTOM PROPERTIES (VARIABLES)
+   ============================================================================= */
+
+:root {
+  /* Light Mode Colors */
+  --bg-canvas: #ffffff;
+  --bg-default: #f6f8fa;
+  --bg-muted: #f6f8fa;
+  --bg-subtle: #afb8c133;
+  --bg-emphasis: #f6f8fa;
+  
+  /* Text Colors */
+  --fg-default: #1f2328;
+  --fg-muted: #656d76;
+  --fg-subtle: #6e7781;
+  --fg-on-emphasis: #ffffff;
+  
+  /* Border Colors */
+  --border-default: #d1d9e0;
+  --border-muted: #d8dee4;
+  --border-subtle: #afb8c133;
+  
+  /* Button Colors */
+  --btn-primary-bg: #1f883d;
+  --btn-primary-fg: #ffffff;
+  --btn-primary-border: #1a7f37;
+  --btn-primary-shadow: #1f883d40;
+  
+  --btn-secondary-bg: #f6f8fa;
+  --btn-secondary-fg: #24292f;
+  --btn-secondary-border: #d1d9e0;
+  
+  --btn-danger-bg: #da3633;
+  --btn-danger-fg: #ffffff;
+  --btn-danger-border: #cf222e;
+  
+  /* Status Colors */
+  --success-fg: #1a7f37;
+  --success-bg: #dafbe1;
+  --success-border: #1f883d40;
+  
+  --danger-fg: #d1242f;
+  --danger-bg: #ffebe9;
+  --danger-border: #cf222e40;
+  
+  --warning-fg: #9a6700;
+  --warning-bg: #fff8c5;
+  --warning-border: #d4a72c40;
+  
+  --info-fg: #0969da;
+  --info-bg: #ddf4ff;
+  --info-border: #0969da40;
+  
+  /* Form Colors */
+  --input-bg: #ffffff;
+  --input-border: #d1d9e0;
+  --input-shadow: #1f232826;
+  --input-focus-border: #0969da;
+  --input-focus-shadow: #0969da26;
+  
+  /* Card Colors */
+  --card-bg: #ffffff;
+  --card-border: #d1d9e0;
+  --card-shadow: #1f232808;
+  
+  /* Dropdown Colors */
+  --dropdown-bg: #ffffff;
+  --dropdown-border: #d1d9e0;
+  --dropdown-shadow: #1f232826;
+}
+
+/* Dark Mode Variables */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-canvas: #0d1117;
+    --bg-default: #161b22;
+    --bg-muted: #21262d;
+    --bg-subtle: #30363d33;
+    --bg-emphasis: #21262d;
+    
+    --fg-default: #e6edf3;
+    --fg-muted: #7d8590;
+    --fg-subtle: #656d76;
+    --fg-on-emphasis: #ffffff;
+    
+    --border-default: #30363d;
+    --border-muted: #21262d;
+    --border-subtle: #21262d66;
+    
+    --btn-primary-bg: #238636;
+    --btn-primary-fg: #ffffff;
+    --btn-primary-border: #238636;
+    --btn-primary-shadow: #23863640;
+    
+    --btn-secondary-bg: #21262d;
+    --btn-secondary-fg: #e6edf3;
+    --btn-secondary-border: #30363d;
+    
+    --btn-danger-bg: #da3633;
+    --btn-danger-fg: #ffffff;
+    --btn-danger-border: #da3633;
+    
+    --success-fg: #3fb950;
+    --success-bg: #0f291766;
+    --success-border: #23863640;
+    
+    --danger-fg: #f85149;
+    --danger-bg: #67060c26;
+    --danger-border: #f8514940;
+    
+    --warning-fg: #d29922;
+    --warning-bg: #4d2d0066;
+    --warning-border: #d2992240;
+    
+    --info-fg: #79c0ff;
+    --info-bg: #0c2d6b26;
+    --info-border: #1f6feb40;
+    
+    --input-bg: #0d1117;
+    --input-border: #30363d;
+    --input-shadow: #0d111726;
+    --input-focus-border: #1f6feb;
+    --input-focus-shadow: #1f6feb26;
+    
+    --card-bg: #161b22;
+    --card-border: #30363d;
+    --card-shadow: #0d111708;
+    
+    --dropdown-bg: #161b22;
+    --dropdown-border: #30363d;
+    --dropdown-shadow: #0d111726;
+  }
+}
+
+/* Dark mode class override for explicit dark mode */
+.dark-mode {
+  --bg-canvas: #0d1117;
+  --bg-default: #161b22;
+  --bg-muted: #21262d;
+  --bg-subtle: #30363d33;
+  --bg-emphasis: #21262d;
+  
+  --fg-default: #e6edf3;
+  --fg-muted: #7d8590;
+  --fg-subtle: #656d76;
+  --fg-on-emphasis: #ffffff;
+  
+  --border-default: #30363d;
+  --border-muted: #21262d;
+  --border-subtle: #21262d66;
+  
+  --btn-primary-bg: #238636;
+  --btn-primary-fg: #ffffff;
+  --btn-primary-border: #238636;
+  --btn-primary-shadow: #23863640;
+  
+  --btn-secondary-bg: #21262d;
+  --btn-secondary-fg: #e6edf3;
+  --btn-secondary-border: #30363d;
+  
+  --btn-danger-bg: #da3633;
+  --btn-danger-fg: #ffffff;
+  --btn-danger-border: #da3633;
+  
+  --success-fg: #3fb950;
+  --success-bg: #0f291766;
+  --success-border: #23863640;
+  
+  --danger-fg: #f85149;
+  --danger-bg: #67060c26;
+  --danger-border: #f8514940;
+  
+  --warning-fg: #d29922;
+  --warning-bg: #4d2d0066;
+  --warning-border: #d2992240;
+  
+  --info-fg: #79c0ff;
+  --info-bg: #0c2d6b26;
+  --info-border: #1f6feb40;
+  
+  --input-bg: #0d1117;
+  --input-border: #30363d;
+  --input-shadow: #0d111726;
+  --input-focus-border: #1f6feb;
+  --input-focus-shadow: #1f6feb26;
+  
+  --card-bg: #161b22;
+  --card-border: #30363d;
+  --card-shadow: #0d111708;
+  
+  --dropdown-bg: #161b22;
+  --dropdown-border: #30363d;
+  --dropdown-shadow: #0d111726;
+}
+
+/* =============================================================================
+   BASE STYLES
+   ============================================================================= */
+
+body {
+  background-color: var(--bg-default);
+  color: var(--fg-default);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - BUTTONS
+   ============================================================================= */
+
+.btn {
+  border-width: 1px;
+  border-style: solid;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 6px 16px;
+  border-radius: 6px;
+}
+
+.btn-primary {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+  color: var(--btn-primary-fg);
+  box-shadow: 0 1px 0 var(--btn-primary-shadow);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+  color: var(--btn-primary-fg);
+  box-shadow: 0 1px 0 var(--btn-primary-shadow);
+}
+
+.btn-secondary {
+  background-color: var(--btn-secondary-bg);
+  border-color: var(--btn-secondary-border);
+  color: var(--btn-secondary-fg);
+  box-shadow: 0 1px 0 var(--border-default);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-secondary:active {
+  background-color: var(--btn-secondary-bg);
+  border-color: var(--btn-secondary-border);
+  color: var(--btn-secondary-fg);
+  box-shadow: 0 1px 0 var(--border-default);
+}
+
+.btn-success {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+  color: var(--btn-primary-fg);
+  box-shadow: 0 1px 0 var(--btn-primary-shadow);
+}
+
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+  color: var(--btn-primary-fg);
+  box-shadow: 0 1px 0 var(--btn-primary-shadow);
+}
+
+.btn-danger {
+  background-color: var(--btn-danger-bg);
+  border-color: var(--btn-danger-border);
+  color: var(--btn-danger-fg);
+  box-shadow: 0 1px 0 var(--btn-danger-border);
+}
+
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active {
+  background-color: var(--btn-danger-bg);
+  border-color: var(--btn-danger-border);
+  color: var(--btn-danger-fg);
+  box-shadow: 0 1px 0 var(--btn-danger-border);
+}
+
+.btn-warning {
+  background-color: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning-fg);
+}
+
+.btn-warning:hover,
+.btn-warning:focus,
+.btn-warning:active {
+  background-color: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning-fg);
+}
+
+.btn-info {
+  background-color: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info-fg);
+}
+
+.btn-info:hover,
+.btn-info:focus,
+.btn-info:active {
+  background-color: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info-fg);
+}
+
+.btn-light {
+  background-color: var(--btn-secondary-bg);
+  border-color: var(--btn-secondary-border);
+  color: var(--btn-secondary-fg);
+  box-shadow: 0 1px 0 var(--border-default);
+}
+
+.btn-light:hover,
+.btn-light:focus,
+.btn-light:active {
+  background-color: var(--btn-secondary-bg);
+  border-color: var(--btn-secondary-border);
+  color: var(--btn-secondary-fg);
+  box-shadow: 0 1px 0 var(--border-default);
+}
+
+.btn-dark {
+  background-color: var(--fg-default);
+  border-color: var(--fg-default);
+  color: var(--bg-canvas);
+}
+
+.btn-dark:hover,
+.btn-dark:focus,
+.btn-dark:active {
+  background-color: var(--fg-default);
+  border-color: var(--fg-default);
+  color: var(--bg-canvas);
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  border-color: var(--btn-primary-bg);
+  color: var(--btn-primary-bg);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+  color: var(--btn-primary-fg);
+}
+
+.btn-outline-secondary {
+  background-color: transparent;
+  border-color: var(--border-default);
+  color: var(--fg-default);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus,
+.btn-outline-secondary:active {
+  background-color: var(--bg-muted);
+  border-color: var(--border-default);
+  color: var(--fg-default);
+}
+
+.btn-link {
+  color: var(--btn-primary-bg);
+  text-decoration: none;
+  border: none;
+  background: none;
+  box-shadow: none;
+}
+
+.btn-link:hover,
+.btn-link:focus,
+.btn-link:active {
+  color: var(--btn-primary-bg);
+  text-decoration: underline;
+}
+
+.btn:disabled,
+.btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - FORMS
+   ============================================================================= */
+
+.form-control,
+.form-select {
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--fg-default);
+  font-size: 14px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 var(--input-shadow);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--input-bg);
+  border-color: var(--input-focus-border);
+  color: var(--fg-default);
+  box-shadow: inset 0 1px 0 var(--input-shadow), 0 0 0 3px var(--input-focus-shadow);
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: var(--fg-muted);
+}
+
+.form-label {
+  color: var(--fg-default);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.form-text {
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.form-check-input {
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+}
+
+.form-check-input:checked {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+}
+
+.form-check-input:focus {
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px var(--input-focus-shadow);
+}
+
+.form-check-label {
+  color: var(--fg-default);
+}
+
+.form-switch .form-check-input {
+  background-image: none;
+}
+
+.form-switch .form-check-input:checked {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+}
+
+/* Form Validation */
+.form-control.is-valid,
+.form-select.is-valid {
+  border-color: var(--success-border);
+  background-image: none;
+}
+
+.form-control.is-valid:focus,
+.form-select.is-valid:focus {
+  border-color: var(--success-border);
+  box-shadow: inset 0 1px 0 var(--input-shadow), 0 0 0 3px var(--success-border);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--danger-border);
+  background-image: none;
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+  border-color: var(--danger-border);
+  box-shadow: inset 0 1px 0 var(--input-shadow), 0 0 0 3px var(--danger-border);
+}
+
+.valid-feedback {
+  color: var(--success-fg);
+  font-size: 12px;
+}
+
+.invalid-feedback {
+  color: var(--danger-fg);
+  font-size: 12px;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - INPUT GROUPS
+   ============================================================================= */
+
+.input-group-text {
+  background-color: var(--bg-muted);
+  border: 1px solid var(--input-border);
+  color: var(--fg-muted);
+  padding: 5px 12px;
+}
+
+.input-group .form-control:not(:first-child) {
+  border-left: 0;
+}
+
+.input-group .form-control:not(:last-child) {
+  border-right: 0;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - CARDS
+   ============================================================================= */
+
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px var(--card-shadow);
+}
+
+.card-header {
+  background-color: var(--bg-muted);
+  border-bottom: 1px solid var(--card-border);
+  color: var(--fg-default);
+  font-weight: 600;
+  padding: 16px;
+  border-radius: 6px 6px 0 0;
+}
+
+.card-body {
+  padding: 16px;
+  color: var(--fg-default);
+}
+
+.card-title {
+  color: var(--fg-default);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.card-text {
+  color: var(--fg-default);
+}
+
+.card-footer {
+  background-color: var(--bg-muted);
+  border-top: 1px solid var(--card-border);
+  padding: 16px;
+}
+
+.card-img-top {
+  border-radius: 6px 6px 0 0;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - NAVIGATION
+   ============================================================================= */
+
+.nav-tabs {
+  border-bottom: 1px solid var(--border-default);
+}
+
+.nav-tabs .nav-link {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--fg-muted);
+  padding: 8px 16px;
+  margin-bottom: -1px;
+  border-radius: 6px 6px 0 0;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: var(--bg-canvas);
+  border-color: var(--border-default) var(--border-default) var(--bg-canvas);
+  color: var(--fg-default);
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
+  border-color: var(--border-muted);
+  color: var(--fg-default);
+}
+
+.navbar {
+  background-color: var(--bg-canvas);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.navbar-brand {
+  color: var(--fg-default);
+  font-weight: 600;
+}
+
+.navbar-brand:hover,
+.navbar-brand:focus {
+  color: var(--fg-default);
+}
+
+.nav-link {
+  color: var(--fg-muted);
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--fg-default);
+}
+
+.navbar-toggler {
+  border: 1px solid var(--border-default);
+  padding: 4px 8px;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2831, 35, 40, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.dark-mode .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28230, 237, 243, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - DROPDOWNS
+   ============================================================================= */
+
+.dropdown-menu {
+  background-color: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  border-radius: 6px;
+  box-shadow: 0 16px 32px var(--dropdown-shadow);
+  padding: 8px 0;
+  min-width: 160px;
+}
+
+.dropdown-item {
+  background-color: transparent;
+  color: var(--fg-default);
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--bg-muted);
+  color: var(--fg-default);
+}
+
+.dropdown-item:active {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+}
+
+.dropdown-divider {
+  border-top: 1px solid var(--border-default);
+  margin: 8px 0;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - ALERTS
+   ============================================================================= */
+
+.alert {
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.alert-primary {
+  background-color: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info-fg);
+}
+
+.alert-success {
+  background-color: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--success-fg);
+}
+
+.alert-danger {
+  background-color: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger-fg);
+}
+
+.alert-warning {
+  background-color: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning-fg);
+}
+
+.alert-info {
+  background-color: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info-fg);
+}
+
+.alert-dismissible .btn-close {
+  background-color: transparent;
+  opacity: 0.5;
+}
+
+.alert-dismissible .btn-close:hover {
+  opacity: 0.75;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - BADGES
+   ============================================================================= */
+
+.badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.badge.bg-primary {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+}
+
+.badge.bg-secondary {
+  background-color: var(--bg-muted);
+  color: var(--fg-default);
+}
+
+.badge.bg-success {
+  background-color: var(--success-fg);
+  color: var(--bg-canvas);
+}
+
+.badge.bg-danger {
+  background-color: var(--danger-fg);
+  color: var(--bg-canvas);
+}
+
+.badge.bg-warning {
+  background-color: var(--warning-fg);
+  color: var(--bg-canvas);
+}
+
+.badge.bg-info {
+  background-color: var(--info-fg);
+  color: var(--bg-canvas);
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - LIST GROUPS
+   ============================================================================= */
+
+.list-group {
+  border-radius: 6px;
+}
+
+.list-group-item {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--fg-default);
+  padding: 12px 16px;
+}
+
+.list-group-item:first-child {
+  border-radius: 6px 6px 0 0;
+}
+
+.list-group-item:last-child {
+  border-radius: 0 0 6px 6px;
+}
+
+.list-group-item:only-child {
+  border-radius: 6px;
+}
+
+.list-group-item:hover {
+  background-color: var(--bg-muted);
+}
+
+.list-group-item.active {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+  color: var(--btn-primary-fg);
+}
+
+.list-group-flush .list-group-item {
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+}
+
+.list-group-flush .list-group-item:first-child {
+  border-top: 0;
+}
+
+.list-group-flush .list-group-item:last-child {
+  border-bottom: 0;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - PROGRESS
+   ============================================================================= */
+
+.progress {
+  background-color: var(--bg-muted);
+  border-radius: 6px;
+  height: 20px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  text-align: center;
+  line-height: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.progress-bar.bg-success {
+  background-color: var(--success-fg);
+}
+
+.progress-bar.bg-warning {
+  background-color: var(--warning-fg);
+}
+
+.progress-bar.bg-danger {
+  background-color: var(--danger-fg);
+}
+
+.progress-bar.bg-info {
+  background-color: var(--info-fg);
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - MODALS
+   ============================================================================= */
+
+.modal-content {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-header {
+  background-color: var(--bg-muted);
+  border-bottom: 1px solid var(--card-border);
+  color: var(--fg-default);
+  padding: 16px;
+  border-radius: 6px 6px 0 0;
+}
+
+.modal-title {
+  color: var(--fg-default);
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 16px;
+  color: var(--fg-default);
+}
+
+.modal-footer {
+  background-color: var(--bg-muted);
+  border-top: 1px solid var(--card-border);
+  padding: 16px;
+  border-radius: 0 0 6px 6px;
+}
+
+.btn-close {
+  background-color: transparent;
+  border: none;
+  opacity: 0.5;
+  padding: 4px;
+}
+
+.btn-close:hover {
+  opacity: 0.75;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - TOASTS
+   ============================================================================= */
+
+.toast {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px var(--card-shadow);
+  color: var(--fg-default);
+}
+
+.toast-header {
+  background-color: var(--bg-muted);
+  border-bottom: 1px solid var(--card-border);
+  color: var(--fg-default);
+  padding: 8px 12px;
+  border-radius: 6px 6px 0 0;
+}
+
+.toast-body {
+  padding: 12px;
+  color: var(--fg-default);
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - PAGINATION
+   ============================================================================= */
+
+.pagination {
+  margin: 0;
+}
+
+.page-link {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--fg-default);
+  padding: 8px 12px;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: var(--bg-muted);
+  border-color: var(--card-border);
+  color: var(--fg-default);
+}
+
+.page-item.active .page-link {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+  color: var(--btn-primary-fg);
+}
+
+.page-item.disabled .page-link {
+  background-color: var(--card-bg);
+  border-color: var(--card-border);
+  color: var(--fg-muted);
+  cursor: not-allowed;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - BREADCRUMB
+   ============================================================================= */
+
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.breadcrumb-item {
+  color: var(--fg-muted);
+  font-size: 14px;
+}
+
+.breadcrumb-item a {
+  color: var(--btn-primary-bg);
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  color: var(--btn-primary-bg);
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+  color: var(--fg-default);
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - BUTTON GROUPS
+   ============================================================================= */
+
+.btn-group .btn {
+  border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.btn-group .btn:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.btn-group .btn:only-child {
+  border-radius: 6px;
+}
+
+.btn-group .btn + .btn {
+  margin-left: -1px;
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - SPINNERS
+   ============================================================================= */
+
+.spinner-border {
+  color: var(--btn-primary-bg);
+}
+
+.spinner-border.text-primary {
+  color: var(--btn-primary-bg);
+}
+
+.spinner-border.text-success {
+  color: var(--success-fg);
+}
+
+.spinner-border.text-danger {
+  color: var(--danger-fg);
+}
+
+.spinner-border.text-warning {
+  color: var(--warning-fg);
+}
+
+.spinner-border.text-info {
+  color: var(--info-fg);
+}
+
+.spinner-grow {
+  color: var(--btn-primary-bg);
+}
+
+.spinner-grow.text-primary {
+  color: var(--btn-primary-bg);
+}
+
+.spinner-grow.text-success {
+  color: var(--success-fg);
+}
+
+.spinner-grow.text-danger {
+  color: var(--danger-fg);
+}
+
+.spinner-grow.text-warning {
+  color: var(--warning-fg);
+}
+
+.spinner-grow.text-info {
+  color: var(--info-fg);
+}
+
+/* =============================================================================
+   BOOTSTRAP OVERRIDES - TABLES
+   ============================================================================= */
+
+.table {
+  color: var(--fg-default);
+  border-color: var(--border-default);
+}
+
+.table th,
+.table td {
+  border-color: var(--border-default);
+  padding: 12px;
+}
+
+.table thead th {
+  background-color: var(--bg-muted);
+  border-bottom: 2px solid var(--border-default);
+  font-weight: 600;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td,
+.table-striped > tbody > tr:nth-of-type(odd) > th {
+  background-color: var(--bg-subtle);
+}
+
+.table-hover > tbody > tr:hover > td,
+.table-hover > tbody > tr:hover > th {
+  background-color: var(--bg-muted);
+}
+
+/* =============================================================================
+   TEXT UTILITIES
+   ============================================================================= */
+
+.text-muted {
+  color: var(--fg-muted);
+}
+
+.text-primary {
+  color: var(--btn-primary-bg);
+}
+
+.text-success {
+  color: var(--success-fg);
+}
+
+.text-danger {
+  color: var(--danger-fg);
+}
+
+.text-warning {
+  color: var(--warning-fg);
+}
+
+.text-info {
+  color: var(--info-fg);
+}
+
+/* =============================================================================
+   BACKGROUND UTILITIES
+   ============================================================================= */
+
+.bg-light {
+  background-color: var(--bg-muted);
+  color: var(--fg-default);
+}
+
+.bg-primary {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+}
+
+.bg-success {
+  background-color: var(--success-fg);
+  color: var(--bg-canvas);
+}
+
+.bg-danger {
+  background-color: var(--danger-fg);
+  color: var(--bg-canvas);
+}
+
+.bg-warning {
+  background-color: var(--warning-fg);
+  color: var(--bg-canvas);
+}
+
+.bg-info {
+  background-color: var(--info-fg);
+  color: var(--bg-canvas);
+}
+
+.bg-secondary {
+  background-color: var(--bg-muted);
+  color: var(--fg-default);
+}
+
+.bg-dark {
+  background-color: var(--fg-default);
+  color: var(--bg-canvas);
+}
+
+/* =============================================================================
+   BORDER UTILITIES
+   ============================================================================= */
+
+.border {
+  border: 1px solid var(--border-default);
+}
+
+.border-primary {
+  border-color: var(--btn-primary-bg);
+}
+
+.border-success {
+  border-color: var(--success-fg);
+}
+
+.border-danger {
+  border-color: var(--danger-fg);
+}
+
+.border-warning {
+  border-color: var(--warning-fg);
+}
+
+.border-info {
+  border-color: var(--info-fg);
+}
+
+/* =============================================================================
+   SHADOW UTILITIES
+   ============================================================================= */
+
+.shadow-sm {
+  box-shadow: 0 1px 3px var(--card-shadow);
+}
+
+.shadow {
+  box-shadow: 0 4px 12px var(--card-shadow);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 25px var(--card-shadow);
+}
+
+/* =============================================================================
+   FLOATING LABELS
+   ============================================================================= */
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+  height: calc(3.5rem + 2px);
+  line-height: 1.25;
+  padding: 1rem 0.75rem 0.25rem;
+}
+
+.form-floating > label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  padding: 1rem 0.75rem;
+  pointer-events: none;
+  border: 1px solid transparent;
+  transform-origin: 0 0;
+  color: var(--fg-muted);
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+  opacity: 0.65;
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  color: var(--fg-muted);
+}
+
+/* =============================================================================
+   FOOTER
+   ============================================================================= */
+
+footer {
+  background-color: var(--bg-canvas);
+  border-top: 1px solid var(--border-default);
+  color: var(--fg-default);
+}
+
+footer .navbar-brand {
+  color: var(--fg-default);
+}
+
+footer a {
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--fg-default);
+}
+
+footer hr {
+  border-color: var(--border-default);
+}
+
+/* =============================================================================
+   RESPONSIVE UTILITIES
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  .btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .card-body {
+    padding: 12px;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 12px;
+  }
+}
