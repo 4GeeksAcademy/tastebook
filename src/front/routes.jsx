@@ -22,16 +22,17 @@ import { PasswordRecovery } from "./pages/PasswordRecovery";
 import { ResetPassword } from "./pages/ResetPassword";
 
 
-import { Settings } from "./pages/Settings";
-import { CreateRecipe } from "./pages/CreateRecipe";
-import { ModifyRecipe } from "./pages/ModifyRecipe";
-import { Recipe } from "./pages/Recipe";
-import { Users } from "./pages/Users";
-import { UserProfile } from "./pages/UserProfile";
-import { Theme } from "./pages/Theme";
-import { MyCollections } from "./pages/MyCollections";
-import { CollectionView } from "./pages/CollectionView";
+import { Settings }          from "./pages/Settings";
+import { CreateRecipe }      from "./pages/CreateRecipe";
+import { ModifyRecipe }      from "./pages/ModifyRecipe";
+import { Recipe }            from "./pages/Recipe";
+import { Users }             from "./pages/Users";
+import { UserProfile }       from "./pages/UserProfile";
+import { Theme }             from "./pages/Theme";
+import { MyCollections }     from "./pages/MyCollections";
+import { CollectionView }    from "./pages/CollectionView";
 import { PublicCollections } from "./pages/PublicCollections";
+import { Messages } from "./pages/Messages";
 
 
 
@@ -67,6 +68,8 @@ export const router = createBrowserRouter(
         <Route path= "/collections" element={<PublicCollections />} />
         <Route path= "/collection/:id" element={<CollectionView />} />
 
+        <Route path= "/messages" element={<Messages />} />
+        <Route path= "/messages/:chatId" element={<Messages />} />
 
         <Route path= "/theme" element={<Theme />} />
  

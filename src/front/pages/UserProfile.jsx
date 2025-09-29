@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   User, 
   Calendar, 
@@ -14,7 +14,8 @@ import {
   UserPlus,
   UserMinus,
   Bookmark,
-  Lock
+  Lock,
+  MessageCircle
 } from "lucide-react";
 import { EditDescriptionModal } from "../components/EditDescriptionModal";
 import { COUNTRIES, CountryFlag } from "../assets/data/countriesData.jsx";
@@ -22,6 +23,7 @@ import CollectionCard from "../components/CollectionCard";
 
 export const UserProfile = () => {
   const { username } = useParams();
+  const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -297,6 +299,40 @@ export const UserProfile = () => {
     }
   };
 
+  // Handle sending a message
+  const handleSendMessage = async () => {
+    if (!token || !userProfile) {
+      console.log("Missing token or userProfile:", { hasToken: !!token, hasUserProfile: !!userProfile });
+      return;
+    }
+    
+    console.log("Attempting to create/get chat with user_id:", userProfile.user_id);
+    
+    try {
+      const response = await fetch(`${backendUrl}/api/chat/with/${userProfile.user_id}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      console.log("Chat response status:", response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Chat data received:", data);
+        navigate(`/messages/${data.chat.chat_id}`);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to create or get chat:", response.status, errorData);
+        alert(`Failed to start conversation: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Failed to start conversation. Please try again.");
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "Unknown";
     return new Date(dateString).toLocaleDateString('en-US', { 
@@ -477,11 +513,11 @@ export const UserProfile = () => {
 
                     </div>
                       
-                      {/* Follow/Unfollow Button */}
+                      {/* Follow/Unfollow and Message Buttons */}
                       {currentUser && currentUser.username !== userProfile.username && (
-                        <div className="mt-4">
+                        <div className="mt-4 d-flex gap-2">
                           <button 
-                            className={`btn w-100 ${isFollowing ? 'btn-outline-danger' : 'btn-primary'}`}
+                            className={`btn flex-fill ${isFollowing ? 'btn-outline-danger' : 'btn-primary'}`}
                             onClick={handleFollowToggle}
                             disabled={followLoading}
                           >
@@ -505,6 +541,15 @@ export const UserProfile = () => {
                                 )}
                               </>
                             )}
+                          </button>
+                          
+                          <button 
+                            className="btn btn-outline-primary flex-fill"
+                            onClick={handleSendMessage}
+                            title="Send Message"
+                          >
+                            <MessageCircle size={16} className="me-1" />
+                            Message
                           </button>
                         </div>
                       )}

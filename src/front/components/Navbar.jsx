@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat, Moon, Sun, Cog, DoorOpen, FilePlus, Heart, Bookmark } from "lucide-react";
+import { ChefHat, Moon, Sun, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 
 
@@ -9,6 +9,7 @@ export const Navbar = () => {
 	const token = localStorage.getItem("token");
 	const [darkMode, setDarkMode] = useState(false);
 	const [userData, setUserData] = useState(null);
+	const [unreadCount, setUnreadCount] = useState(0);
 
 	useEffect(() => {
 		// Check if user has a dark mode preference saved
@@ -24,6 +25,7 @@ export const Navbar = () => {
 		const fetchUserData = async () => {
 			if (!token) {
 				setUserData(null);
+				setUnreadCount(0);
 				return;
 			}
 			
@@ -52,7 +54,53 @@ export const Navbar = () => {
 			}
 		};
 
+		// Fetch unread message count
+		const fetchUnreadCount = async () => {
+			if (!token) {
+				console.log("[DEBUG NAVBAR] No token, setting unread count to 0");
+				setUnreadCount(0);
+				return;
+			}
+			
+			const backendUrl = import.meta.env.VITE_BACKEND_URL;
+			if (!backendUrl) {
+				console.log("[DEBUG NAVBAR] No backend URL");
+				return;
+			}
+			
+			console.log("[DEBUG NAVBAR] Fetching unread count...");
+			
+			try {
+				const resp = await fetch(`${backendUrl}/api/messages/unread-count`, {
+					method: "GET",
+					headers: {
+						"Authorization": `Bearer ${token}`
+					}
+				});
+				
+				console.log("[DEBUG NAVBAR] Unread count response status:", resp.status);
+				
+				if (resp.ok) {
+					const data = await resp.json();
+					console.log("[DEBUG NAVBAR] Unread count data:", data);
+					console.log("[DEBUG NAVBAR] Setting unread count to:", data.unread_count);
+					setUnreadCount(data.unread_count);
+				} else {
+					const errorData = await resp.json();
+					console.error("[DEBUG NAVBAR] Error fetching unread count:", errorData);
+					setUnreadCount(0);
+				}
+			} catch (error) {
+				console.error("[DEBUG NAVBAR] Exception fetching unread count:", error);
+				setUnreadCount(0);
+			}
+		};
+
 		fetchUserData();
+		fetchUnreadCount();
+
+		// Refresh unread count periodically
+		const interval = setInterval(fetchUnreadCount, 30000); // every 30 seconds
 
 		// Listen for user data updates from Settings page
 		const handleUserUpdate = (event) => {
@@ -61,10 +109,19 @@ export const Navbar = () => {
 			}
 		};
 
+		// Listen for message updates to refresh unread count
+		const handleMessageUpdate = () => {
+			console.log("[DEBUG NAVBAR] Message update event received, refreshing unread count");
+			fetchUnreadCount();
+		};
+
 		window.addEventListener('userDataUpdated', handleUserUpdate);
+		window.addEventListener('messageUpdate', handleMessageUpdate);
 
 		return () => {
+			clearInterval(interval);
 			window.removeEventListener('userDataUpdated', handleUserUpdate);
+			window.removeEventListener('messageUpdate', handleMessageUpdate);
 		};
 	}, [token]);
 
@@ -196,6 +253,19 @@ export const Navbar = () => {
 								<Link to="/my-collections" className="btn btn-link text-secondary text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="My Collections">
 									<Bookmark size={22} />
 								</Link>
+
+								<Link to="/messages" className="btn btn-link text-info text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto position-relative" title="Messages">
+									<MessageCircle size={22} />
+									{ unreadCount > 0 && (
+										<span 
+											className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+											style={{ fontSize: "0.65rem", padding: "0.25em 0.5em" }}
+										>
+											{ unreadCount > 99 ? "99+" : unreadCount }
+										</span>
+									)}
+								</Link>
+								
 								<Link to="/liked-recipes" className="btn btn-link text-danger text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Liked Recipes">
 									<Heart size={22} />
 								</Link>

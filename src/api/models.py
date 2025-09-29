@@ -107,6 +107,29 @@ class User(db.Model):
         cascade="all, delete-orphan"
     )
 
+    # One-to-many relationship with Chat (as user1) --> shows all chats where this user is user1
+    chats_as_user1: Mapped[List["Chat"]] = relationship(
+        "Chat",
+        foreign_keys="Chat.user1_id",
+        back_populates="user1",
+        cascade="all, delete-orphan"
+    )
+
+    # One-to-many relationship with Chat (as user2) --> shows all chats where this user is user2
+    chats_as_user2: Mapped[List["Chat"]] = relationship(
+        "Chat",
+        foreign_keys="Chat.user2_id",
+        back_populates="user2",
+        cascade="all, delete-orphan"
+    )
+
+    # One-to-many relationship with Message --> shows all messages sent by this user
+    sent_messages: Mapped[List["Message"]] = relationship(
+        "Message",
+        back_populates="sender",
+        cascade="all, delete-orphan"
+    )
+
 
     #---------------#
     # Serialization #
@@ -144,6 +167,46 @@ class User(db.Model):
     def is_followed_by(self, user):
         """Check if this user is followed by another user"""
         return any(follow.follower_id == user.id for follow in self.follower_relationships)
+
+    def get_all_chats(self):
+        """Get all chats where this user is a participant"""
+        return self.chats_as_user1 + self.chats_as_user2
+    
+    def get_chat_with_user(self, other_user_id: int):
+        """Find existing chat with another user"""
+        print(f"[DEBUG MODEL] User.get_chat_with_user called")
+        print(f"[DEBUG MODEL] self.id: {self.id}, other_user_id: {other_user_id}")
+        print(f"[DEBUG MODEL] self.chats_as_user1 count: {len(self.chats_as_user1)}")
+        print(f"[DEBUG MODEL] self.chats_as_user2 count: {len(self.chats_as_user2)}")
+        
+        # Check if there's a chat where this user is user1 and other is user2
+        print(f"[DEBUG MODEL] Checking chats_as_user1...")
+        for i, chat in enumerate(self.chats_as_user1):
+            print(f"[DEBUG MODEL] Chat {i}: ID={chat.id}, user1_id={chat.user1_id}, user2_id={chat.user2_id}")
+            if chat.user2_id == other_user_id:
+                print(f"[DEBUG MODEL] MATCH FOUND in chats_as_user1: chat ID {chat.id}")
+                return chat
+        
+        # Check if there's a chat where this user is user2 and other is user1
+        print(f"[DEBUG MODEL] Checking chats_as_user2...")
+        for i, chat in enumerate(self.chats_as_user2):
+            print(f"[DEBUG MODEL] Chat {i}: ID={chat.id}, user1_id={chat.user1_id}, user2_id={chat.user2_id}")
+            if chat.user1_id == other_user_id:
+                print(f"[DEBUG MODEL] MATCH FOUND in chats_as_user2: chat ID {chat.id}")
+                return chat
+        
+        print(f"[DEBUG MODEL] NO EXISTING CHAT FOUND")
+        return None
+    
+    def get_total_unread_messages(self) -> int:
+        """Get total count of unread messages across all chats"""
+        total_unread = 0
+        all_chats = self.get_all_chats()
+        
+        for chat in all_chats:
+            total_unread += chat.get_unread_count_for_user(self.id)
+        
+        return total_unread
 
 
     #-----------------#
@@ -849,5 +912,288 @@ class Collection(db.Model):
 
     def __repr__(self):
         return f"<Collection ID {self.id} | Title: {self.title} | Owner: {self.owner_id} | Public: {self.is_public}>"
+
+
+############################################
+##########        CHAT          ###########
+############################################
+
+class Chat(db.Model):
+    """Chat represents a conversation between two users.
+    
+    Each chat has exactly two participants. Direct messaging is 1-on-1.
+    """
+    
+    __tablename__ = "chat"
+
+    #------------#
+    # Attributes #
+    #------------#
+
+    # Primary Key
+    id:           Mapped[int]      = mapped_column( Integer,      primary_key=True,                     autoincrement=True)
+
+    # Foreign Keys (the two participants)
+    user1_id:     Mapped[int]      = mapped_column( Integer,      ForeignKey("user.id", ondelete="CASCADE"),  nullable=False)
+    user2_id:     Mapped[int]      = mapped_column( Integer,      ForeignKey("user.id", ondelete="CASCADE"),  nullable=False)
+
+    # Timestamps
+    created_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
+    updated_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  onupdate=func.now(), nullable=False)
+
+
+    #-------------------#
+    # Table Constraints #
+    #-------------------#
+    __table_args__ = (
+        # Ensure users can't chat with themselves
+        CheckConstraint("user1_id != user2_id", name='check_no_self_chat'),
+        # Ensure unique chat between two users (prevent duplicate chats)
+        UniqueConstraint('user1_id', 'user2_id', name='unique_chat_participants'),
+    )
+
+
+    #-----------#
+    # Relations #
+    #-----------#
+
+    # Many-to-one relationships with User (participants)
+    user1: Mapped["User"] = relationship(
+        "User",
+        foreign_keys=[user1_id],
+        back_populates="chats_as_user1"
+    )
+
+    user2: Mapped["User"] = relationship(
+        "User", 
+        foreign_keys=[user2_id],
+        back_populates="chats_as_user2"
+    )
+
+    # One-to-many relationship with Message
+    messages: Mapped[List["Message"]] = relationship(
+        "Message",
+        back_populates="chat",
+        cascade="all, delete-orphan",
+        order_by="Message.created_at"
+    )
+
+
+    #-----------------#
+    # Helper Methods  #
+    #-----------------#
+    
+    @property
+    def last_message(self):
+        """Get the most recent message in this chat."""
+        if self.messages:
+            return max(self.messages, key=lambda m: m.created_at)
+        return None
+    
+    def get_other_participant(self, current_user_id: int) -> Optional["User"]:
+        """Get the other participant in the chat (not the current user)."""
+        print(f"[DEBUG PARTICIPANT] get_other_participant called")
+        print(f"[DEBUG PARTICIPANT] current_user_id: {current_user_id}")
+        print(f"[DEBUG PARTICIPANT] self.user1_id: {self.user1_id}")
+        print(f"[DEBUG PARTICIPANT] self.user2_id: {self.user2_id}")
+        
+        if self.user1_id == current_user_id:
+            print(f"[DEBUG PARTICIPANT] Current user is user1, returning user2: {self.user2}")
+            return self.user2
+        elif self.user2_id == current_user_id:
+            print(f"[DEBUG PARTICIPANT] Current user is user2, returning user1: {self.user1}")
+            return self.user1
+        
+        print(f"[DEBUG PARTICIPANT] Current user is not a participant! Returning None")
+        return None
+    
+    def is_participant(self, user_id: int) -> bool:
+        """Check if a user is a participant in this chat."""
+        print(f"[DEBUG IS_PARTICIPANT] is_participant called")
+        print(f"[DEBUG IS_PARTICIPANT] user_id: {user_id} (type: {type(user_id)})")
+        print(f"[DEBUG IS_PARTICIPANT] self.user1_id: {self.user1_id} (type: {type(self.user1_id)})")
+        print(f"[DEBUG IS_PARTICIPANT] self.user2_id: {self.user2_id} (type: {type(self.user2_id)})")
+        
+        result = user_id == self.user1_id or user_id == self.user2_id
+        print(f"[DEBUG IS_PARTICIPANT] Result: {result}")
+        print(f"[DEBUG IS_PARTICIPANT] user_id == self.user1_id: {user_id == self.user1_id}")
+        print(f"[DEBUG IS_PARTICIPANT] user_id == self.user2_id: {user_id == self.user2_id}")
+        
+        return result
+    
+    def get_unread_count_for_user(self, user_id: int) -> int:
+        """Get count of unread messages for a specific user."""
+        if not self.is_participant(user_id):
+            return 0
+        
+        unread_messages = [msg for msg in self.messages 
+                          if msg.sender_id != user_id and not msg.is_read]
+        return len(unread_messages)
+
+
+    #---------------#
+    # Serialization #
+    #---------------#
+    def serialize(self, current_user_id=None, include_messages=False):
+        print(f"[DEBUG SERIALIZE] Chat.serialize called")
+        print(f"[DEBUG SERIALIZE] Chat ID: {self.id}")
+        print(f"[DEBUG SERIALIZE] Current user ID: {current_user_id}")
+        print(f"[DEBUG SERIALIZE] Include messages: {include_messages}")
+        print(f"[DEBUG SERIALIZE] Chat user1_id: {self.user1_id}, user2_id: {self.user2_id}")
+        
+        other_participant = self.get_other_participant(current_user_id) if current_user_id else None
+        print(f"[DEBUG SERIALIZE] Other participant: {other_participant}")
+        
+        if other_participant:
+            print(f"[DEBUG SERIALIZE] Other participant details: ID={other_participant.id}, username={other_participant.username}")
+        
+        data = {
+            "chat_id":     self.id,
+            "created_at":  self.created_at.isoformat() if self.created_at else None,
+            "updated_at":  self.updated_at.isoformat() if self.updated_at else None,
+            "participant": {
+                "user_id":        other_participant.id if other_participant else None,
+                "username":       other_participant.username if other_participant else None,
+                "full_name":      other_participant.full_name if other_participant else None,
+                "cloudinary_url": other_participant.cloudinary_url if other_participant else None
+            } if other_participant else None,
+            "last_message": self.last_message.serialize() if self.last_message else None,
+            "unread_count": self.get_unread_count_for_user(current_user_id) if current_user_id else 0
+        }
+
+        if include_messages:
+            print(f"[DEBUG SERIALIZE] Including {len(self.messages)} messages")
+            data["messages"] = [message.serialize() for message in self.messages]
+
+        print(f"[DEBUG SERIALIZE] Final serialized data: {data}")
+        return data
+
+
+    #-----------------#
+    # __repr__ Method #
+    #-----------------#
+    def __repr__(self):
+        return f"<Chat ID {self.id} | Users: {self.user1_id}, {self.user2_id}>"
+
+
+############################################
+##########       MESSAGE        ###########
+############################################
+
+class Message(db.Model):
+    """Message represents a single message within a chat.
+    
+    Each message belongs to a chat and has a sender.
+    """
+    
+    __tablename__ = "message"
+
+    #------------#
+    # Attributes #
+    #------------#
+
+    # Primary Key
+    id:           Mapped[int]      = mapped_column( Integer,      primary_key=True,                     autoincrement=True)
+
+    # Foreign Keys
+    chat_id:      Mapped[int]      = mapped_column( Integer,      ForeignKey("chat.id", ondelete="CASCADE"),    nullable=False)
+    sender_id:    Mapped[int]      = mapped_column( Integer,      ForeignKey("user.id", ondelete="CASCADE"),    nullable=False)
+
+    # Message content
+    content:      Mapped[str]      = mapped_column( Text,                              nullable=False)
+
+    # Message state
+    is_read:      Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
+    is_edited:    Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
+
+    # Timestamps
+    created_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
+    read_at:      Mapped[Optional[datetime]] = mapped_column( DateTime,     nullable=True)
+    edited_at:    Mapped[Optional[datetime]] = mapped_column( DateTime,     nullable=True)
+
+
+    #-------------------#
+    # Table Constraints #
+    #-------------------#
+    __table_args__ = (
+        # Ensure message content is not empty
+        CheckConstraint("char_length(content) > 0", name='check_message_content_not_empty'),
+    )
+
+
+    #-----------#
+    # Relations #
+    #-----------#
+
+    # Many-to-one relationship with Chat
+    chat: Mapped["Chat"] = relationship(
+        "Chat",
+        back_populates="messages"
+    )
+
+    # Many-to-one relationship with User (sender)
+    sender: Mapped["User"] = relationship(
+        "User",
+        back_populates="sent_messages"
+    )
+
+
+    #-----------------#
+    # Helper Methods  #
+    #-----------------#
+    
+    def mark_as_read(self):
+        """Mark the message as read and set read timestamp."""
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = datetime.now()
+    
+    def mark_as_edited(self):
+        """Mark the message as edited and set edited timestamp."""
+        self.is_edited = True
+        self.edited_at = datetime.now()
+
+
+    #---------------#
+    # Serialization #
+    #---------------#
+    def serialize(self):
+        print(f"[DEBUG MSG_SERIALIZE] Message.serialize called")
+        print(f"[DEBUG MSG_SERIALIZE] Message ID: {self.id}")
+        print(f"[DEBUG MSG_SERIALIZE] Chat ID: {self.chat_id}")
+        print(f"[DEBUG MSG_SERIALIZE] Sender ID: {self.sender_id}")
+        print(f"[DEBUG MSG_SERIALIZE] Content: '{self.content}'")
+        print(f"[DEBUG MSG_SERIALIZE] Sender object: {self.sender}")
+        
+        if self.sender:
+            print(f"[DEBUG MSG_SERIALIZE] Sender details: ID={self.sender.id}, username={self.sender.username}")
+        
+        data = {
+            "message_id":  self.id,
+            "chat_id":     self.chat_id,
+            "sender_id":   self.sender_id,
+            "content":     self.content,
+            "is_read":     self.is_read,
+            "is_edited":   self.is_edited,
+            "created_at":  self.created_at.isoformat() if self.created_at else None,
+            "read_at":     self.read_at.isoformat() if self.read_at else None,
+            "edited_at":   self.edited_at.isoformat() if self.edited_at else None,
+            "sender": {
+                "user_id":        self.sender.id if self.sender else None,
+                "username":       self.sender.username if self.sender else None,
+                "full_name":      self.sender.full_name if self.sender else None,
+                "cloudinary_url": self.sender.cloudinary_url if self.sender else None
+            } if self.sender else None
+        }
+        
+        print(f"[DEBUG MSG_SERIALIZE] Final serialized data: {data}")
+        return data
+
+
+    #-----------------#
+    # __repr__ Method #
+    #-----------------#
+    def __repr__(self):
+        return f"<Message ID {self.id} | Chat: {self.chat_id} | Sender: {self.sender_id} | Read: {self.is_read}>"
 
 
