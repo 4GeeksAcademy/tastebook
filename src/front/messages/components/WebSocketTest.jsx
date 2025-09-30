@@ -8,10 +8,20 @@ import socketService from '../../utils/socketService';
 const WebSocketTest = () => {
     const [connectionStatus, setConnectionStatus] = useState('Disconnected');
     const [events, setEvents] = useState([]);
+    const [testChatId, setTestChatId] = useState('');
+    const [currentUserId, setCurrentUserId] = useState('');
 
     useEffect(() => {
-        // Connect to WebSocket
-        socketService.connect();
+        // Get user ID from localStorage
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                setCurrentUserId(payload.sub || '');
+            } catch (e) {
+                console.warn('Could not parse token for user ID');
+            }
+        }
 
         // Listen for connection status changes
         const checkConnection = () => {
@@ -22,15 +32,7 @@ const WebSocketTest = () => {
         // Check connection every second
         const interval = setInterval(checkConnection, 1000);
 
-        // Listen for test events
-        const handleTestEvent = (data) => {
-            setEvents(prev => [...prev, { 
-                type: 'test_event', 
-                data, 
-                timestamp: new Date().toISOString() 
-            }]);
-        };
-
+        // Listen for all WebSocket events
         const handleMessageReceived = (data) => {
             setEvents(prev => [...prev, { 
                 type: 'message_received', 
@@ -39,13 +41,31 @@ const WebSocketTest = () => {
             }]);
         };
 
-        socketService.on('test_event', handleTestEvent);
+        const handleJoinedChat = (data) => {
+            setEvents(prev => [...prev, { 
+                type: 'joined_chat', 
+                data, 
+                timestamp: new Date().toISOString() 
+            }]);
+        };
+
+        const handleLeftChat = (data) => {
+            setEvents(prev => [...prev, { 
+                type: 'left_chat', 
+                data, 
+                timestamp: new Date().toISOString() 
+            }]);
+        };
+
         socketService.on('message_received', handleMessageReceived);
+        socketService.on('joined_chat', handleJoinedChat);
+        socketService.on('left_chat', handleLeftChat);
 
         return () => {
             clearInterval(interval);
-            socketService.off('test_event', handleTestEvent);
             socketService.off('message_received', handleMessageReceived);
+            socketService.off('joined_chat', handleJoinedChat);
+            socketService.off('left_chat', handleLeftChat);
         };
     }, []);
 
@@ -55,6 +75,20 @@ const WebSocketTest = () => {
                 message: 'Test from frontend', 
                 timestamp: new Date().toISOString() 
             });
+        }
+    };
+
+    const joinTestChat = () => {
+        if (testChatId && currentUserId && socketService.socket) {
+            console.log('[WEBSOCKET_TEST] Joining chat:', testChatId);
+            socketService.joinChat(parseInt(testChatId), parseInt(currentUserId));
+        }
+    };
+
+    const leaveTestChat = () => {
+        if (testChatId && currentUserId && socketService.socket) {
+            console.log('[WEBSOCKET_TEST] Leaving chat:', testChatId);
+            socketService.leaveChat(parseInt(testChatId), parseInt(currentUserId));
         }
     };
 
@@ -73,6 +107,30 @@ const WebSocketTest = () => {
                     <span className={`badge ${connectionStatus === 'Connected' ? 'bg-success' : 'bg-danger'}`}>
                         {connectionStatus}
                     </span>
+                    <br />
+                    <small className="text-muted">Current User ID: {currentUserId || 'Not available'}</small>
+                </div>
+                
+                <div className="mb-3">
+                    <div className="row">
+                        <div className="col-md-4">
+                            <input 
+                                type="number" 
+                                className="form-control form-control-sm mb-2" 
+                                placeholder="Chat ID" 
+                                value={testChatId}
+                                onChange={(e) => setTestChatId(e.target.value)}
+                            />
+                        </div>
+                        <div className="col-md-8">
+                            <button className="btn btn-success btn-sm me-2" onClick={joinTestChat}>
+                                Join Chat
+                            </button>
+                            <button className="btn btn-warning btn-sm me-2" onClick={leaveTestChat}>
+                                Leave Chat
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
                 <div className="mb-3">

@@ -174,8 +174,10 @@ def handle_join_chat(data):
     if chat_id and user_id:
         room_name = f"chat_{chat_id}"
         join_room(room_name)
-        logger.info("[SOCKETIO] User %s joined chat room %s", user_id, room_name)
-        emit('joined_chat', {'chat_id': chat_id, 'room': room_name})
+        logger.info("[SOCKETIO] ✅ User %s joined chat room %s (Session: %s)", user_id, room_name, request.sid)
+        emit('joined_chat', {'chat_id': chat_id, 'room': room_name, 'user_id': user_id})
+    else:
+        logger.warning("[SOCKETIO] ❌ Invalid join_chat data: %s", data)
 
 
 @socketio.on('leave_chat')
@@ -187,7 +189,10 @@ def handle_leave_chat(data):
     if chat_id and user_id:
         room_name = f"chat_{chat_id}"
         leave_room(room_name)
-        logger.info("[SOCKETIO] User %s left chat room %s", user_id, room_name)
+        logger.info("[SOCKETIO] ✅ User %s left chat room %s (Session: %s)", user_id, room_name, request.sid)
+        emit('left_chat', {'chat_id': chat_id, 'room': room_name, 'user_id': user_id})
+    else:
+        logger.warning("[SOCKETIO] ❌ Invalid leave_chat data: %s", data)
         emit('left_chat', {'chat_id': chat_id, 'room': room_name})
 
 

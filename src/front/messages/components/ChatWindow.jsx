@@ -21,6 +21,7 @@ import MessageInput from "./MessageInput";
  * @param {function} onStartEdit - Function to start editing a message
  * @param {function} onCancelEdit - Function to cancel editing
  * @param {function} onNavigateBack - Function to navigate back to chat list
+ * @param {boolean} connectionError - Whether there's a connection error
  * @param {boolean} isVisible - Whether chat window is visible (responsive)
  */
 const ChatWindow = ({ 
@@ -40,11 +41,18 @@ const ChatWindow = ({
     onStartEdit,
     onCancelEdit,
     onNavigateBack,
+    connectionError = false,
     isVisible = true
 }) => {
     if (loading) {
         return (
-            <div className={`col-md-8 col-lg-9 d-flex flex-column ${!isVisible ? 'd-none d-md-flex' : ''}`}>
+            <div 
+                className={`col-md-8 col-lg-9 d-flex flex-column px-0 ${!isVisible ? 'd-none d-md-flex' : ''}`}
+                style={{
+                    height: "calc(100vh - 120px)", // Account for navbar and footer
+                    maxHeight: "calc(100vh - 120px)"
+                }}
+            >
                 <div className="d-flex align-items-center justify-content-center h-100">
                     <div className="text-center">
                         <div className="spinner-border text-primary mb-3" role="status">
@@ -59,11 +67,32 @@ const ChatWindow = ({
 
     if (!currentChat) {
         return (
-            <div className={`col-md-8 col-lg-9 d-flex flex-column ${!isVisible ? 'd-none d-md-flex' : ''}`}>
+            <div 
+                className={`col-md-8 col-lg-9 d-flex flex-column ${!isVisible ? 'd-none d-md-flex' : ''}`}
+                style={{
+                    height: "calc(100vh - 120px)", // Account for navbar and footer
+                    maxHeight: "calc(100vh - 120px)"
+                }}
+            >
                 <div className="d-flex align-items-center justify-content-center h-100">
                     <div className="text-center">
-                        <h5 className="text-muted"> Select a conversation </h5>
-                        <p className="text-muted"> Choose a conversation from the sidebar to start messaging </p>
+                        {connectionError ? (
+                            <>
+                                <h5 className="text-danger"> Could not connect to server </h5>
+                                <p className="text-muted"> Unable to load conversations. Please check your internet connection and try again. </p>
+                                <button 
+                                    className="btn btn-outline-danger btn-sm"
+                                    onClick={() => window.location.reload()}
+                                >
+                                    Retry Connection
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <h5 className="text-muted"> Select a conversation </h5>
+                                <p className="text-muted"> Choose a conversation from the sidebar to start messaging </p>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -71,8 +100,14 @@ const ChatWindow = ({
     }
 
     return (
-        <div className={`col-md-8 col-lg-9 d-flex flex-column ${!isVisible ? 'd-none d-md-flex' : ''}`}>
-            <div className="d-flex flex-column h-100">
+        <div 
+            className={`col-md-8 col-lg-9 d-flex flex-column px-0 ${!isVisible ? 'd-none d-md-flex' : ''}`}
+            // style={{
+            //     height: "calc(100vh - 130px)", // Account for navbar and footer
+            //     maxHeight: "calc(100vh - 130px)"
+            // }}
+        >
+            <div className="d-flex flex-column h-100 px-0">
                 {/* Chat Header */}
                 <ChatHeader
                     participant={currentChat.participant}

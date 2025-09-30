@@ -24,13 +24,16 @@ def emit_new_message(chat_id, message_data):
         return
     
     room_name = f"chat_{chat_id}"
-    logger.info("[SOCKETIO] Emitting new message to room %s: message ID %s", room_name, message_data.get('id'))
+    logger.info("[SOCKETIO] 📨 Emitting new message to room %s: message ID %s from sender %s", 
+                room_name, message_data.get('message_id'), message_data.get('sender_id'))
     
     # Emit to specific room (normal behavior)
     socketio_instance.emit('message_received', {
         'chat_id': chat_id,
         'message': message_data
     }, room=room_name)
+    
+    logger.info("[SOCKETIO] 📨 Message emission completed for room %s", room_name)
 
 def emit_messages_read(chat_id, user_id):
     """Emit that messages have been read to all users in a chat room"""

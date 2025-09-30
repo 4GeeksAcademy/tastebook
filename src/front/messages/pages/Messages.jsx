@@ -25,6 +25,7 @@ export const Messages = () => {
         searchTerm,
         currentUser,
         loadingState,
+        connectionError,
         showSuccessToast,
         toastMessage,
         confirmState,
@@ -85,50 +86,54 @@ export const Messages = () => {
     }
 
     return (
-        <div className="d-flex flex-column vh-100">
+        <div 
+            className="d-flex flex-column" 
+            style={{
+                height: "calc(100vh - 120px)", // Account for navbar and footer
+                maxHeight: "calc(100vh - 120px)",
+                overflow: "hidden"
+            }}
+        >
             {/* Temporary WebSocket Test Component */}
             {import.meta.env.MODE === 'development' && <WebSocketTest />}
             
-            <div className="flex-grow-1 d-flex overflow-hidden">
-                <div className="container-fluid h-100 p-0">
-                    <div className="row g-0 h-100">
-                        {/* Chat Sidebar */}
-                        <ChatSidebar
-                            chats={chats}
-                            currentChatId={currentChat?.chat_id}
-                            searchTerm={searchTerm}
-                            onSearch={setSearchTerm}
-                            onSelectChat={handleSelectChat}
-                            loading={loadingState.main}
-                            navigate={navigate}
-                            isVisible={!currentChat}
-                        />
+            <div className="row g-0 flex-grow-1" style={{ height: "100%" }}>
 
-                        {/* Chat Window */}
-                        <ChatWindow
-                            currentChat={currentChat}
-                            messages={messages}
-                            currentUser={currentUser}
-                            loading={loadingState.chat}
-                            newMessage={newMessage}
-                            onNewMessageChange={setNewMessage}
-                            onSendMessage={sendMessage}
-                            onEditMessage={updateMessage}
-                            onDeleteMessage={deleteMessage}
-                            onDeleteChat={deleteChat}
-                            onMarkAsRead={markMessagesAsRead}
-                            sendingMessage={loadingState.sendingMessage}
-                            editingMessageId={loadingState.editingMessage}
-                            onStartEdit={handleStartEdit}
-                            onCancelEdit={handleCancelEdit}
-                            onNavigateBack={handleNavigateBack}
-                            isVisible={!!currentChat}
-                        />
-                    </div>
-                </div>
+                {/* Chat Sidebar */}
+                <ChatSidebar
+                    chats={chats}
+                    currentChatId={currentChat?.chat_id}
+                    searchTerm={searchTerm}
+                    onSearch={setSearchTerm}
+                    onSelectChat={handleSelectChat}
+                    connectionError={connectionError}
+                    isVisible={!chatId}
+                />
+
+                {/* Chat Window */}
+                <ChatWindow
+                    currentChat={currentChat}
+                    messages={messages}
+                    currentUser={currentUser}
+                    loading={loadingState.chat}
+                    newMessage={newMessage}
+                    onNewMessageChange={setNewMessage}
+                    onSendMessage={sendMessage}
+                    onEditMessage={updateMessage}
+                    onDeleteMessage={deleteMessage}
+                    onDeleteChat={deleteChat}
+                    onMarkAsRead={markMessagesAsRead}
+                    sendingMessage={loadingState.sendingMessage}
+                    editingMessageId={loadingState.editingMessage}
+                    onStartEdit={handleStartEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onNavigateBack={handleNavigateBack}
+                    connectionError={connectionError}
+                    isVisible={!!chatId}
+                />
             </div>
 
-            {/* Toast Notifications */}
+            {/* Toast and Confirmation Modal */}
             <Toast
                 show={showSuccessToast}
                 message={toastMessage}

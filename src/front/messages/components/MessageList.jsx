@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import MessageBubble from "./MessageBubble";
+// import "./messages.css";
 
 /**
  * Scrollable list of messages component
@@ -45,8 +46,13 @@ const MessageList = ({
 
     return (
         <div 
-            className="flex-grow-1 overflow-auto p-3" 
-            style={{ backgroundColor: "#f8f9fa", minHeight: 0 }}
+            className="flex-grow-1 overflow-auto custom-scrollbar p-3" 
+            style={{ 
+                backgroundColor: "var(--main-bg-color)", 
+                minHeight: "0",
+                height: "0", // Forces flex container to calculate height properly
+                scrollBehavior: "smooth"
+            }}
             onFocus={handleMarkAsRead}
             onClick={handleMarkAsRead}
         >
@@ -67,19 +73,19 @@ const MessageList = ({
                         <small className="text-muted d-block mb-3"> Quick conversation starters: </small>
                         <div className="d-flex flex-wrap justify-content-center gap-2">
                             <button 
-                                className="btn btn-outline-primary btn-sm"
+                                className="btn btn-outline-primary btn-sm rounded-pill"
                                 onClick={() => onNewMessageChange("Hi! I saw your recipes and wanted to chat 👋")}
                             >
                                 👋 Say Hi
                             </button>
                             <button 
-                                className="btn btn-outline-primary btn-sm"
+                                className="btn btn-outline-primary btn-sm rounded-pill"
                                 onClick={() => onNewMessageChange("Love your recipes! Do you have any cooking tips to share?")}
                             >
                                 🍳 Ask about cooking
                             </button>
                             <button 
-                                className="btn btn-outline-primary btn-sm"
+                                className="btn btn-outline-primary btn-sm rounded-pill"
                                 onClick={() => onNewMessageChange("Would you like to share recipe ideas?")}
                             >
                                 📝 Share ideas
@@ -91,21 +97,45 @@ const MessageList = ({
                 </div>
             ) : (
                 messages.map((message, index) => {
-                    const isCurrentUser = message.sender_id === currentUser?.user_id;
-                    const showDate = index === 0 || 
-                        new Date(message.created_at).toDateString() !== 
-                        new Date(messages[index - 1].created_at).toDateString();
+                    // More robust check for current user - handle both sender_id and sender.user_id
+                    const isCurrentUser = message.sender_id === currentUser?.user_id || 
+                                         message.sender?.user_id === currentUser?.user_id;
+                    
+                    // Safe date handling for date separators
+                    const showDate = index === 0 || (() => {
+                        const currentDate = new Date(message.created_at);
+                        const prevDate = new Date(messages[index - 1].created_at);
+                        
+                        // Only show date separator if both dates are valid
+                        if (isNaN(currentDate.getTime()) || isNaN(prevDate.getTime())) {
+                            return false;
+                        }
+                        
+                        return currentDate.toDateString() !== prevDate.toDateString();
+                    })();
+
+                    // Create unique key to prevent React warnings
+                    const messageKey = message.is_temp 
+                        ? `temp-${message.id}` 
+                        : `msg-${message.message_id || message.id}`;
 
                     return (
-                        <React.Fragment key={message.message_id}>
-                            { showDate && (
+                        <React.Fragment key={messageKey}>
+                            {showDate && (
                                 <div className="text-center my-3">
-                                    <small className="text-muted bg-white px-2 py-1 rounded">
-                                        { new Date(message.created_at).toLocaleDateString() }
-                                    </small>
+                                    <span className="badge bg-secondary bg-opacity-25 text-dark rounded-pill">
+                                        {(() => {
+                                            const messageDate = new Date(message.created_at);
+                                            if (isNaN(messageDate.getTime())) {
+                                                return 'Today';
+                                            }
+                                            return messageDate.toLocaleDateString('en-US', {
+                                                year: 'numeric', month: 'long', day: 'numeric'
+                                            });
+                                        })()}
+                                    </span>
                                 </div>
                             )}
-                            
                             <MessageBubble
                                 message={message}
                                 isCurrentUser={isCurrentUser}

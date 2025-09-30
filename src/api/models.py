@@ -1158,16 +1158,6 @@ class Message(db.Model):
     # Serialization #
     #---------------#
     def serialize(self):
-        print(f"[DEBUG MSG_SERIALIZE] Message.serialize called")
-        print(f"[DEBUG MSG_SERIALIZE] Message ID: {self.id}")
-        print(f"[DEBUG MSG_SERIALIZE] Chat ID: {self.chat_id}")
-        print(f"[DEBUG MSG_SERIALIZE] Sender ID: {self.sender_id}")
-        print(f"[DEBUG MSG_SERIALIZE] Content: '{self.content}'")
-        print(f"[DEBUG MSG_SERIALIZE] Sender object: {self.sender}")
-        
-        if self.sender:
-            print(f"[DEBUG MSG_SERIALIZE] Sender details: ID={self.sender.id}, username={self.sender.username}")
-        
         data = {
             "message_id":  self.id,
             "chat_id":     self.chat_id,
@@ -1186,7 +1176,6 @@ class Message(db.Model):
             } if self.sender else None
         }
         
-        print(f"[DEBUG MSG_SERIALIZE] Final serialized data: {data}")
         return data
 
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Search, MessageCircleMore } from "lucide-react";
 import ChatItem from "./ChatItem";
+// import "./messages.css";
 
 /**
  * Chat Sidebar component with search and chat list
@@ -11,6 +12,7 @@ import ChatItem from "./ChatItem";
  * @param {function} onSelectChat - Function to handle chat selection
  * @param {boolean} loading - Whether chats are loading
  * @param {function} navigate - Navigation function
+ * @param {boolean} connectionError - Whether there's a connection error
  * @param {boolean} isVisible - Whether sidebar is visible (responsive)
  */
 const ChatSidebar = ({ 
@@ -21,12 +23,20 @@ const ChatSidebar = ({
     onSelectChat, 
     loading, 
     navigate,
+    connectionError = false,
     isVisible = true 
 }) => {
     return (
-        <div className={`col-md-4 col-lg-3 border-end d-flex flex-column ${!isVisible ? 'd-none d-md-flex' : ''}`}>
+        <div 
+            className={`col-md-4 col-lg-3 border-end d-flex flex-column bg-light ${!isVisible ? 'd-none d-md-flex' : ''}`} 
+            style={{
+                height: "calc(100vh - 120px)", // Account for navbar and footer
+                maxHeight: "calc(100vh - 120px)",
+                position: "relative"
+            }}
+        >
             {/* Header with Search */}
-            <div className="p-3 border-bottom bg-white">
+            <div className="p-3 border-bottom bg-white flex-shrink-0">
                 <h5 className="mb-3"> Messages </h5>
                 
                 {/* Search */}
@@ -43,8 +53,31 @@ const ChatSidebar = ({
             </div>
 
             {/* Chat List - Scrollable */}
-            <div className="flex-grow-1 overflow-auto scrollarea">
-                { loading ? (
+            <div 
+                className="flex-grow-1 overflow-auto custom-scrollbar" 
+                style={{
+                    height: "0", // This forces flexbox to calculate height properly
+                    minHeight: "0",
+                    maxHeight: "calc(100vh - 240px)" // Account for navbar, footer, and header
+                }}
+            >
+                { connectionError ? (
+                    <div className="text-center py-5">
+                        <div className="mb-4">
+                            <div className="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style={{width: "60px", height: "60px"}}>
+                                <MessageCircleMore size={30} className="text-danger" />
+                            </div>
+                        </div>
+                        <h6 className="mb-2 text-danger"> Could not connect to server </h6>
+                        <p className="text-muted mb-3"> Unable to load your conversations. Please check your internet connection and try again. </p>
+                        <button 
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={() => window.location.reload()}
+                        >
+                            Retry Connection
+                        </button>
+                    </div>
+                ) : loading ? (
                     <div className="text-center py-5">
                         <div className="spinner-border text-primary mb-3" role="status">
                             <span className="visually-hidden"> Loading chats... </span>

@@ -28,14 +28,14 @@ const MessageBubble = ({
     };
 
     return (
-        <div className={`d-flex mb-3 ${isCurrentUser ? 'justify-content-end' : 'justify-content-start'}`}>
+        <div className={`d-flex mb-2 ${isCurrentUser ? 'justify-content-end' : 'justify-content-start'}`}>
             <div
-                className={`message-bubble p-3 rounded-3 position-relative ${
+                className={`message-bubble py-2 px-3 rounded-3 position-relative shadow-sm ${
                     isCurrentUser 
                         ? 'bg-primary text-white' 
-                        : 'bg-white border'
+                        : 'bg-light border'
                 }`}
-                style={{ maxWidth: "70%" }}
+                style={{ maxWidth: "75%", minWidth: "80px" }}
             >
                 { isEditing ? (
                     <form onSubmit={handleEditSubmit}>
@@ -46,13 +46,13 @@ const MessageBubble = ({
                             className="form-control form-control-sm"
                             autoFocus
                         />
-                        <div className="mt-2">
-                            <button type="submit" className="btn btn-sm btn-primary me-2">
+                        <div className="mt-2 d-flex justify-content-end">
+                            <button type="submit" className="btn btn-sm btn-success me-2">
                                 Save
                             </button>
                             <button
                                 type="button"
-                                className="btn btn-sm btn-secondary"
+                                className="btn btn-sm btn-light"
                                 onClick={onCancelEdit}
                             >
                                 Cancel
@@ -61,23 +61,28 @@ const MessageBubble = ({
                     </form>
                 ) : (
                     <>
-                        <p className="mb-1"> { message.content } </p>
-                        <div className="d-flex justify-content-between align-items-center">
+                        <p className="mb-0" style={{whiteSpace: "pre-wrap", wordBreak: "break-word"}}> { message.content } </p>
+                        <div className="d-flex justify-content-end align-items-center mt-1">
+                            <small className={`opacity-75 me-2 ${isCurrentUser ? 'text-white-50' : 'text-muted'}`}>
+                                { message.is_edited && "edited" }
+                            </small>
                             <small className={`opacity-75 ${isCurrentUser ? 'text-white-50' : 'text-muted'}`}>
                                 { formatTime(message.created_at) }
-                                { message.is_edited && " • edited" }
                             </small>
                             
                             { isCurrentUser && (
-                                <div className="dropdown">
+                                <div className="dropdown ms-1">
                                     <button
-                                        className="btn btn-link p-0 text-white-50"
+                                        className="btn btn-link p-0"
                                         type="button"
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false"
-                                        style={{ fontSize: "0.75rem" }}
+                                        style={{ 
+                                            lineHeight: 1,
+                                            color: 'rgba(255, 255, 255, 0.7)'
+                                        }}
                                     >
-                                        <MoreVertical size={14} />
+                                        <MoreVertical size={16} />
                                     </button>
                                     <ul className="dropdown-menu dropdown-menu-end">
                                         <li>
@@ -88,6 +93,9 @@ const MessageBubble = ({
                                                 <Edit3 size={14} className="me-2" />
                                                 Edit
                                             </button>
+                                        </li>
+                                        <li>
+                                            <hr className="dropdown-divider my-1" />
                                         </li>
                                         <li>
                                             <button

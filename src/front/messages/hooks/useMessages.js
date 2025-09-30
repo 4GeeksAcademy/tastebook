@@ -58,6 +58,7 @@ export const useMessages = (chatId) => {
     const token = localStorage.getItem("token");
     const socketConnectedRef = useRef(false);
     const currentUserRef = useRef(null);
+    const currentChatRef = useRef(null);
     
     // State management
     const [chats, setChats] = useState([]);
@@ -69,6 +70,7 @@ export const useMessages = (chatId) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
+    const [connectionError, setConnectionError] = useState(false);
     
     // Loading state management with reducer
     const [loadingState, dispatchLoading] = useReducer(loadingReducer, initialLoadingState);
@@ -82,6 +84,11 @@ export const useMessages = (chatId) => {
     useEffect(() => {
         currentUserRef.current = currentUser;
     }, [currentUser]);
+
+    // Keep currentChat reference up to date
+    useEffect(() => {
+        currentChatRef.current = currentChat;
+    }, [currentChat]);
 
     // Utility functions
     const showToast = useCallback((message, duration = 3000) => {
@@ -107,6 +114,7 @@ export const useMessages = (chatId) => {
     const fetchCurrentUser = useCallback(async () => {
         if (!token || !backendUrl) {
             setCurrentUser(null);
+            setConnectionError(true);
             return;
         }
 
@@ -122,12 +130,15 @@ export const useMessages = (chatId) => {
             if (response.ok) {
                 const data = await response.json();
                 setCurrentUser(data.current_user);
+                setConnectionError(false);
             } else {
                 setCurrentUser(null);
+                setConnectionError(true);
             }
         } catch (error) {
             console.error("Failed to fetch current user:", error);
             setCurrentUser(null);
+            setConnectionError(true);
         }
     }, [token, backendUrl]);
 
@@ -147,12 +158,15 @@ export const useMessages = (chatId) => {
                 const normalizedChats = data.chats.map(normalizeChat);
                 setChats(normalizedChats);
                 setTotalUnreadCount(data.total_unread);
+                setConnectionError(false);
             } else {
                 const errorData = await response.json();
                 console.error("Failed to fetch chats:", errorData);
+                setConnectionError(true);
             }
         } catch (error) {
             console.error("Error fetching chats:", error);
+            setConnectionError(true);
         }
     }, [token, backendUrl]);
 
@@ -280,72 +294,84 @@ export const useMessages = (chatId) => {
         e.preventDefault();
         if (!newMessage.trim() || !currentChat || loadingState.sendingMessage) return;
 
-        console.log('[SEND_MESSAGE] 📤 Starting send message process');
-        console.log('[SEND_MESSAGE] Message content:', newMessage.trim());
-        console.log('[SEND_MESSAGE] Current chat:', currentChat.chat_id);
-
         dispatchLoading({ type: 'SET_SENDING_MESSAGE', payload: true });
         
+        const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const optimisticMessage = normalizeMessage({
+            id: tempId,
+            message_id: tempId, // Ensure both id and message_id are set
+            content: newMessage.trim(),
+            created_at: new Date().toISOString(),
+            sender_id: currentUserRef.current?.user_id,
+            sender: {
+                user_id: currentUserRef.current?.user_id,
+                username: currentUserRef.current?.username,
+                full_name: currentUserRef.current?.full_name,
+                cloudinary_url: currentUserRef.current?.cloudinary_url
+            },
+            chat_id: currentChat.chat_id,
+            is_read: false,
+            is_edited: false,
+            is_temp: true,
+            _tempId: tempId // Keep track of temp ID for replacement
+        });
+
+        setMessages(prev => [...prev, optimisticMessage]);
+        setNewMessage("");
+
         try {
-            const url = `${backendUrl}/api/chat/${currentChat.chat_id}/message`;
-            
-            const requestBody = {
-                content: newMessage.trim()
-            };
-
-            console.log('[SEND_MESSAGE] Sending POST request to:', url);
-            console.log('[SEND_MESSAGE] Request body:', requestBody);
-
-            const response = await fetch(url, {
+            const response = await fetch(`${backendUrl}/api/chat/${currentChat.chat_id}/message`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify({ content: optimisticMessage.content })
             });
-
-            console.log('[SEND_MESSAGE] Response status:', response.status);
 
             if (response.ok) {
                 const data = await response.json();
-                const normalizedMessage = normalizeMessage(data.message);
+                const finalMessage = normalizeMessage(data.message);
                 
-                console.log('[SEND_MESSAGE] ✅ Message sent successfully:', normalizedMessage);
+                // Replace temp message with final message and remove any duplicates
+                setMessages(prev => {
+                    console.log('[SEND_MESSAGE] Replacing temp message with final message');
+                    
+                    // Remove the specific temp message
+                    const withoutTemp = prev.filter(m => m._tempId !== tempId && m.id !== tempId);
+                    
+                    // Check if final message already exists (from WebSocket)
+                    const finalExists = withoutTemp.some(msg => 
+                        msg.message_id === finalMessage.message_id
+                    );
+                    
+                    if (finalExists) {
+                        console.log('[SEND_MESSAGE] Final message already exists from WebSocket, keeping existing');
+                        return withoutTemp;
+                    }
+                    
+                    console.log('[SEND_MESSAGE] Adding final message from API response');
+                    // Mark message as coming from API to help WebSocket deduplication
+                    const markedMessage = { ...finalMessage, _fromAPI: true };
+                    return [...withoutTemp, markedMessage];
+                });
                 
-                // Clear the input immediately for better UX
-                setNewMessage("");
-                
-                console.log('[SEND_MESSAGE] ⏳ Waiting for WebSocket update...');
-                
-                // Don't add message locally - let WebSocket handle it for real-time consistency
-                // The backend should emit the message via WebSocket to all connected clients
-                
-                // Update the chat in the chats list with the new last message
-                setChats(prevChats => 
-                    prevChats.map(chat => 
-                        chat.chat_id === currentChat.chat_id 
-                            ? { 
-                                ...chat, 
-                                last_message: normalizedMessage.content,
-                                last_message_timestamp: normalizedMessage.created_at,
-                                updated_at: normalizedMessage.created_at
-                              }
-                            : chat
-                    )
-                );
+                fetchChats();
+                window.dispatchEvent(new CustomEvent('messageUpdate'));
             } else {
                 const errorData = await response.json();
-                console.error("[SEND_MESSAGE] ❌ Failed to send message:", response.status, errorData);
-                showToast("Failed to send message. Please try again.", 3000);
+                console.error("[SEND_MESSAGE] Failed to send message:", errorData);
+                showToast(errorData.error || "Failed to send message", 5000);
+                setMessages(prev => prev.filter(m => m._tempId !== tempId && m.id !== tempId));
             }
         } catch (error) {
-            console.error("[SEND_MESSAGE] ❌ Error sending message:", error);
-            showToast("Failed to send message. Please try again.", 3000);
+            console.error("[SEND_MESSAGE] Error sending message:", error);
+            showToast("An unexpected error occurred while sending the message.", 5000);
+            setMessages(prev => prev.filter(m => m._tempId !== tempId && m.id !== tempId));
         } finally {
             dispatchLoading({ type: 'SET_SENDING_MESSAGE', payload: false });
         }
-    }, [newMessage, currentChat, loadingState.sendingMessage, backendUrl, token, showToast]);
+    }, [newMessage, currentChat, token, backendUrl, fetchChats, showToast, loadingState.sendingMessage]);
 
     const updateMessage = useCallback(async (messageId, newContent) => {
         if (!token || !newContent.trim()) return;
@@ -458,10 +484,10 @@ export const useMessages = (chatId) => {
         showConfirmation("Are you sure you want to delete this entire conversation?", confirmDelete, 'danger');
     }, [token, backendUrl, currentChat, navigate, showConfirmation, hideConfirmation, showToast]);
 
-    // WebSocket event handlers
+    // WebSocket event handlers - Use refs to avoid dependency issues
     const handleNewMessage = useCallback((data) => {
         console.log('[WEBSOCKET] 📨 RAW MESSAGE RECEIVED:', data);
-        console.log('[WEBSOCKET] Current chat ID:', currentChat?.chat_id);
+        console.log('[WEBSOCKET] Current chat ID:', currentChatRef.current?.chat_id);
         console.log('[WEBSOCKET] Current user ID:', currentUserRef.current?.user_id);
         
         const { chat_id, message } = data;
@@ -471,24 +497,53 @@ export const useMessages = (chatId) => {
         
         // Always add the message to the current chat if we're viewing it,
         // regardless of sender (this ensures real-time updates for all users)
-        if (currentChat && currentChat.chat_id === chat_id) {
+        if (currentChatRef.current && currentChatRef.current.chat_id === chat_id) {
             console.log('[WEBSOCKET] ✅ Adding to current chat - chat IDs match');
+            
+            // Check if this is our own message (to handle temp message replacement)
+            const isOwnMessage = normalizedMessage.sender_id === currentUserRef.current?.user_id;
+            
             setMessages(prevMessages => {
                 console.log('[WEBSOCKET] Previous messages count:', prevMessages.length);
                 
-                // Check if message already exists to avoid duplicates
-                const messageExists = prevMessages.some(msg => 
-                    msg.message_id === normalizedMessage.message_id || 
-                    (msg.content === normalizedMessage.content && 
-                     msg.sender_id === normalizedMessage.sender_id &&
-                     Math.abs(new Date(msg.created_at) - new Date(normalizedMessage.created_at)) < 1000)
-                );
+                // Enhanced deduplication logic
+                const messageExists = prevMessages.some(msg => {
+                    // Check by message_id first (most reliable)
+                    if (normalizedMessage.message_id && msg.message_id === normalizedMessage.message_id) {
+                        console.log('[WEBSOCKET] ⚠️ Message exists by ID:', normalizedMessage.message_id);
+                        return true;
+                    }
+                    
+                    // For messages flagged as from API, skip WebSocket duplicates
+                    if (msg._fromAPI && isOwnMessage) {
+                        const timeDiff = Math.abs(
+                            new Date(msg.created_at).getTime() - 
+                            new Date(normalizedMessage.created_at).getTime()
+                        );
+                        if (timeDiff < 2000) { // Within 2 seconds
+                            console.log('[WEBSOCKET] ⚠️ Skipping WebSocket message - already have from API');
+                            return true;
+                        }
+                    }
+                    
+                    return false;
+                });
                 
                 if (!messageExists) {
                     console.log('[WEBSOCKET] ✅ Adding NEW message to current chat:', normalizedMessage);
-                    const newMessages = [...prevMessages, normalizedMessage];
-                    console.log('[WEBSOCKET] New messages count:', newMessages.length);
-                    return newMessages;
+                    
+                    // For own messages, replace any temp messages with same content
+                    if (isOwnMessage) {
+                        const filteredMessages = prevMessages.filter(msg => 
+                            !(msg.is_temp && 
+                              msg.content === normalizedMessage.content && 
+                              msg.sender_id === normalizedMessage.sender_id)
+                        );
+                        return [...filteredMessages, normalizedMessage];
+                    } else {
+                        // For others' messages, just add normally
+                        return [...prevMessages, normalizedMessage];
+                    }
                 }
                 
                 console.log('[WEBSOCKET] ⚠️ Message already exists, skipping duplicate');
@@ -496,7 +551,7 @@ export const useMessages = (chatId) => {
             });
         } else {
             console.log('[WEBSOCKET] ❌ NOT adding to current chat - chat IDs don\'t match or no current chat');
-            console.log('[WEBSOCKET] Current chat:', currentChat?.chat_id, 'Message chat:', chat_id);
+            console.log('[WEBSOCKET] Current chat:', currentChatRef.current?.chat_id, 'Message chat:', chat_id);
         }
         
         // Always update chat list to show latest message and time (for all users)
@@ -505,7 +560,7 @@ export const useMessages = (chatId) => {
             return prevChats.map(chat => {
                 if (chat.chat_id === chat_id) {
                     const isCurrentUserMessage = normalizedMessage.sender_id === currentUserRef.current?.user_id;
-                    const isCurrentChat = currentChat && currentChat.chat_id === chat_id;
+                    const isCurrentChat = currentChatRef.current && currentChatRef.current.chat_id === chat_id;
                     
                     console.log('[WEBSOCKET] Updating chat in list:', {
                         chat_id,
@@ -531,7 +586,7 @@ export const useMessages = (chatId) => {
 
         // Update total unread count if message is not from current user and not in current chat
         const isCurrentUserMessage = normalizedMessage.sender_id === currentUserRef.current?.user_id;
-        const isCurrentChat = currentChat && currentChat.chat_id === chat_id;
+        const isCurrentChat = currentChatRef.current && currentChatRef.current.chat_id === chat_id;
         
         if (!isCurrentUserMessage && !isCurrentChat) {
             setTotalUnreadCount(prev => prev + 1);
@@ -543,7 +598,7 @@ export const useMessages = (chatId) => {
         }
         
         console.log('[WEBSOCKET] 📨 Message handling completed');
-    }, [currentChat]);
+    }, []); // ✅ No dependencies - use refs instead
 
     const handleMessagesRead = useCallback((data) => {
         const { chat_id, user_id } = data;
@@ -575,10 +630,10 @@ export const useMessages = (chatId) => {
         showToast(message);
         
         // Navigate away if this is the current chat
-        if (currentChat && currentChat.chat_id === chat_id) {
+        if (currentChatRef.current && currentChatRef.current.chat_id === chat_id) {
             navigate('/messages');
         }
-    }, [currentChat, navigate, showToast]);
+    }, [navigate, showToast]);
 
     // Effects with proper dependency arrays
     // Fetch current user on component mount
@@ -598,12 +653,17 @@ export const useMessages = (chatId) => {
             
             // Connect to WebSocket server
             socketService.connect();
-            socketConnectedRef.current = true;
+            
+            // Wait a moment for connection to establish, then register handlers
+            const setupTimeout = setTimeout(() => {
+                console.log('[WEBSOCKET] Registering event handlers');
+                socketService.on('message_received', handleNewMessage);
+                socketService.on('messages_marked_read', handleMessagesRead);
+                socketService.on('chat_was_deleted', handleChatDeleted);
+                socketConnectedRef.current = true;
+            }, 200);
 
-            // Register event listeners
-            socketService.on('message_received', handleNewMessage);
-            socketService.on('messages_marked_read', handleMessagesRead);
-            socketService.on('chat_was_deleted', handleChatDeleted);
+            return () => clearTimeout(setupTimeout);
         }
 
         // Cleanup function
@@ -618,7 +678,7 @@ export const useMessages = (chatId) => {
                 socketConnectedRef.current = false;
             }
         };
-    }, [currentUser?.user_id, handleNewMessage, handleMessagesRead, handleChatDeleted]);
+    }, [currentUser?.user_id]); // ✅ Only depend on user_id, callbacks are now stable
 
     // Join/leave chat rooms when current chat changes
     useEffect(() => {
@@ -649,9 +709,11 @@ export const useMessages = (chatId) => {
             return;
         }
 
+        // Always stop main loading after initialization, regardless of connection success
+        dispatchLoading({ type: 'SET_MAIN_LOADING', payload: false });
+
         if (currentUser) {
             fetchChats();
-            dispatchLoading({ type: 'SET_MAIN_LOADING', payload: false });
         }
     }, [token, navigate, currentUser, fetchChats]);
 
@@ -687,6 +749,7 @@ export const useMessages = (chatId) => {
         totalUnreadCount,
         currentUser,
         loadingState,
+        connectionError,
         showSuccessToast,
         toastMessage,
         confirmState,
