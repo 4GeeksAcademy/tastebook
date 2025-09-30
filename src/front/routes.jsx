@@ -32,7 +32,7 @@ import { Theme }             from "./pages/Theme";
 import { MyCollections }     from "./pages/MyCollections";
 import { CollectionView }    from "./pages/CollectionView";
 import { PublicCollections } from "./pages/PublicCollections";
-import { Messages } from "./pages/Messages";
+import { Messages } from "./messages";
 
 
 

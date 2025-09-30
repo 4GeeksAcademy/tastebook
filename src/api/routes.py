@@ -5,6 +5,9 @@ import os
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Recipe, RecipeImage, Follow, Comment, CommentLike, Like, Collection, CollectionRecipe, Chat, Message
 from api.utils import generate_sitemap, APIException
+
+from api.websocket_events import emit_new_message, emit_messages_read, emit_chat_deleted
+
 from flask_cors import CORS
 from sqlalchemy import or_
 
@@ -12,10 +15,11 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
-# import datetime
+
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 
+# JWT for authentication and werkzeug security for password hashing
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -3060,6 +3064,10 @@ def send_message(chat_id):
         serialized_message = new_message.serialize()
         print(f"[DEBUG SEND_MSG] Serialized message: {serialized_message}")
         
+        # Emit WebSocket event to notify other users in the chat
+        print(f"[DEBUG SEND_MSG] Emitting WebSocket event for new message...")
+        emit_new_message(chat_id, serialized_message)
+        
         return jsonify({
             "message": serialized_message
         }), 201
@@ -3127,6 +3135,11 @@ def mark_messages_as_read(chat_id):
         print(f"[DEBUG MARK_READ] Committing changes...")
         db.session.commit()
         print(f"[DEBUG MARK_READ] SUCCESS: Marked {len(unread_messages)} messages as read")
+        
+        # Emit WebSocket event to notify other users that messages have been read
+        if len(unread_messages) > 0:
+            print(f"[DEBUG MARK_READ] Emitting WebSocket event for messages read...")
+            emit_messages_read(chat_id, current_user_id)
         
         return jsonify({
             "message": f"Marked {len(unread_messages)} messages as read",
@@ -3299,6 +3312,10 @@ def delete_chat(chat_id):
         db.session.commit()
         
         print(f"[DEBUG DELETE_CHAT] SUCCESS: Chat deleted successfully")
+        
+        # Emit WebSocket event to notify other users that the chat has been deleted
+        print(f"[DEBUG DELETE_CHAT] Emitting WebSocket event for chat deletion...")
+        emit_chat_deleted(chat_id, current_user_id)
         
         return jsonify({"message": "Chat deleted successfully"}), 200
         

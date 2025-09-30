@@ -5,7 +5,12 @@
 # This file is required for Render.com deployment using gunicorn.
 # Read more about it here: https://devcenter.heroku.com/articles/python-gunicorn
 
-from app import app as application
+# Import the SocketIO app for WebSocket support
+from app import app, socketio
 
+# For regular WSGI servers (if needed)
+application = app
+
+# For SocketIO deployment with eventlet
 if __name__ == "__main__":
-    application.run()
+    socketio.run(app)

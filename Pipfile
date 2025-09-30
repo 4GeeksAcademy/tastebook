@@ -20,12 +20,15 @@ typing-extensions = "*"
 flask-jwt-extended = "==4.6.0"
 wtforms = "==3.1.2"
 sqlalchemy = "*"
+flask-socketio = "*"
+eventlet = "*"
 
 [requires]
 python_version = "3.13"
 
 [scripts]
 start="flask run -p 3001 -h 0.0.0.0"
+start-socketio="python src/app.py" 
 init="flask db init"
 migrate="flask db migrate"
 local="heroku local"
