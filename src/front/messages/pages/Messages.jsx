@@ -5,7 +5,9 @@ import ChatSidebar from "../components/ChatSidebar";
 import ChatWindow from "../components/ChatWindow";
 import Toast from "../components/Toast";
 import ConfirmationModal from "../components/ConfirmationModal";
-import WebSocketTest from "../components/WebSocketTest";
+import WebSocketStatus from "../components/WebSocketStatus";
+
+
 
 /**
  * Main Messages page component - entry point from router
@@ -94,8 +96,6 @@ export const Messages = () => {
                 overflow: "hidden"
             }}
         >
-            {/* Temporary WebSocket Test Component */}
-            {import.meta.env.MODE === 'development' && <WebSocketTest />}
             
             <div className="row g-0 flex-grow-1" style={{ height: "100%" }}>
 

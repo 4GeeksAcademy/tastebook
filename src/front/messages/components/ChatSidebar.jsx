@@ -1,6 +1,7 @@
 import React from "react";
 import { Search, MessageCircleMore } from "lucide-react";
 import ChatItem from "./ChatItem";
+import WebSocketStatus from "./WebSocketStatus";
 // import "./messages.css";
 
 /**
@@ -37,7 +38,14 @@ const ChatSidebar = ({
         >
             {/* Header with Search */}
             <div className="p-3 border-bottom bg-white flex-shrink-0">
-                <h5 className="mb-3"> Messages </h5>
+
+                <h3 className="mb-3"> Messages </h3>
+
+                {/* WebSocket Status Connection testing - OPTION TO ONLY SHOW IN PRODUCTION */}
+                <div className="mb-3">
+                    {/* {import.meta.env.MODE === 'development' && <WebSocketStatus />} */}
+                    <WebSocketStatus />
+                </div>
                 
                 {/* Search */}
                 <div className="position-relative">
