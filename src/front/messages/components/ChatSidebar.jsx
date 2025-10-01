@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Search, MessageCircleMore } from "lucide-react";
 import ChatItem from "./ChatItem";
 import WebSocketStatus from "./WebSocketStatus";
@@ -12,7 +13,6 @@ import WebSocketStatus from "./WebSocketStatus";
  * @param {function} onSearch - Function to handle search input change
  * @param {function} onSelectChat - Function to handle chat selection
  * @param {boolean} loading - Whether chats are loading
- * @param {function} navigate - Navigation function
  * @param {boolean} connectionError - Whether there's a connection error
  * @param {boolean} isVisible - Whether sidebar is visible (responsive)
  */
@@ -23,7 +23,6 @@ const ChatSidebar = ({
     onSearch, 
     onSelectChat, 
     loading, 
-    navigate,
     connectionError = false,
     isVisible = true 
 }) => {
@@ -39,7 +38,7 @@ const ChatSidebar = ({
             {/* Header with Search */}
             <div className="p-3 border-bottom bg-white flex-shrink-0">
 
-                <h3 className="mb-3"> Messages </h3>
+                <h2 className="mb-3"> Messages </h2>
 
                 {/* WebSocket Status Connection testing - OPTION TO ONLY SHOW IN PRODUCTION */}
                 <div className="mb-3">
@@ -94,31 +93,45 @@ const ChatSidebar = ({
                     </div>
                 ) : chats.length === 0 ? (
                     <div className="text-center py-5">
+
                         <div className="mb-4">
                             <div className="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style={{width: "60px", height: "60px"}}>
                                 <MessageCircleMore size={30} className="text-white" />
                             </div>
                         </div>
-                        <h6 className="mb-2"> No conversations yet </h6>
-                        <p className="text-muted mb-3"> Start chatting with other TasteBook users! </p>
-                        <div className="d-flex flex-column gap-2 align-items-center">
-                            <button 
-                                className="btn btn-primary btn-sm"
-                                onClick={() => navigate("/users")}
-                            >
-                                Find Users to Chat With
-                            </button>
-                            <button 
-                                className="btn btn-outline-secondary btn-sm"
-                                onClick={() => navigate("/all-recipes")}
-                            >
-                                Browse Recipes & Connect
-                            </button>
+
+                        <h5 className="mb-3"> No conversations yet </h5>
+
+                        <p className="text-muted mb-3 mx-4"> Start chatting with other TasteBook users! </p>
+                        
+                        <div className="row g-2 my-4 mx-2">
+
+                            <div className="col-12">
+                                <Link 
+                                    to="/users"
+                                    className="btn btn-primary btn-sm text-decoration-none w-75"
+                                >
+                                    Find Users to Chat With
+                                </Link>
+                            </div>
+
+                            <div className="col-12">
+                                <Link 
+                                    to="/all-recipes"
+                                    className="btn btn-outline-secondary btn-sm text-decoration-none w-75"
+                                >
+                                    Browse Recipes & Connect
+                                </Link>
+                            </div>
+
                         </div>
-                        <small className="text-muted d-block mt-3"> 
+
+                        <small className="text-muted d-block mt-3 mx-3"> 
                             Visit someone's profile and click "Message" to start a conversation 
                         </small>
+
                     </div>
+
                 ) : (
                     chats.map(chat => (
                         <ChatItem
