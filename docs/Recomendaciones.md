@@ -1,11 +1,12 @@
 
-Requisitos para el proyecto
+## Requisitos para el proyecto
 
-[] Registro y logueado
+[] **Registro y logueado**
   No tener botón de Signup por defecto
 
-[] Contraseña
-  pensar en usar bcrypt que genera un salt, se importa de python
+[] **Contraseña**
+
+  Pensar en usar bcrypt que genera un salt, se importa de python (pip install bcrypt) -- <mark>Aunque creo que Werkzeug ya hace esto</mark>
 
     import bcrypt
 
@@ -17,10 +18,3 @@ Requisitos para el proyecto
     LOGIN:
     bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))
 
-[] 
-[] 
-[] 
-[] 
-[] 
-[] 
-[] 
