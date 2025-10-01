@@ -6,5 +6,9 @@
     },
     "[javascriptreact]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
-    }
+    },
+
+    // Python Environments config
+    "python-envs.defaultEnvManager": "ms-python.python:pipenv",
+    "python-envs.pythonProjects": []
 }
