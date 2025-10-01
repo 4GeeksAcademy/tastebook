@@ -9,31 +9,37 @@ import {
 
 
 import { Layout } from "./pages/Layout";
-import { Home } from "./pages/Home";
-import { Single } from "./pages/Single";
-import { Demo } from "./pages/Demo";
-import { AllRecipes } from "./pages/AllRecipes.jsx";
-import { LikedRecipes } from "./pages/LikedRecipes.jsx";
+import { Home }   from "./pages/Home";
 
-
-import { Login } from "./pages/Login";
+import { Login }  from "./pages/Login";
 import { Signup } from "./pages/Signup";
+
+import { ResetPassword }    from "./pages/ResetPassword";
 import { PasswordRecovery } from "./pages/PasswordRecovery";
-import { ResetPassword } from "./pages/ResetPassword";
 
+import { Settings } from "./pages/Settings";
 
-import { Settings }          from "./pages/Settings";
-import { CreateRecipe }      from "./pages/CreateRecipe";
-import { ModifyRecipe }      from "./pages/ModifyRecipe";
-import { Recipe }            from "./pages/Recipe";
-import { Users }             from "./pages/Users";
-import { UserProfile }       from "./pages/UserProfile";
-import { Theme }             from "./pages/Theme";
-import { MyCollections }     from "./pages/MyCollections";
+import { UserProfile } from "./pages/UserProfile";
+import { Users }       from "./pages/Users";
+
+import { AllRecipes }   from "./pages/AllRecipes.jsx";
+import { Recipe }       from "./pages/Recipe";
+import { CreateRecipe } from "./pages/CreateRecipe";
+import { ModifyRecipe } from "./pages/ModifyRecipe";
+
 import { CollectionView }    from "./pages/CollectionView";
 import { PublicCollections } from "./pages/PublicCollections";
-import { Messages } from "./messages";
 
+import { LikedRecipes }  from "./pages/LikedRecipes.jsx";
+import { MyCollections } from "./pages/MyCollections";
+
+import { Messages }      from "./messages";
+
+import { Theme } from "./pages/Theme";
+
+
+import { Single } from "./pages/Single";
+import { Demo }   from "./pages/Demo";
 
 
 export const router = createBrowserRouter(
@@ -47,36 +53,53 @@ export const router = createBrowserRouter(
       // Root Route: All navigation will start from here.
       <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
-        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
 
+        {/* Nested Routes: Defines sub-routes within the Layout component. */}
+
+
+        {/* Home */}
         <Route path= "/" element={<Home />} />
         
+        {/* Auth */}
         <Route path= "/signup" element={<Signup />} />
         <Route path= "/login"  element={<Login />} />
-        <Route path= "/recovery-validation" element={<PasswordRecovery />} />
-        <Route path= "/reset-password/:token" element={<ResetPassword />} />
 
+        {/* Password Recovery */}
+        <Route path= "/recovery-validation"    element={<PasswordRecovery />} />
+        <Route path= "/reset-password/:token"  element={<ResetPassword />} />
+
+        {/* User Private Settings */}
         <Route path= "/settings" element={<Settings />} />
-  
-        <Route path= "/new-recipe" element={<CreateRecipe />} />
-        <Route path= "/recipe/:id" element={<Recipe />} />
-        <Route path= "/recipe/:id/modify" element={<ModifyRecipe />} />
-        <Route path= "/users" element={<Users />} />
-        <Route path= "/user/:username" element={<UserProfile />} />
 
-        <Route path= "/my-collections" element={<MyCollections />} />
-        <Route path= "/collections" element={<PublicCollections />} />
-        <Route path= "/collection/:id" element={<CollectionView />} />
+        {/* Users and User Public Profile */}
+        <Route path= "/users"           element={<Users />} />
+        <Route path= "/user/:username"  element={<UserProfile />} />
 
-        <Route path= "/messages" element={<Messages />} />
-        <Route path= "/messages/:chatId" element={<Messages />} />
+        {/* User Specific Pages  */}
+        <Route path= "/liked-recipes"   element={<LikedRecipes />} />
+        <Route path= "/my-collections"  element={<MyCollections />} />
 
+        {/* Recipes */}
+        <Route path= "/all-recipes"        element={<AllRecipes />} />
+        <Route path= "/new-recipe"         element={<CreateRecipe />} />
+        <Route path= "/recipe/:id"         element={<Recipe />} />
+        <Route path= "/recipe/:id/modify"  element={<ModifyRecipe />} />
+
+        {/* Collections */}
+        <Route path= "/collections"     element={<PublicCollections />} />
+        <Route path= "/collection/:id"  element={<CollectionView />} />
+
+        {/* Messages */}
+        <Route path= "/messages"          element={<Messages />} />
+        <Route path= "/messages/:chatId"  element={<Messages />} />
+
+        {/* Theme */}
         <Route path= "/theme" element={<Theme />} />
- 
+
+
+        {/* Miscellaneous, Testing and Extras*/}
         <Route path= "/demo" element={<Demo />} />
         <Route path= "/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
-        <Route path= "/all-recipes" element={<AllRecipes />} />
-        <Route path= "/liked-recipes" element={<LikedRecipes />} />
 
       </Route>
     )
