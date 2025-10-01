@@ -5,6 +5,7 @@
 ---
 You can find a comprehensive documentation about this boilerplate here:
 https://start.4geeksacademy.com/starters/full-stack
+
 ---
 
 <br>
@@ -66,5 +67,46 @@ To add them in the `.devcontainer/devcontainer.json` file add them to the "exten
 Get the Extension names in their page, look for <kbd>identifier</kbd>
 
 
+<br>
+<br>
+<br>
+<br>
+<br>
+
+---
+
+Websocket transition
+
+Reconnting errors code
 
 
+```
+                        <div className="d-flex align-items-center text-warning">
+                            <AlertCircle size={14} className="me-1" />
+                            <small>Reconnecting...</small>
+                        </div>
+```
+
+
+
+```
+                        <div className="d-flex align-items-center text-warning">
+                            <AlertCircle size={14} className="me-1" />
+                            <small>Reconnecting...</small>
+                        </div>
+                    )}
+```
+
+
+
+Download whole repo from codespace
+
+```
+zip -r tastebook.zip . -x ".git/*" "node_modules/*" "*.log" "*.sqlite*" "*.db" ".DS_Store" "dist/*" "build/*" ".history/*" ".venv/*"
+```
+<mark>IF THIS FOLDERS ARE NOT MARKED, IT WILL DOWNLOAD TOO MANY FILES</mark>
+
+
+```
+
+```
