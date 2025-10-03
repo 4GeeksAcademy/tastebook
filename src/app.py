@@ -74,7 +74,7 @@ Run this in a Python shell to generate a new key:
 
 python3 -c "import secrets; print(secrets.token_hex(32))"
 
-And set it in the .env file as JWT_SECRET_KEY,
+And set it in the ".env" file as JWT_SECRET_KEY,
 or use in your Render dashboard for the JWT_SECRET_KEY
 environment variable instead of using the same one from
 your development environment.
