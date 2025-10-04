@@ -7,7 +7,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"_comment": "Use 'start' to run locally, 'dev' to expose to network  to host",
+		"_comment": "Use 'start' to run locally in host, run 'dev' to expose to network to the host via a DevContainer",
 		"start": "vite",
 		"dev":   "vite --host",
 		"build": "vite build",
