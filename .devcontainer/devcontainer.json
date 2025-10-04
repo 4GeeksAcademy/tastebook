@@ -30,8 +30,7 @@
 		"vscode": {
 			"extensions": [
 				"esbenp.prettier-vscode",
-				"ms-python.autopep8",
-				"pkief.material-icon-theme"
+				"ms-python.autopep8"
 			]
 		}
 	}
