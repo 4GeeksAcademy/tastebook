@@ -157,12 +157,14 @@ export const Signup = () => {
                                 <label htmlFor="fullName" className="form-label">Full Name</label>
                                 <input
                                     id="fullName"
+                                    name="full_name"
                                     type="text"
                                     placeholder=""
                                     className="form-control"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
                                     required
+                                    autoComplete="name"
                                 />
                             </div>
 
@@ -172,6 +174,7 @@ export const Signup = () => {
                                 <label htmlFor="username" className="form-label">Username</label>
                                 <input
                                     id="username"
+                                    name="username"
                                     type="text"
                                     placeholder=""
                                     className="form-control"
@@ -179,6 +182,7 @@ export const Signup = () => {
                                     onChange={(e) => setUsername(e.target.value)}
                                     onBlur={checkUsernameExists}
                                     required
+                                    autoComplete="username"
                                 />
                                 {checkingUsername && (
                                     <div className="text-secondary mt-1" style={{fontSize: "0.95em"}}>Checking username...</div>
@@ -196,6 +200,7 @@ export const Signup = () => {
                                 <label htmlFor="email" className="form-label">Email</label>
                                 <input
                                     id="email"
+                                    name="email"
                                     type="email"
                                     placeholder=""
                                     className="form-control"
@@ -215,12 +220,14 @@ export const Signup = () => {
                                 <label htmlFor="password" className="form-label">Password</label>
                                 <input
                                     id="password"
+                                    name="password"
                                     type={showPass ? "text" : "password"}
                                     className="form-control"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     minLength={8}
+                                    autoComplete="new-password"
                                 />
                             </div>
                             
