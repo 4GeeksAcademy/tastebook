@@ -8,6 +8,9 @@ import { BackendURL } from './components/BackendURL';
 
 const Main = () => {
     
+    // Temporarily log the environment variable for debugging
+    console.log('VITE_BACKEND_URL:', import.meta.env.VITE_BACKEND_URL);
+    
     if(! import.meta.env.VITE_BACKEND_URL ||  import.meta.env.VITE_BACKEND_URL == "") return (
         <React.StrictMode>
               <BackendURL/ >
