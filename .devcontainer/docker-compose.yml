@@ -7,7 +7,9 @@ services:
       dockerfile: .devcontainer/Dockerfile
 
     volumes:
-      - ../..:/workspaces:cached
+        # Changed from "cached" to "consistent" to avoid issues with file change detection in some environments,
+        # specifically, when using Windows as a host and developing in a Docker container in VS Code
+      - ../..:/workspaces:consistent
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
