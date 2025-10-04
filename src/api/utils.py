@@ -32,10 +32,121 @@ def generate_sitemap(app):
 
     links_html = "".join(["<li><a href='" + y + "'>" + y + "</a></li>" for y in links])
     return """
-        <div style="text-align: center;">
-        <img style="max-height: 80px" src='https://storage.googleapis.com/breathecode/boilerplates/rigo-baby.jpeg' />
-        <h1>Rigo welcomes you to your API!!</h1>
-        <p>API HOST: <script>document.write('<input style="padding: 5px; width: 300px" type="text" value="'+window.location.href+'" />');</script></p>
-        <p>Start working on your project by following the <a href="https://start.4geeksacademy.com/starters/full-stack" target="_blank">Quick Start</a></p>
-        <p>Remember to specify a real endpoint path like: </p>
-        <ul style="text-align: left;">"""+links_html+"</ul></div>"
+    <style>
+        body {
+            background-color: black;
+            font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: rgb(255, 255, 255);
+
+        }
+
+        h1 {
+            text-align: center;
+            margin: 10px 30px;
+        }
+
+        a:link {
+            color:rgb(0, 132, 199);
+        }
+
+        a:visited {
+            color:rgb(150, 0, 196);
+        }
+
+        a:active {
+            color:rgb(102, 101, 55);
+        }
+
+        .big-container {
+            /* border: 1px solid rgb(65, 65, 65); */
+            margin: 40px auto 40px;
+            border-radius: 10px;
+            width: 45%;
+            padding: 20px;
+            /* background-color: rgb(34, 34, 34); */
+        }
+
+        .small-container {
+            border: 1px solid black;
+            width: 60%;
+            margin: 20px auto 40px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgb(34, 34, 34);
+        }
+
+        .small-title {
+            padding-top: 5px;
+            margin-bottom: 5px;
+            display: block;
+            font-size: 23px;
+        }
+
+        .method {
+            padding: 3px;
+            border-radius: 5px;
+            color: white;
+            font-family: monospace;
+        }
+
+        .get {
+            background-color: rgb(0, 95, 177);
+        }
+
+        .post {
+            background-color: rgb(0, 117, 23);
+        }
+
+        .delete {
+            background-color: rgb(182, 0, 0);
+        }
+
+        .endpoint {
+            padding: 3px;
+            border-radius: 5px;
+            color: rgb(170, 170, 170); 
+            background-color: rgb(50, 50, 50);
+            font-weight: bold;
+        }
+
+        .code-snippet {
+            background-color: rgb(183, 183, 183);
+            padding: 5px;
+            border-radius: 5px;
+            font-size: smaller;
+        }
+
+    </style>
+    
+    <div class="big-container">
+
+        <h1>TasteBook API with Flask</h1>
+        
+        <div class="small-container">
+
+            <strong class="small-title">API Host path:</strong>
+
+            <p><script>document.write('<input style="padding: 5px;" type="text" value="'+window.location.href+'" />');</script></p>
+
+            
+            <hr>
+
+            
+            <strong class="small-title">Endpoint paths:</strong>
+
+            <p>Click <kbd class="endpoint">/admin</kbd> to go to the Admin panel</p>
+
+            <ul>
+            """ + links_html + """
+            </ul>
+
+            
+            <hr>
+
+            
+            <p style="text-align:center;">Start working on your project by following the <a href="https://start.4geeksacademy.com/starters/full-stack" target="_blank">Quick Start</a></p>
+
+        </div>
+
+    </div>
+    """
