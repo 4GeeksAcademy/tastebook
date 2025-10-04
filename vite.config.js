@@ -18,7 +18,7 @@ export default defineConfig({
             // enable polling only for dev (e.g., in container/host mounts)
             // bind mount inotify issues between Windows/WSL and Linux containers
             usePolling: true, // <-- enable polling so FS changes on host are detected
-            interval: 300     // check every 300ms (adjust if noisy)
+            interval: 800     // check every 300ms (adjust if noisy)
         },
 
         hmr: {
