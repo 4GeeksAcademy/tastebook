@@ -12,14 +12,12 @@ ENV LANGUAGE en_US:en
 # RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
 #    && rm -rf /tmp/pip-tmp
 
-#[Optional] Uncomment this section to install additional OS packages.
+# Install only essential system packages that rarely change
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     # Install postgresql client + locales and generate en_US + es_ES UTF-8 locales
     && apt-get -y install --no-install-recommends postgresql-client locales \
     && sed -i 's/^# \+\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
     && sed -i 's/^# \+\(es_ES.UTF-8 UTF-8\)/\1/' /etc/locale.gen || true \
     && locale-gen en_US.UTF-8 es_ES.UTF-8 \
-    && update-locale LANG=en_US.UTF-8
-
-
-
+    && update-locale LANG=en_US.UTF-8 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*

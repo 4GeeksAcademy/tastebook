@@ -1,17 +1,18 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// For format det  },
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally., see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/postgres
 {
-	"name": "Python 3 & PostgreSQL",
+	"name": "TasteBook Development",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
-	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"workspaceFolder": "/workspaces/tastebook",
 	"features": {
 		"ghcr.io/devcontainers/features/github-cli:1": {
 			"installDirectlyFromGitHubRelease": true,
 			"version": "latest"
 		},
 		"ghcr.io/devcontainers/features/node:1": {
-			"nodeGypDependencies": true,
 			"version": "lts"
 		}
 	},
@@ -21,16 +22,20 @@
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or the host.
-	"forwardPorts": [3000, 3001],
-
-	"onCreateCommand": "(cp .env.example .env || echo \".env creation failed\"); (pipenv install || echo \"pipenv install failed\"); (bash database.sh || echo \"database.sh failed\");",
+	"forwardPorts": [3000, 3001, 5432],
+	
+  	"onCreateCommand": "(cp .env.example .env || echo \".env creation failed\"); (pipenv install || echo \"pipenv install failed\"); (bash database.sh || echo \"database.sh failed\");",
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "git config core.filemode false && git config core.autocrlf input && npm install",
+	"postCreateCommand": "npm install",
+	"postStartCommand": "git config --global core.filemode false && git config --global core.autocrlf input",
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"ms-python.python",
+				"ms-python.pylint",
+				"ms-python.black-formatter",
 				"esbenp.prettier-vscode",
-				"ms-python.autopep8"
+				"ms-vscode.vscode-json"
 			]
 		}
 	}

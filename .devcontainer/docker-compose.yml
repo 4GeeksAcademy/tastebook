@@ -7,9 +7,8 @@ services:
       dockerfile: .devcontainer/Dockerfile
 
     volumes:
-        # Changed from "cached" to "consistent" to avoid issues with file change detection in some environments,
-        # specifically, when using Windows as a host and developing in a Docker container in VS Code
-      - ../..:/workspaces:consistent
+      # Mount the workspace folder to match devcontainer.json workspaceFolder setting
+      - ..:/workspaces/tastebook:consistent
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
@@ -26,8 +25,8 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: gitpod
-      POSTGRES_DB: example
+      POSTGRES_USER: postgres
+      POSTGRES_DB: tastebook
       POSTGRES_PASSWORD: postgres
 
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
