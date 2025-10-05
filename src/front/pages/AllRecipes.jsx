@@ -223,7 +223,7 @@ export const AllRecipes = () => {
 
     if (loading && recipes.length === 0) {
         return (
-            <div className="bg-light min-vh-100 py-5">
+            <div className="min-vh-100 py-5">
                 <div className="container">
                     <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '60vh' }}>
                         <div className="spinner-border text-primary mb-4" style={{ width: '3rem', height: '3rem' }} role="status">

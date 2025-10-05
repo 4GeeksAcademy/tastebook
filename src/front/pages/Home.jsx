@@ -40,20 +40,26 @@ export const Home = () => {
 
 						{/* Hero Section */}
 						<div className="row align-items-center g-4 mb-5">
+
 							<div className="col-lg-6 text-center text-lg-start">
+
 								<h1 className="display-4 fw-bold mb-3">
 									Welcome to <span className="text-primary">Tastebook</span>
 								</h1>
+
 								<p className="lead mb-4">
 									Your place to discover and share delicious recipes.
 								</p>
+
 								<div className="d-flex gap-3 justify-content-center justify-content-lg-start">
 									<Link to="/all-recipes" className="btn btn-primary btn-lg">
 										<i className="fas fa-search me-2"></i>
 										Browse All Recipes
 									</Link>
 								</div>
+
 							</div>
+
 							<div className="col-lg-6 text-center">
 								<img
 									src={food}
@@ -62,7 +68,9 @@ export const Home = () => {
 									style={{ maxWidth: 300 }}
 								/>
 							</div>
+							
 						</div>
+
 
 						{/* Placeholder Cards for Features */}
 						<div className="row row-cols-1 row-cols-md-3 g-4 mt-3">

@@ -1,6 +1,15 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+
 // import './index.css'  // Global styles for your application ... DELETED TO USE THEMES IN DIFFFERENT FOLDER
+
+// Custom theme CSS
+// import './styles/custom-theme.css'
+
+// New imports from npm Bootstrap modules
+import './styles/custom.scss';                       // Custom Bootstrap theme with SCSS variables
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';  // Bootstrap JS components
+
 import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
 import { router } from "./routes";  // Import the router configuration
 import { StoreProvider } from './hooks/useGlobalReducer';  // Import the StoreProvider for global state management
