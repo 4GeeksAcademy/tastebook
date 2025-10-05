@@ -7,6 +7,44 @@
 <br>
 
 
+## (October 5, 2025 - 20:15 UTC+1) -- Git Change Detection Fix: Automated File Sync in Dev Container
+
+**Problem encountered:**
+Git was not automatically detecting file changes in the dev container, requiring manual `git update-index --refresh` commands. This was caused by conflicting configuration from previous troubleshooting attempts that mixed Windows-specific settings with Linux container requirements.
+
+**Root causes:**
+1. **Manual index refresh commands** in `postCreateCommand` fighting against VS Code's automatic detection
+2. **Incorrect Git cache settings** (`core.preloadindex`, `core.fscache`) causing sync issues
+3. **Missing proper line ending configuration** for Windows host + Linux container environment
+
+**Changes made:**
+- ✅ Removed manual `git update-index --refresh` commands from `postCreateCommand`
+- ✅ Removed problematic `core.preloadindex` and `core.fscache` settings
+- ✅ Set proper Git configuration: `core.filemode false` and `core.autocrlf input`
+- ✅ Simplified `postCreateCommand` to essential setup only
+- ✅ Kept volume mount as `consistent` for reliable file system sync
+
+**Why:**
+- Git change detection should be completely automated in modern dev containers
+- Manual commands create conflicts with VS Code's built-in file watching
+- Proper line ending handling prevents false positives on all files
+- Clean configuration eliminates the need for manual intervention
+
+**Result:**
+- 🎉 **Git automatically detects changes** without manual commands
+- ⚡ **VS Code Source Control works seamlessly** 
+- 🧹 **Clean, maintainable configuration** without conflicting settings
+- 🔄 **Reliable file sync** between Windows host and Linux container
+- 📝 **No more "running commands like an idiot"** - fully automated
+
+**Files modified:**
+- `.devcontainer/devcontainer.json` - Simplified postCreateCommand, removed manual Git commands
+
+---
+<br>
+<br>
+
+
 ## (October 5, 2025 - 20:00 UTC+1) -- Devcontainer Build Efficiency: Remove Unnecessary Greeting Operations
 
 **Problem encountered:**

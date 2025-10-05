@@ -25,7 +25,7 @@
 
 	"onCreateCommand": "(cp .env.example .env || echo \".env creation failed\"); (pipenv install || echo \"pipenv install failed\"); (bash database.sh || echo \"database.sh failed\");",
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm install",
+	"postCreateCommand": "git config core.filemode false && git config core.autocrlf input && npm install",
 	"customizations": {
 		"vscode": {
 			"extensions": [
