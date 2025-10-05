@@ -218,3 +218,31 @@ export default defineConfig({
 - `vite.config.js` - Added Sass configuration to suppress dependency warnings
 
 ---
+
+## (October 5, 2025) -- Dev & Build optimizations (non-breaking)
+
+**Changes made:**
+- ✅ Made Vite file-system polling configurable via the `FORCE_POLLING` environment variable while preserving the existing default behavior so current dev containers are unaffected.
+- ✅ Improved the repository build script (`render_build.sh`) to use `npm ci` when `package-lock.json` is present, and to use deterministic `pipenv install --deploy --ignore-pipfile` when `Pipfile.lock` is present. Falls back to the previous commands when lockfiles or tools are missing.
+- ✅ Added a `.dockerignore` to reduce Docker build context size by excluding `node_modules`, `.git`, virtualenvs, build outputs, and local env files.
+
+**Why:**
+- Make CI and remote builds more deterministic and faster by preferring lockfile-driven installs.
+- Reduce unnecessary Docker upload time and disk I/O during builds.
+- Allow polling to be toggled per environment (useful for container mounts on Windows/WSL) without changing default behavior for existing developers.
+
+**Notes / How to opt-in:**
+- To disable polling when starting the dev server, set `FORCE_POLLING=0` in your environment (or `FORCE_POLLING=1` to force it on). Example (bash):
+
+```bash
+FORCE_POLLING=0 npm run dev
+```
+
+**Files modified:**
+- `vite.config.js` — made polling configurable via `FORCE_POLLING`
+- `render_build.sh` — prefer `npm ci` and deterministic pipenv installs when lockfiles exist; preserved fallback behavior
+- `.dockerignore` — reduced Docker build context
+
+**Result:**
+- Faster, more deterministic builds in CI and Render without changing existing developer workflows in the dev container. No breaking changes were introduced.
+

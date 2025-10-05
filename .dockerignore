@@ -1,0 +1,31 @@
+# Added a .dockerignore to reduce Docker build context size by excluding node_modules,
+# .git, virtualenvs, build outputs, and local env files.
+
+
+# Ignore node_modules to avoid sending large dependency tree into Docker build context
+node_modules
+
+# Git metadata and local editor files
+.git
+.vscode
+*.swp
+
+# Python virtualenvs and Pipenv cache
+venv
+venv/
+*.pyc
+__pycache__
+.mypy_cache
+
+# Environment files
+.env
+.env.local
+
+# Build outputs
+dist
+build
+/.cache
+
+# Mac/Windows files
+.DS_Store
+Thumbs.db

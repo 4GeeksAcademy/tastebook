@@ -15,10 +15,17 @@ export default defineConfig({
         port: 3000,
 
         watch: {
-            // enable polling only for dev (e.g., in container/host mounts)
-            // bind mount inotify issues between Windows/WSL and Linux containers
-            usePolling: true, // <-- enable polling so FS changes on host are detected
-            interval: 800     // check every 300ms (adjust if noisy)
+            // Polling can be expensive. Keep the current behavior as the default
+            // (true) to avoid changing any developer workflows. Make it configurable
+            // via the FORCE_POLLING env var so container/host setups can opt-in/out.
+            // Accepted values for FORCE_POLLING: "1", "true", "0", "false".
+            usePolling: (function(){
+                const env = process.env.FORCE_POLLING;
+                if (env === undefined) return true; // preserve current default
+                return env === '1' || env === 'true';
+            })(),
+            // Poll interval (ms) when polling is enabled. Adjust if noisy.
+            interval: 800
         },
 
         hmr: {
