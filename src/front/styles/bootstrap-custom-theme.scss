@@ -794,4 +794,859 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
 // Dark mode
 [data-bs-theme="dark"] {
   .form-range {
-    &::-
+    &::-webkit-slider-runnable-track {
+      background-color: $form-range-track-bg-dark;
+    }
+    
+    &::-moz-range-track {
+      background-color: $form-range-track-bg-dark;
+    }
+    
+    &::-webkit-slider-thumb {
+      background-color: $form-range-thumb-bg-dark;
+      border: 2px solid $form-range-thumb-border-dark;
+    }
+    
+    &::-moz-range-thumb {
+      background-color: $form-range-thumb-bg-dark;
+      border: 2px solid $form-range-thumb-border-dark;
+    }
+    
+    &:focus {
+      &::-webkit-slider-thumb {
+        box-shadow: $form-range-thumb-focus-box-shadow-dark;
+      }
+      
+      &::-moz-range-thumb {
+        box-shadow: $form-range-thumb-focus-box-shadow-dark;
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// BUTTONS - Theme-Specific Button Styles
+// ----------------------------------------------------------------------------
+// Light mode buttons
+[data-bs-theme="light"] {
+  .btn {
+    &:focus {
+      box-shadow: $btn-focus-box-shadow-light;
+    }
+  }
+  
+  // Primary button
+  .btn-primary {
+    background-color: $primary;
+    border-color: $primary;
+    color: #ffffff;
+    
+    &:hover {
+      background-color: darken($primary, 10%);
+      border-color: darken($primary, 10%);
+    }
+    
+    &:active {
+      background-color: darken($primary, 15%);
+      border-color: darken($primary, 15%);
+    }
+  }
+  
+  // Outline buttons
+  .btn-outline-primary {
+    color: $primary;
+    border-color: $primary;
+    
+    &:hover {
+      background-color: $primary;
+      color: #ffffff;
+    }
+  }
+}
+
+// Dark mode buttons
+[data-bs-theme="dark"] {
+  .btn {
+    &:focus {
+      box-shadow: $btn-focus-box-shadow-dark;
+    }
+  }
+  
+  // Primary button
+  .btn-primary {
+    background-color: lighten($primary, 10%);
+    border-color: lighten($primary, 10%);
+    color: #000000;
+    
+    &:hover {
+      background-color: lighten($primary, 15%);
+      border-color: lighten($primary, 15%);
+    }
+    
+    &:active {
+      background-color: lighten($primary, 20%);
+      border-color: lighten($primary, 20%);
+    }
+  }
+  
+  // Outline buttons
+  .btn-outline-primary {
+    color: lighten($primary, 10%);
+    border-color: lighten($primary, 10%);
+    
+    &:hover {
+      background-color: lighten($primary, 10%);
+      color: #000000;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// MODALS - Theme-Specific Modal Styles
+// ----------------------------------------------------------------------------
+// Light mode modals
+[data-bs-theme="light"] {
+  .modal-content {
+    background-color: $modal-content-bg-light;
+    border-color: $modal-content-border-color-light;
+  }
+  
+  .modal-header {
+    border-bottom-color: $modal-header-border-color-light;
+  }
+  
+  .modal-footer {
+    border-top-color: $modal-footer-border-color-light;
+  }
+  
+  .modal-backdrop {
+    opacity: $modal-backdrop-opacity-light;
+  }
+}
+
+// Dark mode modals
+[data-bs-theme="dark"] {
+  .modal-content {
+    background-color: $modal-content-bg-dark;
+    border-color: $modal-content-border-color-dark;
+  }
+  
+  .modal-header {
+    border-bottom-color: $modal-header-border-color-dark;
+  }
+  
+  .modal-footer {
+    border-top-color: $modal-footer-border-color-dark;
+  }
+  
+  .modal-backdrop {
+    opacity: $modal-backdrop-opacity-dark;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// DROPDOWNS - Theme-Specific Dropdown Styles
+// ----------------------------------------------------------------------------
+// Light mode dropdowns
+[data-bs-theme="light"] {
+  .dropdown-menu {
+    background-color: $dropdown-bg-light;
+    border-color: $dropdown-border-color-light;
+  }
+  
+  .dropdown-item {
+    color: $dropdown-link-color-light;
+    
+    &:hover {
+      background-color: $dropdown-link-hover-bg-light;
+    }
+    
+    &.active {
+      background-color: $dropdown-link-active-bg-light;
+      color: $dropdown-link-color-light;
+    }
+  }
+  
+  .dropdown-divider {
+    border-top-color: $border-color-light;
+  }
+}
+
+// Dark mode dropdowns (GitHub-style)
+[data-bs-theme="dark"] {
+  .dropdown-menu {
+    background-color: $dropdown-bg-dark;
+    border-color: $dropdown-border-color-dark;
+  }
+  
+  .dropdown-item {
+    color: $dropdown-link-color-dark;
+    
+    &:hover {
+      background-color: $dropdown-link-hover-bg-dark;
+    }
+    
+    &.active {
+      background-color: $dropdown-link-active-bg-dark;
+      color: $dropdown-link-color-dark;
+    }
+  }
+  
+  .dropdown-divider {
+    border-top-color: $dark-border;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// ALERTS - Theme-Specific Alert Styles
+// ----------------------------------------------------------------------------
+// Light mode alerts
+[data-bs-theme="light"] {
+  .alert-success {
+    background-color: lighten($success, 45%);
+    border-color: $success-border-light;
+    color: darken($success, 20%);
+  }
+  
+  .alert-info {
+    background-color: lighten($info, 35%);
+    border-color: $info-border-light;
+    color: darken($info, 20%);
+  }
+  
+  .alert-warning {
+    background-color: lighten($warning, 35%);
+    border-color: $warning-border-light;
+    color: darken($warning, 30%);
+  }
+  
+  .alert-danger {
+    background-color: lighten($danger, 35%);
+    border-color: $danger-border-light;
+    color: darken($danger, 20%);
+  }
+}
+
+// Dark mode alerts
+[data-bs-theme="dark"] {
+  .alert-success {
+    background-color: rgba($success, 0.15);
+    border-color: $success-border-dark;
+    color: lighten($success, 20%);
+  }
+  
+  .alert-info {
+    background-color: rgba($info, 0.15);
+    border-color: $info-border-dark;
+    color: lighten($info, 20%);
+  }
+  
+  .alert-warning {
+    background-color: rgba($warning, 0.15);
+    border-color: $warning-border-dark;
+    color: lighten($warning, 20%);
+  }
+  
+  .alert-danger {
+    background-color: rgba($danger, 0.15);
+    border-color: $danger-border-dark;
+    color: lighten($danger, 20%);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// BADGES - Theme-Specific Badge Styles
+// ----------------------------------------------------------------------------
+// Badges work well with default Bootstrap styles, but you can customize here
+[data-bs-theme="light"] {
+  .badge {
+    // Light mode badges use default Bootstrap behavior
+  }
+}
+
+[data-bs-theme="dark"] {
+  .badge {
+    // Dark mode - lighten badge colors for better visibility
+    &.bg-primary {
+      background-color: lighten($primary, 10%) !important;
+    }
+    
+    &.bg-secondary {
+      background-color: lighten($secondary, 10%) !important;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// BREADCRUMB - Theme-Specific Breadcrumb Styles
+// ----------------------------------------------------------------------------
+// Light mode breadcrumb
+[data-bs-theme="light"] {
+  .breadcrumb-item {
+    color: $breadcrumb-divider-color-light;
+    
+    &.active {
+      color: $breadcrumb-active-color-light;
+    }
+    
+    + .breadcrumb-item::before {
+      color: $breadcrumb-divider-color-light;
+    }
+  }
+}
+
+// Dark mode breadcrumb
+[data-bs-theme="dark"] {
+  .breadcrumb-item {
+    color: $breadcrumb-divider-color-dark;
+    
+    &.active {
+      color: $breadcrumb-active-color-dark;
+    }
+    
+    + .breadcrumb-item::before {
+      color: $breadcrumb-divider-color-dark;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// PAGINATION - Theme-Specific Pagination Styles
+// ----------------------------------------------------------------------------
+// Light mode pagination
+[data-bs-theme="light"] {
+  .page-link {
+    background-color: $pagination-bg-light;
+    border-color: $pagination-border-color-light;
+    color: $body-color-light;
+    
+    &:hover {
+      background-color: $pagination-hover-bg-light;
+    }
+  }
+  
+  .page-item.active .page-link {
+    background-color: $pagination-active-bg-light;
+    border-color: $pagination-active-border-color-light;
+  }
+  
+  .page-item.disabled .page-link {
+    background-color: $pagination-disabled-bg-light;
+    border-color: $pagination-disabled-border-color-light;
+  }
+}
+
+// Dark mode pagination
+[data-bs-theme="dark"] {
+  .page-link {
+    background-color: $pagination-bg-dark;
+    border-color: $pagination-border-color-dark;
+    color: $body-color-dark;
+    
+    &:hover {
+      background-color: $pagination-hover-bg-dark;
+    }
+  }
+  
+  .page-item.active .page-link {
+    background-color: $pagination-active-bg-dark;
+    border-color: $pagination-active-border-color-dark;
+  }
+  
+  .page-item.disabled .page-link {
+    background-color: $pagination-disabled-bg-dark;
+    border-color: $pagination-disabled-border-color-dark;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// LIST GROUP - Theme-Specific List Group Styles
+// ----------------------------------------------------------------------------
+// Light mode list group
+[data-bs-theme="light"] {
+  .list-group-item {
+    background-color: $list-group-bg-light;
+    border-color: $list-group-border-color-light;
+    
+    &:hover {
+      background-color: $list-group-hover-bg-light;
+    }
+    
+    &.active {
+      background-color: $list-group-active-bg-light;
+      border-color: $list-group-active-border-color-light;
+    }
+  }
+}
+
+// Dark mode list group
+[data-bs-theme="dark"] {
+  .list-group-item {
+    background-color: $list-group-bg-dark;
+    border-color: $list-group-border-color-dark;
+    color: $body-color-dark;
+    
+    &:hover {
+      background-color: $list-group-hover-bg-dark;
+    }
+    
+    &.active {
+      background-color: $list-group-active-bg-dark;
+      border-color: $list-group-active-border-color-dark;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// PROGRESS BARS - Theme-Specific Progress Styles
+// ----------------------------------------------------------------------------
+// Light mode progress
+[data-bs-theme="light"] {
+  .progress {
+    background-color: $progress-bg-light;
+  }
+  
+  .progress-bar {
+    background-color: $progress-bar-bg-light;
+  }
+}
+
+// Dark mode progress
+[data-bs-theme="dark"] {
+  .progress {
+    background-color: $progress-bg-dark;
+  }
+  
+  .progress-bar {
+    background-color: $progress-bar-bg-dark;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// TOASTS - Theme-Specific Toast Styles
+// ----------------------------------------------------------------------------
+// Light mode toasts
+[data-bs-theme="light"] {
+  .toast {
+    background-color: $toast-bg-light;
+    border-color: $toast-border-color-light;
+  }
+  
+  .toast-header {
+    background-color: $toast-header-bg-light;
+    border-bottom-color: $toast-border-color-light;
+  }
+}
+
+// Dark mode toasts
+[data-bs-theme="dark"] {
+  .toast {
+    background-color: $toast-bg-dark;
+    border-color: $toast-border-color-dark;
+    color: $body-color-dark;
+  }
+  
+  .toast-header {
+    background-color: $toast-header-bg-dark;
+    border-bottom-color: $toast-border-color-dark;
+    color: $body-color-dark;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// TOOLTIPS - Theme-Specific Tooltip Styles
+// ----------------------------------------------------------------------------
+// Light mode tooltips
+[data-bs-theme="light"] {
+  .tooltip {
+    .tooltip-inner {
+      background-color: $tooltip-bg-light;
+      color: $tooltip-color-light;
+    }
+    
+    .tooltip-arrow::before {
+      border-top-color: $tooltip-bg-light;
+    }
+  }
+}
+
+// Dark mode tooltips
+[data-bs-theme="dark"] {
+  .tooltip {
+    .tooltip-inner {
+      background-color: $tooltip-bg-dark;
+      color: $tooltip-color-dark;
+    }
+    
+    .tooltip-arrow::before {
+      border-top-color: $tooltip-bg-dark;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// POPOVERS - Theme-Specific Popover Styles
+// ----------------------------------------------------------------------------
+// Light mode popovers
+[data-bs-theme="light"] {
+  .popover {
+    background-color: $popover-bg-light;
+    border-color: $popover-border-color-light;
+  }
+  
+  .popover-header {
+    background-color: $popover-header-bg-light;
+    border-bottom-color: $popover-border-color-light;
+  }
+}
+
+// Dark mode popovers
+[data-bs-theme="dark"] {
+  .popover {
+    background-color: $popover-bg-dark;
+    border-color: $popover-border-color-dark;
+  }
+  
+  .popover-header {
+    background-color: $popover-header-bg-dark;
+    border-bottom-color: $popover-border-color-dark;
+    color: $body-color-dark;
+  }
+  
+  .popover-body {
+    color: $body-color-dark;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// OFFCANVAS - Theme-Specific Offcanvas Styles
+// ----------------------------------------------------------------------------
+// Light mode offcanvas
+[data-bs-theme="light"] {
+  .offcanvas {
+    background-color: $offcanvas-bg-light;
+    border-color: $offcanvas-border-color-light;
+  }
+  
+  .offcanvas-backdrop {
+    opacity: $offcanvas-backdrop-opacity-light;
+  }
+}
+
+// Dark mode offcanvas
+[data-bs-theme="dark"] {
+  .offcanvas {
+    background-color: $offcanvas-bg-dark;
+    border-color: $offcanvas-border-color-dark;
+    color: $body-color-dark;
+  }
+  
+  .offcanvas-backdrop {
+    opacity: $offcanvas-backdrop-opacity-dark;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// ACCORDION - Theme-Specific Accordion Styles
+// ----------------------------------------------------------------------------
+// Light mode accordion
+[data-bs-theme="light"] {
+  .accordion-item {
+    background-color: $accordion-bg-light;
+    border-color: $accordion-border-color-light;
+  }
+  
+  .accordion-button {
+    background-color: $accordion-button-bg-light;
+    color: $body-color-light;
+    
+    &:not(.collapsed) {
+      background-color: $accordion-button-active-bg-light;
+      color: $body-color-light;
+    }
+  }
+}
+
+// Dark mode accordion
+[data-bs-theme="dark"] {
+  .accordion-item {
+    background-color: $accordion-bg-dark;
+    border-color: $accordion-border-color-dark;
+  }
+  
+  .accordion-button {
+    background-color: $accordion-button-bg-dark;
+    color: $body-color-dark;
+    
+    &:not(.collapsed) {
+      background-color: $accordion-button-active-bg-dark;
+      color: $body-color-dark;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// TABLES - Theme-Specific Table Styles
+// ----------------------------------------------------------------------------
+// Light mode tables
+[data-bs-theme="light"] {
+  .table {
+    color: $body-color-light;
+    border-color: $table-border-color-light;
+  }
+  
+  .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: $table-striped-bg-light;
+  }
+  
+  .table-hover > tbody > tr:hover > * {
+    background-color: $table-hover-bg-light;
+  }
+}
+
+// Dark mode tables
+[data-bs-theme="dark"] {
+  .table {
+    color: $body-color-dark;
+    border-color: $table-border-color-dark;
+  }
+  
+  .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: $table-striped-bg-dark;
+  }
+  
+  .table-hover > tbody > tr:hover > * {
+    background-color: $table-hover-bg-dark;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// SPINNERS - Theme-Specific Spinner Styles
+// ----------------------------------------------------------------------------
+// Light mode spinners
+[data-bs-theme="light"] {
+  .spinner-border {
+    border-color: $spinner-border-color-light;
+    border-right-color: $spinner-border-active-color-light;
+  }
+  
+  .spinner-grow {
+    background-color: $spinner-border-active-color-light;
+  }
+}
+
+// Dark mode spinners
+[data-bs-theme="dark"] {
+  .spinner-border {
+    border-color: $spinner-border-color-dark;
+    border-right-color: $spinner-border-active-color-dark;
+  }
+  
+  .spinner-grow {
+    background-color: $spinner-border-active-color-dark;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// NAVS & TABS - Theme-Specific Navigation Styles
+// ----------------------------------------------------------------------------
+// Light mode navs and tabs
+[data-bs-theme="light"] {
+  .nav-tabs {
+    border-bottom-color: $border-color-light;
+    
+    .nav-link {
+      color: $body-color-light;
+      
+      &:hover {
+        border-color: $border-color-light $border-color-light $border-color-light;
+      }
+      
+      &.active {
+        background-color: $body-bg-light;
+        border-color: $border-color-light $border-color-light $body-bg-light;
+      }
+    }
+  }
+  
+  .nav-pills {
+    .nav-link {
+      color: $body-color-light;
+      
+      &.active {
+        background-color: $primary;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+// Dark mode navs and tabs
+[data-bs-theme="dark"] {
+  .nav-tabs {
+    border-bottom-color: $dark-border;
+    
+    .nav-link {
+      color: $body-color-dark;
+      
+      &:hover {
+        border-color: $dark-border $dark-border $dark-border;
+      }
+      
+      &.active {
+        background-color: $body-bg-dark;
+        border-color: $dark-border $dark-border $body-bg-dark;
+        color: $body-color-dark;
+      }
+    }
+  }
+  
+  .nav-pills {
+    .nav-link {
+      color: $body-color-dark;
+      
+      &.active {
+        background-color: lighten($primary, 10%);
+        color: #000000;
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// CLOSE BUTTON - Theme-Specific Close Button Styles
+// ----------------------------------------------------------------------------
+// Light mode close button
+[data-bs-theme="light"] {
+  .btn-close {
+    filter: invert(0);
+    opacity: 0.5;
+    
+    &:hover {
+      opacity: 0.75;
+    }
+  }
+}
+
+// Dark mode close button
+[data-bs-theme="dark"] {
+  .btn-close {
+    filter: invert(1);
+    opacity: 0.5;
+    
+    &:hover {
+      opacity: 0.75;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// CAROUSEL - Theme-Specific Carousel Styles
+// ----------------------------------------------------------------------------
+// Light mode carousel
+[data-bs-theme="light"] {
+  .carousel-indicators [data-bs-target] {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+  
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    filter: invert(0);
+  }
+}
+
+// Dark mode carousel
+[data-bs-theme="dark"] {
+  .carousel-indicators [data-bs-target] {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    filter: invert(1);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// PLACEHOLDERS - Theme-Specific Placeholder Styles
+// ----------------------------------------------------------------------------
+// Light mode placeholders
+[data-bs-theme="light"] {
+  .placeholder {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Dark mode placeholders
+[data-bs-theme="dark"] {
+  .placeholder {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// ============================================================================
+// 4. ADDITIONAL CUSTOM UTILITIES
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// CUSTOM SCROLLBAR - Optional Scrollbar Styling
+// ----------------------------------------------------------------------------
+// Uncomment below to enable custom scrollbar styling
+
+// Light mode scrollbar
+// [data-bs-theme="light"] {
+//   ::-webkit-scrollbar {
+//     width: 12px;
+//     height: 12px;
+//   }
+//   
+//   ::-webkit-scrollbar-track {
+//     background: $beige-100;
+//   }
+//   
+//   ::-webkit-scrollbar-thumb {
+//     background: $beige-400;
+//     border-radius: $border-radius;
+//     
+//     &:hover {
+//       background: $beige-500;
+//     }
+//   }
+// }
+
+// Dark mode scrollbar
+// [data-bs-theme="dark"] {
+//   ::-webkit-scrollbar {
+//     width: 12px;
+//     height: 12px;
+//   }
+//   
+//   ::-webkit-scrollbar-track {
+//     background: $body-bg-dark;
+//   }
+//   
+//   ::-webkit-scrollbar-thumb {
+//     background: $dark-component-bg-lighter;
+//     border-radius: $border-radius;
+//     
+//     &:hover {
+//       background: lighten($dark-component-bg-lighter, 10%);
+//     }
+//   }
+// }
+
+// ============================================================================
+// END OF CUSTOM BOOTSTRAP THEME
+// ============================================================================
+// You can now use this file in your React Vite project by importing it in your
+// main SCSS file or directly in your main.jsx/tsx file.
+// 
+// Usage example in main.jsx:
+// import './styles/custom-bootstrap.scss';
+//
+// To switch between themes, use the data-bs-theme attribute:
+// <html data-bs-theme="light"> or <html data-bs-theme="dark">
+// 
+// You can toggle this dynamically with JavaScript:
+// document.documentElement.setAttribute('data-bs-theme', 'dark');
+// ============================================================================
