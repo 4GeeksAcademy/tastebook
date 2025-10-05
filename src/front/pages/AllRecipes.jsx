@@ -146,7 +146,7 @@ export const AllRecipes = () => {
                                 }}
                             />
                         ) : (
-                            <div className="bg-light w-100 h-100 d-flex align-items-center justify-content-center border-bottom">
+                            <div className="w-100 h-100 d-flex align-items-center justify-content-center border-bottom">
                                 <Utensils size={48} className="text-muted" />
                             </div>
                         )}
@@ -238,7 +238,7 @@ export const AllRecipes = () => {
     }
 
     return (
-        <div className="bg-light min-vh-100 py-4">
+        <div className="min-vh-100 py-4">
             <div className="container">
                 {/* Header Section */}
                 <div className="text-center mb-5">
@@ -260,11 +260,11 @@ export const AllRecipes = () => {
                 </div>
 
                 {/* Search and Filters */}
-                <div className="bg-light border rounded-3 p-4 mb-4 shadow-sm">
+                <div className="border rounded-3 p-4 mb-4 shadow-sm">
                     <div className="mb-4">
                         <form onSubmit={handleSearch} className="mx-auto" style={{ maxWidth: '600px' }}>
                             <div className="input-group input-group-lg shadow-sm">
-                                <span className="input-group-text bg-white border-end-0">
+                                <span className="input-group-text border-end-0">
                                     <Search size={20} className="text-muted" />
                                 </span>
                                 <input

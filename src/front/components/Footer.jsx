@@ -2,13 +2,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Twitter, Github, Mail, Palette, Settings } from "lucide-react";
 import MiniThemeSelector from "./MiniThemeSelector";
+import ThemeToggle from "./ThemeToggle";
 
 export const Footer = () => {
 
 	const year = new Date().getFullYear();
 
 	return (
-		<footer className="bg-light border-top mt-auto" style={{paddingTop: "0.5rem", paddingBottom: "0.5rem"}}>
+		<footer className="border-top mt-auto" style={{paddingTop: "0.5rem", paddingBottom: "0.5rem"}}>
 			<div className="container py-2">
 				{/* Brand */}
 				<div className="row gy-1 align-items-center">
@@ -49,8 +50,15 @@ export const Footer = () => {
 							</div>
 						</div>
 
+						<Link to="/theme" className="text-muted" title="Theme settings">
+							<Settings size={16} strokeWidth={2} />
+						</Link>
 
-						<a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-muted me-2">
+						{/* Theme Toggle */}
+						<ThemeToggle />
+
+
+						<a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-muted ms-4 me-2">
 							<Twitter size={16} strokeWidth={2} />
 						</a>
 
@@ -63,19 +71,20 @@ export const Footer = () => {
 						<a href="mailto:contact@yourapp.com" className="text-muted">
 							<Mail size={16} strokeWidth={2} />
 						</a>
+
 					</div>
 				</div>
 
-				{/* <hr style={{margin: "0.5rem 0"}} /> */}
+				<hr style={{margin: "0.5rem 0"}} />
 
 				{/* Legal */}
-				{/* <div className="d-flex justify-content-between flex-column flex-sm-row" style={{gap: "0.5rem"}}>
+				<div className="d-flex justify-content-between flex-column flex-sm-row" style={{gap: "0.5rem"}}>
 					<small className="text-muted" style={{fontSize: "0.85rem"}}>© {year} Tastebook. All rights reserved.</small>
 					<div>
 						<Link to="/terms" className="text-muted me-2" style={{fontSize: "0.85rem"}}>Terms</Link>
 						<Link to="/privacy" className="text-muted" style={{fontSize: "0.85rem"}}>Privacy</Link>
 					</div>
-				</div> */}
+				</div>
 
 			</div>
 		</footer>

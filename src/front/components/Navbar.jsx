@@ -3,22 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChefHat, Moon, Sun, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 
+import ThemeToggle from "./ThemeToggle"; //Imported for final CSS styling implementation
+
 
 export const Navbar = () => {
 	const navigate = useNavigate();
 	const token = localStorage.getItem("token");
-	const [darkMode, setDarkMode] = useState(false);
 	const [userData, setUserData] = useState(null);
 	const [unreadCount, setUnreadCount] = useState(0);
-
-	useEffect(() => {
-		// Check if user has a dark mode preference saved
-		const isDark = localStorage.getItem("darkMode") === "true";
-		setDarkMode(isDark);
-		if (isDark) {
-			document.documentElement.classList.add("dark-mode");
-		}
-	}, []);
 
 	useEffect(() => {
 		// Fetch user data if logged in
@@ -125,13 +117,6 @@ export const Navbar = () => {
 		};
 	}, [token]);
 
-	const toggleDarkMode = () => {
-		const newDarkMode = !darkMode;
-		setDarkMode(newDarkMode);
-		localStorage.setItem("darkMode", newDarkMode);
-		document.documentElement.classList.toggle("dark-mode");
-	};
-
 	const handleLogout = () => {
 		if (localStorage.getItem("token")) {
 			localStorage.removeItem("token");
@@ -152,7 +137,7 @@ export const Navbar = () => {
 
 	
 	return (
-		<nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+		<nav className="navbar navbar-expand-lg shadow-sm">
 			<div className="container">
 
 				{/* Logo and Name */}
@@ -187,20 +172,12 @@ export const Navbar = () => {
 					<span className="navbar-toggler-icon"></span>
 				</button>
 
-
+				{/* Collapsible content */}
 				<div className="collapse navbar-collapse" id="navbarContent">
 					<div className="ms-auto d-flex gap-2 align-items-center flex-lg-row flex-column text-center">
-						<button
-							onClick={toggleDarkMode}
-							className="btn btn-link text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto"
-							aria-label="Toggle dark mode"
-						>
-							{darkMode ? (
-								<Sun size={20} className="text-warning" />
-							) : (
-								<Moon size={20} className="text-primary" />
-							)}
-						</button>
+						
+						{/* Bootstrap Dark Mode Toggle */}
+						<ThemeToggle />
 
 						{!token ? (
 
