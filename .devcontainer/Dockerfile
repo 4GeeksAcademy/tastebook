@@ -19,7 +19,10 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && sed -i 's/^# \+\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
     && sed -i 's/^# \+\(es_ES.UTF-8 UTF-8\)/\1/' /etc/locale.gen || true \
     && locale-gen en_US.UTF-8 es_ES.UTF-8 \
-    && update-locale LANG=en_US.UTF-8
+    && update-locale LANG=en_US.UTF-8 \
+    # Ensure Codespaces/devcontainer shared folder exists and is writable by the default non-root user
+    && mkdir -p /workspaces/.codespaces/shared \
+    && chown -R vscode:vscode /workspaces/.codespaces || true
 
 
 

@@ -1,6 +1,20 @@
 # Changelog
 
->Add new changes at the top of the file
+>Add new changes at the top of the file, just below this line.
+
+---
+<br>
+<br>
+
+
+## (October 5, 2025) -- Devcontainer: ensure shared folder for first-run notice
+
+**What I changed:**
+- Added an idempotent `mkdir -p /workspaces/.codespaces/shared` and `chown -R vscode:vscode /workspaces/.codespaces` to `.devcontainer/Dockerfile`.
+
+**Why / result:**
+- Prevents the postCreateCommand failing when it redirects the greeting output into `/workspaces/.codespaces/shared/first-run-notice.txt` by ensuring the directory exists and is writable in the image.
+
 
 ---
 <br>
