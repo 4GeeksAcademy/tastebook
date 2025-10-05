@@ -5,6 +5,9 @@
 // This file allows full control over light and dark mode using data-bs-theme
 // ============================================================================
 
+// Import Sass color module for modern color functions
+@use "sass:color";
+
 // ============================================================================
 // 1. VARIABLE OVERRIDES (Before Bootstrap Import)
 // ============================================================================
@@ -112,7 +115,7 @@ $input-bg-dark: #1a1a1a;
 $input-border-color-dark: #2d2d2d;
 $input-color-dark: #e8e8e8;
 $input-placeholder-color-dark: rgba(232, 232, 232, 0.5);
-$input-focus-border-color-dark: lighten($beige-500, 15%);
+$input-focus-border-color-dark: color.adjust($beige-500, $lightness: 15%);
 $input-focus-bg-dark: #242424;
 
 // Focus ring/shadow
@@ -133,22 +136,22 @@ $text-selection-bg-dark: rgba($beige-500, 0.4);
 // FORM VALIDATION - Success, Warning, Danger States
 // ----------------------------------------------------------------------------
 // Valid (success) state
-$form-valid-color-light: darken($success, 10%);
-$form-valid-color-dark: lighten($success, 10%);
+$form-valid-color-light: color.adjust($success, $lightness: -10%);
+$form-valid-color-dark: color.adjust($success, $lightness: 10%);
 $form-valid-border-color-light: $success;
-$form-valid-border-color-dark: lighten($success, 5%);
+$form-valid-border-color-dark: color.adjust($success, $lightness: 5%);
 
 // Invalid (danger) state
-$form-invalid-color-light: darken($danger, 10%);
-$form-invalid-color-dark: lighten($danger, 10%);
+$form-invalid-color-light: color.adjust($danger, $lightness: -10%);
+$form-invalid-color-dark: color.adjust($danger, $lightness: 10%);
 $form-invalid-border-color-light: $danger;
-$form-invalid-border-color-dark: lighten($danger, 5%);
+$form-invalid-border-color-dark: color.adjust($danger, $lightness: 5%);
 
 // Warning state
-$form-warning-color-light: darken($warning, 15%);
-$form-warning-color-dark: lighten($warning, 5%);
+$form-warning-color-light: color.adjust($warning, $lightness: -15%);
+$form-warning-color-dark: color.adjust($warning, $lightness: 5%);
 $form-warning-border-color-light: $warning;
-$form-warning-border-color-dark: lighten($warning, 5%);
+$form-warning-border-color-dark: color.adjust($warning, $lightness: 5%);
 
 // ----------------------------------------------------------------------------
 // CHECKBOXES, RADIOS, SWITCHES
@@ -159,15 +162,15 @@ $form-check-input-border-light: rgba(0, 0, 0, 0.25);
 $form-check-input-border-dark: #2d2d2d;
 
 $form-check-input-checked-bg-light: $beige-500;
-$form-check-input-checked-bg-dark: lighten($beige-500, 10%);
+$form-check-input-checked-bg-dark: color.adjust($beige-500, $lightness: 10%);
 $form-check-input-checked-border-light: $beige-500;
-$form-check-input-checked-border-dark: lighten($beige-500, 10%);
+$form-check-input-checked-border-dark: color.adjust($beige-500, $lightness: 10%);
 
 // Switch specific
 $form-switch-bg-light: rgba(0, 0, 0, 0.15);
 $form-switch-bg-dark: #2d2d2d;
 $form-switch-checked-bg-light: $beige-500;
-$form-switch-checked-bg-dark: lighten($beige-500, 10%);
+$form-switch-checked-bg-dark: color.adjust($beige-500, $lightness: 10%);
 
 // ----------------------------------------------------------------------------
 // RANGE SLIDERS
@@ -175,7 +178,7 @@ $form-switch-checked-bg-dark: lighten($beige-500, 10%);
 $form-range-track-bg-light: rgba(0, 0, 0, 0.1);
 $form-range-track-bg-dark: #2d2d2d;
 $form-range-thumb-bg-light: $beige-500;
-$form-range-thumb-bg-dark: lighten($beige-500, 10%);
+$form-range-thumb-bg-dark: color.adjust($beige-500, $lightness: 10%);
 $form-range-thumb-border-light: transparent;
 $form-range-thumb-border-dark: transparent;
 $form-range-thumb-focus-box-shadow-light: 0 0 0 0.25rem rgba($beige-500, 0.25);
@@ -313,8 +316,8 @@ $pagination-disabled-border-color-light: $border-color-light;
 $pagination-bg-dark: $dark-component-bg;
 $pagination-border-color-dark: $dark-border;
 $pagination-hover-bg-dark: $dark-component-bg-lighter;
-$pagination-active-bg-dark: lighten($beige-500, 10%);
-$pagination-active-border-color-dark: lighten($beige-500, 10%);
+$pagination-active-bg-dark: color.adjust($beige-500, $lightness: 10%);
+$pagination-active-border-color-dark: color.adjust($beige-500, $lightness: 10%);
 $pagination-disabled-bg-dark: #0d0d0d;
 $pagination-disabled-border-color-dark: $dark-border;
 
@@ -332,8 +335,8 @@ $list-group-active-border-color-light: $beige-500;
 $list-group-bg-dark: $dark-component-bg;
 $list-group-border-color-dark: $dark-border;
 $list-group-hover-bg-dark: $dark-component-bg-lighter;
-$list-group-active-bg-dark: lighten($beige-500, 10%);
-$list-group-active-border-color-dark: lighten($beige-500, 10%);
+$list-group-active-bg-dark: color.adjust($beige-500, $lightness: 10%);
+$list-group-active-border-color-dark: color.adjust($beige-500, $lightness: 10%);
 
 // ----------------------------------------------------------------------------
 // PROGRESS BARS - Progress Component
@@ -347,7 +350,7 @@ $progress-bar-bg-light: $beige-500;
 
 // Dark mode
 $progress-bg-dark: #2d2d2d;
-$progress-bar-bg-dark: lighten($beige-500, 10%);
+$progress-bar-bg-dark: color.adjust($beige-500, $lightness: 10%);
 
 // ----------------------------------------------------------------------------
 // TOASTS - Toast Notifications
@@ -430,13 +433,15 @@ $table-border-color-dark: $dark-border;
 // ----------------------------------------------------------------------------
 $spinner-border-color-light: rgba($beige-500, 0.25);
 $spinner-border-active-color-light: $beige-500;
-$spinner-border-color-dark: rgba(lighten($beige-500, 10%), 0.25);
-$spinner-border-active-color-dark: lighten($beige-500, 10%);
+$spinner-border-color-dark: rgba(color.adjust($beige-500, $lightness: 10%), 0.25);
+$spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
 
 // ============================================================================
-// 2. IMPORT BOOTSTRAP
+// 2. IMPORT BOOTSTRAP  
 // ============================================================================
 // Import Bootstrap SCSS after variable overrides
+// Note: We still use @import here because Bootstrap's SCSS structure requires it
+// for proper variable override functionality. Bootstrap will migrate to @use in future versions.
 @import "bootstrap/scss/bootstrap";
 
 // ============================================================================
@@ -670,7 +675,7 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
     
     &:focus {
       border-color: $form-valid-border-color-dark;
-      box-shadow: 0 0 0 0.25rem rgba(lighten($success, 10%), 0.25);
+      box-shadow: 0 0 0 0.25rem rgba(color.adjust($success, $lightness: 10%), 0.25);
     }
   }
   
@@ -680,7 +685,7 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
     
     &:focus {
       border-color: $form-invalid-border-color-dark;
-      box-shadow: 0 0 0 0.25rem rgba(lighten($danger, 10%), 0.25);
+      box-shadow: 0 0 0 0.25rem rgba(color.adjust($danger, $lightness: 10%), 0.25);
     }
   }
   
@@ -725,7 +730,7 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
     }
     
     &:focus {
-      box-shadow: 0 0 0 0.25rem rgba(lighten($beige-500, 10%), 0.25);
+      box-shadow: 0 0 0 0.25rem rgba(color.adjust($beige-500, $lightness: 10%), 0.25);
     }
   }
 }
@@ -842,13 +847,13 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
     color: #ffffff;
     
     &:hover {
-      background-color: darken($primary, 10%);
-      border-color: darken($primary, 10%);
+      background-color: color.adjust($primary, $lightness: -10%);
+      border-color: color.adjust($primary, $lightness: -10%);
     }
     
     &:active {
-      background-color: darken($primary, 15%);
-      border-color: darken($primary, 15%);
+      background-color: color.adjust($primary, $lightness: -15%);
+      border-color: color.adjust($primary, $lightness: -15%);
     }
   }
   
@@ -874,28 +879,28 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
   
   // Primary button
   .btn-primary {
-    background-color: lighten($primary, 10%);
-    border-color: lighten($primary, 10%);
+    background-color: color.adjust($primary, $lightness: 10%);
+    border-color: color.adjust($primary, $lightness: 10%);
     color: #000000;
     
     &:hover {
-      background-color: lighten($primary, 15%);
-      border-color: lighten($primary, 15%);
+      background-color: color.adjust($primary, $lightness: 15%);
+      border-color: color.adjust($primary, $lightness: 15%);
     }
     
     &:active {
-      background-color: lighten($primary, 20%);
-      border-color: lighten($primary, 20%);
+      background-color: color.adjust($primary, $lightness: 20%);
+      border-color: color.adjust($primary, $lightness: 20%);
     }
   }
   
   // Outline buttons
   .btn-outline-primary {
-    color: lighten($primary, 10%);
-    border-color: lighten($primary, 10%);
+    color: color.adjust($primary, $lightness: 10%);
+    border-color: color.adjust($primary, $lightness: 10%);
     
     &:hover {
-      background-color: lighten($primary, 10%);
+      background-color: color.adjust($primary, $lightness: 10%);
       color: #000000;
     }
   }
@@ -1003,27 +1008,27 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
 // Light mode alerts
 [data-bs-theme="light"] {
   .alert-success {
-    background-color: lighten($success, 45%);
+    background-color: color.adjust($success, $lightness: 45%);
     border-color: $success-border-light;
-    color: darken($success, 20%);
+    color: color.adjust($success, $lightness: -20%);
   }
   
   .alert-info {
-    background-color: lighten($info, 35%);
+    background-color: color.adjust($info, $lightness: 35%);
     border-color: $info-border-light;
-    color: darken($info, 20%);
+    color: color.adjust($info, $lightness: -20%);
   }
   
   .alert-warning {
-    background-color: lighten($warning, 35%);
+    background-color: color.adjust($warning, $lightness: 35%);
     border-color: $warning-border-light;
-    color: darken($warning, 30%);
+    color: color.adjust($warning, $lightness: -30%);
   }
   
   .alert-danger {
-    background-color: lighten($danger, 35%);
+    background-color: color.adjust($danger, $lightness: 35%);
     border-color: $danger-border-light;
-    color: darken($danger, 20%);
+    color: color.adjust($danger, $lightness: -20%);
   }
 }
 
@@ -1032,47 +1037,40 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
   .alert-success {
     background-color: rgba($success, 0.15);
     border-color: $success-border-dark;
-    color: lighten($success, 20%);
+    color: color.adjust($success, $lightness: 20%);
   }
   
   .alert-info {
     background-color: rgba($info, 0.15);
     border-color: $info-border-dark;
-    color: lighten($info, 20%);
+    color: color.adjust($info, $lightness: 20%);
   }
   
   .alert-warning {
     background-color: rgba($warning, 0.15);
     border-color: $warning-border-dark;
-    color: lighten($warning, 20%);
+    color: color.adjust($warning, $lightness: 20%);
   }
   
   .alert-danger {
     background-color: rgba($danger, 0.15);
     border-color: $danger-border-dark;
-    color: lighten($danger, 20%);
+    color: color.adjust($danger, $lightness: 20%);
   }
 }
 
 // ----------------------------------------------------------------------------
 // BADGES - Theme-Specific Badge Styles
 // ----------------------------------------------------------------------------
-// Badges work well with default Bootstrap styles, but you can customize here
-[data-bs-theme="light"] {
-  .badge {
-    // Light mode badges use default Bootstrap behavior
-  }
-}
-
+// Dark mode - lighten badge colors for better visibility
 [data-bs-theme="dark"] {
   .badge {
-    // Dark mode - lighten badge colors for better visibility
     &.bg-primary {
-      background-color: lighten($primary, 10%) !important;
+      background-color: color.adjust($primary, $lightness: 10%) !important;
     }
     
     &.bg-secondary {
-      background-color: lighten($secondary, 10%) !important;
+      background-color: color.adjust($secondary, $lightness: 10%) !important;
     }
   }
 }
@@ -1506,7 +1504,7 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
       color: $body-color-dark;
       
       &.active {
-        background-color: lighten($primary, 10%);
+        background-color: color.adjust($primary, $lightness: 10%);
         color: #000000;
       }
     }
@@ -1630,7 +1628,7 @@ $spinner-border-active-color-dark: lighten($beige-500, 10%);
 //     border-radius: $border-radius;
 //     
 //     &:hover {
-//       background: lighten($dark-component-bg-lighter, 10%);
+//       background: color.adjust($dark-component-bg-lighter, $lightness: 10%);
 //     }
 //   }
 // }

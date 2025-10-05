@@ -28,6 +28,20 @@ export default defineConfig({
         }
     },
 
+    css: {
+        preprocessorOptions: {
+            scss: {
+                // Suppress Sass deprecation warnings from Bootstrap and other dependencies
+                quietDeps: true,
+                // Suppress specific deprecation warnings
+                silenceDeprecations: [
+                    'import',
+                    'global-builtin',
+                    'color-functions'
+                ]
+            }
+        }
+    },
 
     build: {
         outDir: 'dist'

@@ -1,13 +1,19 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-// import './index.css'  // Global styles for your application ... DELETED TO USE THEMES IN DIFFFERENT FOLDER
+// ----------------------------------------------------------------------
+// CUSTOM CSS AND SCSS
 
-// Custom theme CSS
+// SCSS imports
+import './styles/scss-bootstrap-custom-theme.scss'; // COMPLETE Custom Bootstrap theme with SCSS variables
+// import './styles/simple-custom.scss';            // SIMPLE   Custom Bootstrap theme with SCSS variables
+
+// CSS custom theme 
 // import './styles/custom-theme.css'
+// ----------------------------------------------------------------------
 
-// New imports from npm Bootstrap modules
-import './styles/custom.scss';                       // Custom Bootstrap theme with SCSS variables
+
+// JS Bootstrap module (or it can be in `index.html`)
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';  // Bootstrap JS components
 
 import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
