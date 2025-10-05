@@ -8,22 +8,22 @@ $enable-css-custom-properties: true;
 // ===== COLOR PALETTE =====
 
 // Primary brand colors
-$primary:   #0d6efd;       // Main brand color (buttons, links, active states)
-$secondary: #6c757d;       // Secondary elements, muted text
+$primary:   #0d6efd;     // Main brand color (buttons, links, active states)
+$secondary: #6c757d;     // Secondary elements, muted text
 // Status/feedback color
-$success:   #198754;       // Success messages, valid states
-$info:      #0dcaf0;       // Info messages, highlights
-$warning:   #ffc107;       // Warning messages, alerts
-$danger:    #dc3545;       // Error messages, delete actions
+$success:   #198754;     // Success messages, valid states
+$info:      #0dcaf0;     // Info messages, highlights
+$warning:   #ffc107;     // Warning messages, alerts
+$danger:    #dc3545;     // Error messages, delete actions
 // Neutral colors
-$light:     #f8f9fa;       // Light backgrounds, subtle borders
-$dark:      #212529;       // Dark text, strong contrast
+$light:     #f8f9fa;     // Light backgrounds, subtle borders
+$dark:      #212529;     // Dark text, strong contrast
 
 
 // ===== THEME COLORS =====
 
 // Light theme
-$body-bg: #ffffff;        // Main background
+$body-bg:    #ffffff;     // Main background
 $body-color: #212529;     // Main text color
 $text-muted: #6c757d;     // Secondary text
 
@@ -73,26 +73,26 @@ $navbar-padding-y: 0.5rem;
 $navbar-brand-font-size: 1.25rem;
 
 // Borders
-$border-radius: 0.375rem;
+$border-radius:    0.375rem;
 $border-radius-sm: 0.25rem;
 $border-radius-lg: 0.5rem;
 
 // ===== BREAKPOINTS =====
 $grid-breakpoints: (
-  xs: 0,
-  sm: 576px,
-  md: 768px,
-  lg: 992px,
-  xl: 1200px,
+  xs:  0,
+  sm:  576px,
+  md:  768px,
+  lg:  992px,
+  xl:  1200px,
   xxl: 1400px
 );
 
 // ===== CONTAINER SIZES =====
 $container-max-widths: (
-  sm: 540px,
-  md: 720px,
-  lg: 960px,
-  xl: 1140px,
+  sm:  540px,
+  md:  720px,
+  lg:  960px,
+  xl:  1140px,
   xxl: 1320px
 );
 
