@@ -7,6 +7,19 @@ ENV PYTHONUNBUFFERED 1
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 
+
+# ---------------------------
+# Copy dependency files
+COPY Pipfile Pipfile.lock /tmp/pip-tmp/
+
+# Install pipenv and then install project dependencies
+RUN pip3 install pipenv && \
+    cd /tmp/pip-tmp && \
+    pipenv install --system --deploy && \
+    rm -rf /tmp/pip-tmp
+# ---------------------------
+
+
 # [Optional] If your requirements rarely change, uncomment this section to add them to the image.
 # COPY requirements.txt /tmp/pip-tmp/
 # RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \

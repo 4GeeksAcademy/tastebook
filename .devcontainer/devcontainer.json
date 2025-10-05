@@ -24,9 +24,13 @@
 	// This can be used to network with other containers or the host.
 	"forwardPorts": [3000, 3001, 5432],
 	
-  	"onCreateCommand": "(cp .env.example .env || echo \".env creation failed\"); (pipenv install || echo \"pipenv install failed\"); (bash database.sh || echo \"database.sh failed\");",
+	// Use 'onCreateCommand' to run commands when the container is being created.
+  	"onCreateCommand": "(cp .env.example .env || echo \".env creation failed\"); (bash database.sh || echo \"database.sh failed\");",
+	
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "npm install",
+
+	// Use 'postStartCommand' to run commands after the container istarts (every time it does).
 	"postStartCommand": "git config --global core.filemode false && git config --global core.autocrlf input",
 	"customizations": {
 		"vscode": {
