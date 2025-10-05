@@ -7,6 +7,37 @@
 <br>
 
 
+## (October 5, 2025 - 20:00 UTC+1) -- Devcontainer Build Efficiency: Remove Unnecessary Greeting Operations
+
+**Problem encountered:**
+The devcontainer build was failing with exit code 2 due to the `postCreateCommand` trying to redirect greeting output to `/workspaces/.codespaces/shared/first-run-notice.txt`, but the directory didn't exist or wasn't writable.
+
+**Changes made:**
+- ✅ Simplified `postCreateCommand` in `.devcontainer/devcontainer.json` to only run `npm install`
+- ✅ Removed unnecessary greeting.py redirect that was causing build failures
+- ✅ Removed codespaces shared directory creation from `.devcontainer/Dockerfile`
+- ✅ Kept the greeting.py file intact (still used by Gitpod configurations)
+
+**Why:**
+- The greeting output to file served no functional purpose for the application
+- It was just a developer welcome message that was causing build failures
+- Removing this unnecessary complexity makes builds more reliable and faster
+
+**Result:**
+- 🎉 **Build now completes successfully** without exit code 2 failures
+- ⚡ **Faster container builds** with less unnecessary file operations
+- 🧹 **Cleaner, more maintainable** devcontainer configuration
+- 📝 **No functionality lost** - greeting script still available for manual use
+
+**Files modified:**
+- `.devcontainer/devcontainer.json` - Simplified postCreateCommand
+- `.devcontainer/Dockerfile` - Removed unnecessary directory creation
+
+---
+<br>
+<br>
+
+
 ## (October 5, 2025) -- Devcontainer: ensure shared folder for first-run notice
 
 **What I changed:**
