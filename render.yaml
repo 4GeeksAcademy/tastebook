@@ -6,8 +6,8 @@
 
 services:
     - type: web # valid values: https://render.com/docs/yaml-spec#type
-      region: ohio
-      name: sample-service-name
+      region: frankfurt
+      name: tastebook # optional; if not provided, the service name will be generated from the repo name
       env: python # valid values: https://render.com/docs/yaml-spec#environment
       buildCommand: "./render_build.sh"
       startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/"
@@ -26,11 +26,11 @@ services:
             value: 3.10.6
           - key: DATABASE_URL # Render PostgreSQL database
             fromDatabase:
-                name: postgresql-trapezoidal-42170
+                name: postgresql-db-tastebook
                 property: connectionString
 
 databases: # Render PostgreSQL database
-    - name: postgresql-trapezoidal-42170
-      region: ohio
+    - name: postgresql-db-tastebook
+      region: frankfurt
       ipAllowList: [] # only allow internal connections
       plan: free # optional; defaults to starter
