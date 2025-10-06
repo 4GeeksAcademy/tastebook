@@ -5,6 +5,17 @@
 ---
 <br>
 <br>
+ 
+## (October 6, 2025) -- Archive: Moved legacy `requirements.txt` to docs/Moved Config files
+
+**What changed:**
+- The top-level `requirements.txt` (legacy pip-style file) was copied into `docs/Moved Config files/Old Python requirements/requirements.txt` to avoid confusion with the repository's active `Pipfile`/`Pipfile.lock` workflow.
+
+**Why:**
+- The repository uses `Pipfile` and `Pipfile.lock` as the canonical environment definition (pipenv). Keeping a root `requirements.txt` alongside a Pipfile causes ambiguity for contributors and tooling. Archiving the legacy file preserves history while clarifying the recommended workflow.
+
+**Notes:**
+- To regenerate a compatible `requirements.txt` from the lockfile use: `pipenv lock -r > requirements.txt`.
 
 
 ## (October 5, 2025 - 21:45 UTC+1) -- Database Reset Script Update: Alignment with New Configuration
