@@ -27,7 +27,7 @@
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "npm install",
 
-	// Use 'postStartCommand' to run commands after the container istarts (every time it does).
+	// Use 'postStartCommand' to run commands after the container starts (every time it does).
 	"postStartCommand": "git config --global core.filemode false && git config --global core.autocrlf input",
 	"customizations": {
 		"vscode": {
