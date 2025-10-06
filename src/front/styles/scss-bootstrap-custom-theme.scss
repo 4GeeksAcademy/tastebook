@@ -5,17 +5,29 @@
 // This file allows full control over light and dark mode using data-bs-theme
 // ============================================================================
 
+
 // Import Sass color module for modern color functions
 @use "sass:color";
+
+
+
 
 // ============================================================================
 // 1. VARIABLE OVERRIDES (Before Bootstrap Import)
 // ============================================================================
 // These variables must be set BEFORE importing Bootstrap to take effect
 
+
+
+
 // ----------------------------------------------------------------------------
 // COLOR PALETTE - Base Colors (Beige & Pastel Theme)
 // ----------------------------------------------------------------------------
+
+// Define your custom color palette here
+// These colors are used throughout the theme for consistency
+
+// Primary brand colors - Beige and pastel palette
 $beige-100: #faf8f5;
 $beige-200: #f5f1e8;
 $beige-300: #e8dfd0;
@@ -23,85 +35,122 @@ $beige-400: #d4c5af;
 $beige-500: #c0a98e;
 $beige-600: #a68d6d;
 
-$pastel-pink: #ffd6e0;
+$pastel-pink:     #ffd6e0;
 $pastel-lavender: #e0d4f7;
-$pastel-blue: #d4e7f7;
-$pastel-mint: #d4f7e7;
-$pastel-peach: #ffe4d6;
+$pastel-blue:     #d4e7f7;
+$pastel-mint:     #d4f7e7;
+$pastel-peach:    #ffe4d6;
+
+
 
 // ----------------------------------------------------------------------------
 // THEME COLORS - Bootstrap Color System
 // ----------------------------------------------------------------------------
-$primary: $beige-500;
+
+// Override Bootstrap's default theme colors --- These map to Bootstrap's utility classes (bg-primary, text-success, etc.)
+
+$primary:   $beige-500;
 $secondary: $beige-400;
+
 $success: #a8d5ba; // Soft pastel green
-$info: #a8c7d5; // Soft pastel blue
+$info:    #a8c7d5; // Soft pastel blue
 $warning: #f5d5a8; // Soft pastel yellow/orange
-$danger: #f5b5b5; // Soft pastel red
-$light: $beige-100;
-$dark: #2d2d2d;
+$danger:  #f5b5b5; // Soft pastel red
+
+$light:     $beige-100;
+$dark:    #2d2d2d;
+
+
 
 // ----------------------------------------------------------------------------
 // BODY & BACKGROUND COLORS - Light Mode
 // ----------------------------------------------------------------------------
-$body-bg-light: $beige-100;
+
+// Light mode defaults - controls the main page background and text color
+$body-bg-light:      $beige-100;
 $body-color-light: #2d2d2d;
+
+
 
 // ----------------------------------------------------------------------------
 // BODY & BACKGROUND COLORS - Dark Mode
 // ----------------------------------------------------------------------------
-$body-bg-dark: #000000; // OLED black for main background
+
+// Dark mode defaults (OLED black for body)
+$body-bg-dark:    #000000; // OLED black for main background
 $body-color-dark: #e8e8e8;
 
-// Soft dark colors for components (GitHub-style dark mode)
-$dark-component-bg: #1a1a1a; // Cards, navbars, dropdowns
+// Soft dark colors for separate components backgrounds (GitHub-style dark mode)
+$dark-component-bg:         #1a1a1a; // Cards, navbars, dropdowns
 $dark-component-bg-lighter: #242424; // Hover states
-$dark-component-bg-darker: #0d0d0d; // Active states
-$dark-border: #2d2d2d; // Borders in dark mode
-$dark-text-muted: #a0a0a0; // Muted text in dark mode
+$dark-component-bg-darker:  #0d0d0d; // Active states
+$dark-border:               #2d2d2d; // Borders in dark mode
+$dark-text-muted:           #a0a0a0; // Muted text in dark mode
+
+
 
 // ----------------------------------------------------------------------------
 // BORDER RADIUS - Global Control
 // ----------------------------------------------------------------------------
-// Edit these to change roundness across all components
-$border-radius: 0.375rem; // Default Bootstrap value
-$border-radius-sm: 0.25rem; // Small elements (badges, small buttons)
-$border-radius-lg: 0.5rem; // Large elements (large buttons, cards)
-$border-radius-xl: 1rem; // Extra large
-$border-radius-2xl: 2rem; // Pills and very rounded elements
+
+// Edit these to change roundness across all components --- Set to Bootstrap defaults but easily customizable
+
+$border-radius-sm:  0.25rem;  // Small elements (badges, small buttons)
+$border-radius:     0.375rem; // DEFAULT Bootstrap value
+$border-radius-lg:  0.5rem;   // Large elements (large buttons, cards)
+$border-radius-xl:  1rem;     // Extra large
+$border-radius-2xl: 2rem;     // Pills and very rounded elements
+
+
 
 // ----------------------------------------------------------------------------
 // BORDERS - Colors and Width
 // ----------------------------------------------------------------------------
+
+// Control border appearance globally
+
 $border-width: 1px;
+
 $border-color-light: rgba(0, 0, 0, 0.1);
-$border-color-dark: $dark-border;
+$border-color-dark:    $dark-border;
 
-// Status borders (for alerts, validation, etc.)
+// Status borders (for alerts, validation, etc.) --- Different opacity for light/dark mode for better visibility
+
 $success-border-light: rgba(168, 213, 186, 0.5);
-$success-border-dark: rgba(168, 213, 186, 0.3);
+$success-border-dark:  rgba(168, 213, 186, 0.3);
 
-$info-border-light: rgba(168, 199, 213, 0.5);
-$info-border-dark: rgba(168, 199, 213, 0.3);
+$info-border-light:    rgba(168, 199, 213, 0.5);
+$info-border-dark:     rgba(168, 199, 213, 0.3);
 
 $warning-border-light: rgba(245, 213, 168, 0.5);
-$warning-border-dark: rgba(245, 213, 168, 0.3);
+$warning-border-dark:  rgba(245, 213, 168, 0.3);
 
-$danger-border-light: rgba(245, 181, 181, 0.5);
-$danger-border-dark: rgba(245, 181, 181, 0.3);
+$danger-border-light:  rgba(245, 181, 181, 0.5);
+$danger-border-dark:   rgba(245, 181, 181, 0.3);
+
+
 
 // ----------------------------------------------------------------------------
 // TYPOGRAPHY - Font Smoothing for Better Rendering
 // ----------------------------------------------------------------------------
+
+// System font stack for optimal performance and native look
+
 $font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 $font-family-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
 
 // Enable font smoothing (will be applied globally)
+// Applied via CSS rules in section 3
 $enable-smooth-fonts: true;
+
+
 
 // ----------------------------------------------------------------------------
 // FORM CONTROLS - Input, Select, Textarea
 // ----------------------------------------------------------------------------
+
+// All form inputs, selects, and textareas use these
+
 // Light mode form colors
 $input-bg-light: #ffffff;
 $input-border-color-light: rgba(0, 0, 0, 0.15);
@@ -110,7 +159,7 @@ $input-placeholder-color-light: rgba(45, 45, 45, 0.5);
 $input-focus-border-color-light: $beige-500;
 $input-focus-bg-light: #ffffff;
 
-// Dark mode form colors
+// Dark mode form colors (Higher contrast for better dark mode readability)
 $input-bg-dark: #1a1a1a;
 $input-border-color-dark: #2d2d2d;
 $input-color-dark: #e8e8e8;
@@ -118,88 +167,118 @@ $input-placeholder-color-dark: rgba(232, 232, 232, 0.5);
 $input-focus-border-color-dark: color.adjust($beige-500, $lightness: 15%);
 $input-focus-bg-dark: #242424;
 
-// Focus ring/shadow
+
+// Focus ring/shadow (visual feedback when form elements are focused)
 $input-focus-box-shadow-light: 0 0 0 0.25rem rgba($beige-500, 0.25);
-$input-focus-box-shadow-dark: 0 0 0 0.25rem rgba($beige-500, 0.15);
+$input-focus-box-shadow-dark:  0 0 0 0.25rem rgba($beige-500, 0.15);
 
-// Disabled state
+// Disabled state (reduced contrast for disabled form elements)
 $input-disabled-bg-light: #f0f0f0;
-$input-disabled-bg-dark: #0d0d0d;
+$input-disabled-bg-dark:  #0d0d0d;
 $input-disabled-border-color-light: rgba(0, 0, 0, 0.1);
-$input-disabled-border-color-dark: #1a1a1a;
+$input-disabled-border-color-dark:  #1a1a1a;
 
-// Text selection color
+// Text selection color (color when user selects text inside form inputs)
 $text-selection-bg-light: rgba($beige-500, 0.3);
-$text-selection-bg-dark: rgba($beige-500, 0.4);
+$text-selection-bg-dark:  rgba($beige-500, 0.4);
+
+
 
 // ----------------------------------------------------------------------------
-// FORM VALIDATION - Success, Warning, Danger States
+// FORM VALIDATION - Success, Warning, Danger states
 // ----------------------------------------------------------------------------
-// Valid (success) state
-$form-valid-color-light: color.adjust($success, $lightness: -10%);
-$form-valid-color-dark: color.adjust($success, $lightness: 10%);
-$form-valid-border-color-light: $success;
+
+// Valid (success) state --- Used for .is-valid class on form controls
+$form-valid-color-light:       color.adjust($success, $lightness: -10%);
+$form-valid-color-dark:        color.adjust($success, $lightness:  10%);
+
+$form-valid-border-color-light:             $success;
 $form-valid-border-color-dark: color.adjust($success, $lightness: 5%);
 
-// Invalid (danger) state
-$form-invalid-color-light: color.adjust($danger, $lightness: -10%);
-$form-invalid-color-dark: color.adjust($danger, $lightness: 10%);
-$form-invalid-border-color-light: $danger;
+// Invalid (danger) state --- Used for .is-invalid class on form controls
+$form-invalid-color-light:       color.adjust($danger, $lightness: -10%);
+$form-invalid-color-dark:        color.adjust($danger, $lightness:  10%);
+
+$form-invalid-border-color-light:             $danger;
 $form-invalid-border-color-dark: color.adjust($danger, $lightness: 5%);
 
-// Warning state
-$form-warning-color-light: color.adjust($warning, $lightness: -15%);
-$form-warning-color-dark: color.adjust($warning, $lightness: 5%);
-$form-warning-border-color-light: $warning;
+// Warning state --- Custom warning state (not default Bootstrap)
+$form-warning-color-light:       color.adjust($warning, $lightness: -15%);
+$form-warning-color-dark:        color.adjust($warning, $lightness:  5%);
+
+$form-warning-border-color-light:             $warning;
 $form-warning-border-color-dark: color.adjust($warning, $lightness: 5%);
+
+
 
 // ----------------------------------------------------------------------------
 // CHECKBOXES, RADIOS, SWITCHES
 // ----------------------------------------------------------------------------
-$form-check-input-bg-light: #ffffff;
-$form-check-input-bg-dark: #1a1a1a;
-$form-check-input-border-light: rgba(0, 0, 0, 0.25);
-$form-check-input-border-dark: #2d2d2d;
 
-$form-check-input-checked-bg-light: $beige-500;
+// Background and border for unchecked state
+$form-check-input-bg-light: #ffffff;
+$form-check-input-bg-dark:  #1a1a1a;
+
+$form-check-input-border-light: rgba(0, 0, 0, 0.25);
+$form-check-input-border-dark:  #2d2d2d;
+
+// Checked state colors
+$form-check-input-checked-bg-light:             $beige-500;
 $form-check-input-checked-bg-dark: color.adjust($beige-500, $lightness: 10%);
-$form-check-input-checked-border-light: $beige-500;
+
+$form-check-input-checked-border-light:             $beige-500;
 $form-check-input-checked-border-dark: color.adjust($beige-500, $lightness: 10%);
 
-// Switch specific
+// Switch specific --- Different from checkboxes (uses a sliding toggle)
 $form-switch-bg-light: rgba(0, 0, 0, 0.15);
-$form-switch-bg-dark: #2d2d2d;
-$form-switch-checked-bg-light: $beige-500;
+$form-switch-bg-dark:  #2d2d2d;
+
+$form-switch-checked-bg-light:             $beige-500;
 $form-switch-checked-bg-dark: color.adjust($beige-500, $lightness: 10%);
+
+
 
 // ----------------------------------------------------------------------------
 // RANGE SLIDERS
 // ----------------------------------------------------------------------------
+
+// Track (the line) and thumb (the draggable circle) colors
+
 $form-range-track-bg-light: rgba(0, 0, 0, 0.1);
-$form-range-track-bg-dark: #2d2d2d;
-$form-range-thumb-bg-light: $beige-500;
+$form-range-track-bg-dark:  #2d2d2d;
+
+$form-range-thumb-bg-light:             $beige-500;
 $form-range-thumb-bg-dark: color.adjust($beige-500, $lightness: 10%);
+
 $form-range-thumb-border-light: transparent;
-$form-range-thumb-border-dark: transparent;
+$form-range-thumb-border-dark:  transparent;
+
 $form-range-thumb-focus-box-shadow-light: 0 0 0 0.25rem rgba($beige-500, 0.25);
-$form-range-thumb-focus-box-shadow-dark: 0 0 0 0.25rem rgba($beige-500, 0.15);
+$form-range-thumb-focus-box-shadow-dark:  0 0 0 0.25rem rgba($beige-500, 0.15);
+
+
 
 // ----------------------------------------------------------------------------
 // BUTTONS - All Button Styles
 // ----------------------------------------------------------------------------
-// Default button
+
+// Default button padding and border radius
 $btn-padding-y: 0.375rem;
 $btn-padding-x: 0.75rem;
+
 $btn-border-radius: $border-radius;
 
-// Button focus
+// Button focus --- Focus ring appears when button is focused via keyboard
 $btn-focus-box-shadow-light: 0 0 0 0.25rem rgba($beige-500, 0.25);
-$btn-focus-box-shadow-dark: 0 0 0 0.25rem rgba($beige-500, 0.15);
+$btn-focus-box-shadow-dark:  0 0 0 0.25rem rgba($beige-500, 0.15);
+
+
 
 // ----------------------------------------------------------------------------
 // NAVBAR - Navigation Bar
 // ----------------------------------------------------------------------------
-// Light navbar
+
+// Light navbar --- Used when navbar-light class is applied ???
 $navbar-light-bg: $beige-200;
 $navbar-light-color: #2d2d2d;
 $navbar-light-hover-color: $beige-600;
@@ -207,7 +286,7 @@ $navbar-light-active-color: $beige-600;
 $navbar-light-brand-color: #2d2d2d;
 $navbar-light-toggler-border-color: rgba(0, 0, 0, 0.1);
 
-// Dark navbar (GitHub-style soft dark)
+// Dark navbar (GitHub-style soft dark) --- Used when navbar-dark class is applied ???
 $navbar-dark-bg: $dark-component-bg;
 $navbar-dark-color: #e8e8e8;
 $navbar-dark-hover-color: #ffffff;
@@ -215,10 +294,14 @@ $navbar-dark-active-color: #ffffff;
 $navbar-dark-brand-color: #ffffff;
 $navbar-dark-toggler-border-color: rgba(255, 255, 255, 0.1);
 
+
+
 // ----------------------------------------------------------------------------
 // CARDS - Card Component
 // ----------------------------------------------------------------------------
-$card-border-width: $border-width;
+
+// Card structure variables
+$card-border-width:  $border-width;
 $card-border-radius: $border-radius-lg;
 
 // Light mode cards
@@ -231,78 +314,107 @@ $card-bg-dark: $dark-component-bg;
 $card-border-color-dark: $dark-border;
 $card-cap-bg-dark: rgba(255, 255, 255, 0.03);
 
+
+
 // ----------------------------------------------------------------------------
 // MODALS - Modal Dialogs
 // ----------------------------------------------------------------------------
+
+// Modal structure
 $modal-content-border-radius: $border-radius-lg;
 
 // Light mode
 $modal-content-bg-light: #ffffff;
 $modal-content-border-color-light: $border-color-light;
-$modal-header-border-color-light: $border-color-light;
-$modal-footer-border-color-light: $border-color-light;
+$modal-header-border-color-light:  $border-color-light;
+$modal-footer-border-color-light:  $border-color-light;
 $modal-backdrop-opacity-light: 0.5;
 
 // Dark mode
 $modal-content-bg-dark: $dark-component-bg;
 $modal-content-border-color-dark: $dark-border;
-$modal-header-border-color-dark: $dark-border;
-$modal-footer-border-color-dark: $dark-border;
-$modal-backdrop-opacity-dark: 0.7;
+$modal-header-border-color-dark:  $dark-border;
+$modal-footer-border-color-dark:  $dark-border;
+$modal-backdrop-opacity-dark:  0.7;
+
+
 
 // ----------------------------------------------------------------------------
 // DROPDOWNS - Dropdown Menus
 // ----------------------------------------------------------------------------
+
+// Dropdown structure
 $dropdown-border-radius: $border-radius;
 
 // Light mode
 $dropdown-bg-light: #ffffff;
-$dropdown-border-color-light: $border-color-light;
-$dropdown-link-color-light: #2d2d2d;
-$dropdown-link-hover-bg-light: $beige-100;
+$dropdown-border-color-light:   $border-color-light;
+$dropdown-link-color-light:   #2d2d2d;
+$dropdown-link-hover-bg-light:  $beige-100;
 $dropdown-link-active-bg-light: $beige-200;
 
 // Dark mode (GitHub-style)
 $dropdown-bg-dark: $dark-component-bg;
-$dropdown-border-color-dark: $dark-border;
-$dropdown-link-color-dark: #e8e8e8;
-$dropdown-link-hover-bg-dark: $dark-component-bg-lighter;
+$dropdown-border-color-dark:   $dark-border;
+$dropdown-link-color-dark:   #e8e8e8;
+$dropdown-link-hover-bg-dark:  $dark-component-bg-lighter;
 $dropdown-link-active-bg-dark: $dark-component-bg-lighter;
+
+
 
 // ----------------------------------------------------------------------------
 // ALERTS - Alert Component
 // ----------------------------------------------------------------------------
+
+// Alert structure
 $alert-border-radius: $border-radius;
-$alert-border-width: $border-width;
+$alert-border-width:  $border-width;
 
-// Light mode alerts
-$alert-bg-scale-light: -80%;
+// Light mode alerts --- Uses Bootstrap's color mixing functions
+$alert-bg-scale-light:     -80%;
 $alert-border-scale-light: -70%;
-$alert-color-scale-light: 40%;
+$alert-color-scale-light:   40%;
 
-// Dark mode alerts
-$alert-bg-scale-dark: -60%;
+// Dark mode alerts --- Different scaling for better dark mode appearance
+$alert-bg-scale-dark:     -60%;
 $alert-border-scale-dark: -50%;
-$alert-color-scale-dark: 30%;
+$alert-color-scale-dark:   30%;
+
+
 
 // ----------------------------------------------------------------------------
 // BADGES - Badge Component
 // ----------------------------------------------------------------------------
+
+// Badge structure and padding
+
 $badge-border-radius: $border-radius-sm;
+
 $badge-padding-y: 0.35em;
 $badge-padding-x: 0.65em;
+
+
 
 // ----------------------------------------------------------------------------
 // BREADCRUMB - Breadcrumb Navigation
 // ----------------------------------------------------------------------------
+
+// Breadcrumb text and divider colors
+
 $breadcrumb-divider-color-light: rgba(0, 0, 0, 0.5);
-$breadcrumb-divider-color-dark: rgba(255, 255, 255, 0.5);
-$breadcrumb-active-color-light: rgba(0, 0, 0, 0.7);
-$breadcrumb-active-color-dark: rgba(255, 255, 255, 0.7);
+$breadcrumb-divider-color-dark:  rgba(255, 255, 255, 0.5);
+
+$breadcrumb-active-color-light:  rgba(0, 0, 0, 0.7);
+$breadcrumb-active-color-dark:   rgba(255, 255, 255, 0.7);
+
+
 
 // ----------------------------------------------------------------------------
 // PAGINATION - Pagination Component
 // ----------------------------------------------------------------------------
+
+// Background, border, hover, active, and disabled states
+
 // Light mode
 $pagination-bg-light: #ffffff;
 $pagination-border-color-light: $border-color-light;
@@ -312,7 +424,7 @@ $pagination-active-border-color-light: $beige-500;
 $pagination-disabled-bg-light: #f0f0f0;
 $pagination-disabled-border-color-light: $border-color-light;
 
-// Dark mode
+// Dark mode --- Higher contrast for dark mode visibility
 $pagination-bg-dark: $dark-component-bg;
 $pagination-border-color-dark: $dark-border;
 $pagination-hover-bg-dark: $dark-component-bg-lighter;
@@ -321,9 +433,12 @@ $pagination-active-border-color-dark: color.adjust($beige-500, $lightness: 10%);
 $pagination-disabled-bg-dark: #0d0d0d;
 $pagination-disabled-border-color-dark: $dark-border;
 
+
+
 // ----------------------------------------------------------------------------
 // LIST GROUP - List Group Component
 // ----------------------------------------------------------------------------
+
 // Light mode
 $list-group-bg-light: #ffffff;
 $list-group-border-color-light: $border-color-light;
@@ -338,9 +453,13 @@ $list-group-hover-bg-dark: $dark-component-bg-lighter;
 $list-group-active-bg-dark: color.adjust($beige-500, $lightness: 10%);
 $list-group-active-border-color-dark: color.adjust($beige-500, $lightness: 10%);
 
+
+
 // ----------------------------------------------------------------------------
 // PROGRESS BARS - Progress Component
 // ----------------------------------------------------------------------------
+
+// Progress bar height and border radius
 $progress-height: 1rem;
 $progress-border-radius: $border-radius;
 
@@ -352,9 +471,13 @@ $progress-bar-bg-light: $beige-500;
 $progress-bg-dark: #2d2d2d;
 $progress-bar-bg-dark: color.adjust($beige-500, $lightness: 10%);
 
+
+
 // ----------------------------------------------------------------------------
 // TOASTS - Toast Notifications
 // ----------------------------------------------------------------------------
+
+// Toast structure
 $toast-border-radius: $border-radius;
 
 // Light mode
@@ -367,27 +490,36 @@ $toast-bg-dark: rgba(26, 26, 26, 0.95);
 $toast-border-color-dark: $dark-border;
 $toast-header-bg-dark: rgba(255, 255, 255, 0.03);
 
+
+
 // ----------------------------------------------------------------------------
 // TOOLTIPS & POPOVERS - Tooltip and Popover Components
 // ----------------------------------------------------------------------------
-// Tooltips
+
+// Tooltips --- Small floating hints
 $tooltip-bg-light: rgba(0, 0, 0, 0.9);
 $tooltip-color-light: #ffffff;
+
 $tooltip-bg-dark: rgba(255, 255, 255, 0.9);
 $tooltip-color-dark: #000000;
 
-// Popovers
+// Popovers --- Larger floating content boxes
 $popover-border-radius: $border-radius;
 $popover-bg-light: #ffffff;
 $popover-border-color-light: $border-color-light;
 $popover-header-bg-light: $beige-100;
+
 $popover-bg-dark: $dark-component-bg;
 $popover-border-color-dark: $dark-border;
 $popover-header-bg-dark: rgba(255, 255, 255, 0.05);
 
+
+
 // ----------------------------------------------------------------------------
-// OFFCANVAS - Offcanvas Component
+// OFFCANVAS - Offcanvas Component (sliding panel from screen edge)
 // ----------------------------------------------------------------------------
+
+
 // Light mode
 $offcanvas-bg-light: #ffffff;
 $offcanvas-border-color-light: $border-color-light;
@@ -398,9 +530,12 @@ $offcanvas-bg-dark: $dark-component-bg;
 $offcanvas-border-color-dark: $dark-border;
 $offcanvas-backdrop-opacity-dark: 0.7;
 
+
+
 // ----------------------------------------------------------------------------
-// ACCORDION - Accordion Component
+// ACCORDION - Accordion Component (collapsible content sections)
 // ----------------------------------------------------------------------------
+
 // Light mode
 $accordion-bg-light: #ffffff;
 $accordion-border-color-light: $border-color-light;
@@ -413,9 +548,12 @@ $accordion-border-color-dark: $dark-border;
 $accordion-button-bg-dark: rgba(255, 255, 255, 0.03);
 $accordion-button-active-bg-dark: rgba(255, 255, 255, 0.05);
 
+
+
 // ----------------------------------------------------------------------------
 // TABLES - Table Component
 // ----------------------------------------------------------------------------
+
 // Light mode
 $table-bg-light: transparent;
 $table-striped-bg-light: rgba(0, 0, 0, 0.02);
@@ -428,40 +566,76 @@ $table-striped-bg-dark: rgba(255, 255, 255, 0.02);
 $table-hover-bg-dark: rgba(255, 255, 255, 0.04);
 $table-border-color-dark: $dark-border;
 
+
+
 // ----------------------------------------------------------------------------
 // SPINNERS - Loading Spinners
 // ----------------------------------------------------------------------------
+
+// Loading animation colors
+
 $spinner-border-color-light: rgba($beige-500, 0.25);
 $spinner-border-active-color-light: $beige-500;
+
 $spinner-border-color-dark: rgba(color.adjust($beige-500, $lightness: 10%), 0.25);
 $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
+
+
+
+
+
+
 
 // ============================================================================
 // 2. IMPORT BOOTSTRAP  
 // ============================================================================
+
 // Import Bootstrap SCSS after variable overrides
-// Note: We still use @import here because Bootstrap's SCSS structure requires it
-// for proper variable override functionality. Bootstrap will migrate to @use in future versions.
+// This is where Bootstrap reads all the variables we defined above
+
 @import "bootstrap/scss/bootstrap";
+
+// NJTE: We still use @import here because Bootstrap's SCSS structure requires it
+// for proper variable override functionality. Bootstrap will migrate to @use in future versions.
+
+
+
+
+
+
+
+
 
 // ============================================================================
 // 3. CUSTOM OVERRIDES (After Bootstrap Import)
 // ============================================================================
-// Additional customizations that need to override Bootstrap's compiled styles
+
+// Additional customizations that need to override Bootstrap's compiled CSS styles
+// These apply AFTER Bootstrap processes everything
+
+
 
 // ----------------------------------------------------------------------------
 // FONT SMOOTHING - Better Font Rendering
 // ----------------------------------------------------------------------------
+
 // Apply font smoothing for better text rendering on all OS (especially macOS)
+// Makes text look crisper and more readable
+
 * {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing:   antialiased;
+  -moz-osx-font-smoothing:  grayscale;
+  text-rendering:           optimizeLegibility;
 }
+
+
 
 // ----------------------------------------------------------------------------
 // TEXT SELECTION - Custom Selection Colors
 // ----------------------------------------------------------------------------
+
+// Color appears when user highlights text
+
 // Light mode text selection
 :root,
 [data-bs-theme="light"] {
@@ -489,25 +663,31 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // BODY & BACKGROUND - Theme-Specific Backgrounds
 // ----------------------------------------------------------------------------
-// Light mode
+
+// Light mode --- Apply light theme background to root element
 :root,
 [data-bs-theme="light"] {
   background-color: $body-bg-light;
   color: $body-color-light;
 }
 
-// Dark mode with OLED black background
+// Dark mode --- Apply OLED black background for better dark mode
 [data-bs-theme="dark"] {
   background-color: $body-bg-dark;
   color: $body-color-dark;
 }
 
+
+
 // ----------------------------------------------------------------------------
 // NAVBAR - Theme-Specific Navbar Styles
 // ----------------------------------------------------------------------------
+
 // Light mode navbar
 [data-bs-theme="light"] {
   .navbar {
@@ -556,9 +736,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // CARDS - Theme-Specific Card Styles
 // ----------------------------------------------------------------------------
+
 // Light mode cards
 [data-bs-theme="light"] {
   .card {
@@ -587,9 +770,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // FORMS - Theme-Specific Form Styles
 // ----------------------------------------------------------------------------
+
 // Light mode forms
 [data-bs-theme="light"] {
   .form-control,
@@ -698,9 +884,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // CHECKBOXES & RADIOS - Theme-Specific Styles
 // ----------------------------------------------------------------------------
+
 // Light mode
 [data-bs-theme="light"] {
   .form-check-input {
@@ -735,9 +924,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // SWITCHES - Theme-Specific Switch Styles
 // ----------------------------------------------------------------------------
+
 // Light mode
 [data-bs-theme="light"] {
   .form-switch .form-check-input {
@@ -760,9 +952,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // RANGE SLIDERS - Theme-Specific Range Input Styles
 // ----------------------------------------------------------------------------
+
 // Light mode
 [data-bs-theme="light"] {
   .form-range {
@@ -829,9 +1024,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // BUTTONS - Theme-Specific Button Styles
 // ----------------------------------------------------------------------------
+
 // Light mode buttons
 [data-bs-theme="light"] {
   .btn {
@@ -906,9 +1104,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // MODALS - Theme-Specific Modal Styles
 // ----------------------------------------------------------------------------
+
 // Light mode modals
 [data-bs-theme="light"] {
   .modal-content {
@@ -949,9 +1150,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // DROPDOWNS - Theme-Specific Dropdown Styles
 // ----------------------------------------------------------------------------
+
 // Light mode dropdowns
 [data-bs-theme="light"] {
   .dropdown-menu {
@@ -1002,9 +1206,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // ALERTS - Theme-Specific Alert Styles
 // ----------------------------------------------------------------------------
+
 // Light mode alerts
 [data-bs-theme="light"] {
   .alert-success {
@@ -1059,9 +1266,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // BADGES - Theme-Specific Badge Styles
 // ----------------------------------------------------------------------------
+
 // Dark mode - lighten badge colors for better visibility
 [data-bs-theme="dark"] {
   .badge {
@@ -1075,9 +1285,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // BREADCRUMB - Theme-Specific Breadcrumb Styles
 // ----------------------------------------------------------------------------
+
 // Light mode breadcrumb
 [data-bs-theme="light"] {
   .breadcrumb-item {
@@ -1108,9 +1321,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // PAGINATION - Theme-Specific Pagination Styles
 // ----------------------------------------------------------------------------
+
 // Light mode pagination
 [data-bs-theme="light"] {
   .page-link {
@@ -1157,9 +1373,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // LIST GROUP - Theme-Specific List Group Styles
 // ----------------------------------------------------------------------------
+
 // Light mode list group
 [data-bs-theme="light"] {
   .list-group-item {
@@ -1195,9 +1414,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // PROGRESS BARS - Theme-Specific Progress Styles
 // ----------------------------------------------------------------------------
+
 // Light mode progress
 [data-bs-theme="light"] {
   .progress {
@@ -1220,9 +1442,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // TOASTS - Theme-Specific Toast Styles
 // ----------------------------------------------------------------------------
+
 // Light mode toasts
 [data-bs-theme="light"] {
   .toast {
@@ -1251,9 +1476,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // TOOLTIPS - Theme-Specific Tooltip Styles
 // ----------------------------------------------------------------------------
+
 // Light mode tooltips
 [data-bs-theme="light"] {
   .tooltip {
@@ -1282,9 +1510,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // POPOVERS - Theme-Specific Popover Styles
 // ----------------------------------------------------------------------------
+
 // Light mode popovers
 [data-bs-theme="light"] {
   .popover {
@@ -1316,9 +1547,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // OFFCANVAS - Theme-Specific Offcanvas Styles
 // ----------------------------------------------------------------------------
+
 // Light mode offcanvas
 [data-bs-theme="light"] {
   .offcanvas {
@@ -1344,9 +1578,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // ACCORDION - Theme-Specific Accordion Styles
 // ----------------------------------------------------------------------------
+
 // Light mode accordion
 [data-bs-theme="light"] {
   .accordion-item {
@@ -1383,9 +1620,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // TABLES - Theme-Specific Table Styles
 // ----------------------------------------------------------------------------
+
 // Light mode tables
 [data-bs-theme="light"] {
   .table {
@@ -1418,9 +1658,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // SPINNERS - Theme-Specific Spinner Styles
 // ----------------------------------------------------------------------------
+
 // Light mode spinners
 [data-bs-theme="light"] {
   .spinner-border {
@@ -1445,9 +1688,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // NAVS & TABS - Theme-Specific Navigation Styles
 // ----------------------------------------------------------------------------
+
 // Light mode navs and tabs
 [data-bs-theme="light"] {
   .nav-tabs {
@@ -1511,9 +1757,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // CLOSE BUTTON - Theme-Specific Close Button Styles
 // ----------------------------------------------------------------------------
+
 // Light mode close button
 [data-bs-theme="light"] {
   .btn-close {
@@ -1538,9 +1787,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // CAROUSEL - Theme-Specific Carousel Styles
 // ----------------------------------------------------------------------------
+
 // Light mode carousel
 [data-bs-theme="light"] {
   .carousel-indicators [data-bs-target] {
@@ -1565,9 +1817,12 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
 // ----------------------------------------------------------------------------
 // PLACEHOLDERS - Theme-Specific Placeholder Styles
 // ----------------------------------------------------------------------------
+
 // Light mode placeholders
 [data-bs-theme="light"] {
   .placeholder {
@@ -1582,13 +1837,24 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
   }
 }
 
+
+
+
+
+
 // ============================================================================
 // 4. ADDITIONAL CUSTOM UTILITIES
 // ============================================================================
 
+// Extra utilities that aren't part of Bootstrap
+
+
 // ----------------------------------------------------------------------------
 // CUSTOM SCROLLBAR - Optional Scrollbar Styling
 // ----------------------------------------------------------------------------
+
+//  !!!!!  WARNING: Only works in WebKit browsers (Chrome, Safari, Edge)  !!!!!
+
 // Uncomment below to enable custom scrollbar styling
 
 // Light mode scrollbar
@@ -1632,6 +1898,9 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
 //     }
 //   }
 // }
+
+
+
 
 // ============================================================================
 // END OF CUSTOM BOOTSTRAP THEME
