@@ -2,7 +2,7 @@
 # https://www.npmjs.com/package/@renderinc/heroku-import
 # Schema documented at https://render.com/docs/yaml-spec
 
-# IF THERE ARE PROBLEMS, Ccheck the "startCommand" since it was changed to supor WebSocket
+# IF THERE ARE PROBLEMS, check the "startCommand" since it was changed to support WebSocket
 
 services:
     - type: web # valid values: https://render.com/docs/yaml-spec#type
