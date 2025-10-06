@@ -10,7 +10,7 @@ php_errorlog
 .log
 
 
-# do not ignore gitpod and render files
+# do not ignore development environment and deployment files
 !.gitpod.Dockerfile
 !.welcome
 !.devcontainer

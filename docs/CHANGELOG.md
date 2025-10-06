@@ -5,6 +5,105 @@
 ---
 <br>
 <br>
+
+## (October 6, 2025) -- Legacy Configuration Cleanup: Removed Deprecated Gitpod References
+
+**Problem encountered:**
+The template contained multiple references to "gitpod" throughout the configuration files, which was causing confusion and inconsistency since the project now uses GitHub Codespaces with dev containers. These legacy references included outdated database credentials and documentation that no longer matched the current development environment.
+
+**Root causes:**
+1. **Legacy template origins**: The original template was designed for Gitpod but later migrated to dev containers
+2. **Inconsistent database configuration**: Mixed references to `gitpod`/`example` vs `tastebook_user`/`tastebook` 
+3. **Outdated documentation**: README and comments still referenced old Gitpod-specific setup instructions
+4. **Compiled assets**: Bundle.js contained hardcoded gitpod.io URLs from previous builds
+
+**Solution implemented:**
+
+**Part 1: Database Configuration Standardization**
+```bash
+# Before: Mixed legacy references
+DATABASE_URL=postgres://gitpod:postgres@localhost:5432/example
+
+# After: Consistent project-specific naming  
+DATABASE_URL=postgres://tastebook_user:postgres@localhost:5432/tastebook
+```
+
+**Part 2: Docker Compose Environment Update**
+```yaml
+# Before: Legacy Gitpod database setup
+environment:
+  POSTGRES_USER: gitpod
+  POSTGRES_DB: example
+  POSTGRES_PASSWORD: postgres
+
+# After: Project-aligned configuration
+environment:
+  POSTGRES_USER: tastebook_user  
+  POSTGRES_DB: tastebook
+  POSTGRES_PASSWORD: postgres
+```
+
+**Part 3: Documentation Modernization**
+```bash
+# Before: Gitpod-specific connection command
+psql -h localhost -U gitpod example
+
+# After: Current dev container command
+psql -h localhost -U tastebook_user tastebook
+```
+
+**Configuration changes:**
+- ✅ **Updated `.env` and `.env.example`**: Standardized database URLs to use `tastebook_user`/`tastebook`
+- ✅ **Updated `.devcontainer/docker-compose.yml`**: Aligned PostgreSQL environment variables with project naming
+- ✅ **Updated `README.md`**: Fixed psql connection instructions for current setup
+- ✅ **Updated `.gitignore`**: Modernized comments from "gitpod files" to "development environment files"
+- ✅ **Preserved legacy files**: Kept archived Gitpod configurations in `docs/Moved Config files/` for historical reference
+
+**Files modified:**
+- `.env` - Updated DATABASE_URL with correct credentials
+- `.env.example` - Updated template with project-specific database configuration  
+- `.devcontainer/docker-compose.yml` - Aligned PostgreSQL environment with project naming
+- `README.md` - Fixed psql connection command for current dev container setup
+- `.gitignore` - Updated comments to reflect current development environment
+
+**Next steps to set up dev environment correctly:**
+
+1. **Rebuild the dev container** to apply new database configuration:
+   - In VS Code: `Ctrl+Shift+P` → "Dev Containers: Rebuild Container"
+   - This will create the database with the new `tastebook_user`/`tastebook` credentials
+
+2. **Initialize the database** with proper migrations:
+   ```bash
+   pipenv run migrate    # Generate initial migration
+   pipenv run upgrade    # Apply migration to database
+   ```
+
+3. **Verify database connection** using the updated credentials:
+   ```bash
+   psql -h localhost -U tastebook_user tastebook
+   ```
+
+4. **Optional: Rebuild frontend** to refresh compiled assets (removes old gitpod URLs):
+   ```bash
+   npm run build
+   ```
+
+5. **Test the application** to ensure everything works with the new configuration:
+   ```bash
+   pipenv run start      # Start backend
+   npm run dev          # Start frontend (in separate terminal)
+   ```
+
+**Result:**
+- 🎉 **Consistent configuration** - All files now use project-specific naming
+- 🗃️ **Proper database setup** - Aligned with actual dev container PostgreSQL configuration  
+- 📝 **Updated documentation** - README reflects current development environment
+- 🧹 **Clean legacy handling** - Gitpod files preserved in archived location for reference
+- ⚡ **Ready for development** - Fresh setup with consistent, modern configuration
+
+---
+<br>
+<br>
  
 ## (October 6, 2025) -- Archive: Moved legacy `requirements.txt` to docs/Moved Config files
 
