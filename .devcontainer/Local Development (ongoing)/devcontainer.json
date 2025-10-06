@@ -1,17 +1,15 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/postgres
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at: https://github.com/devcontainers/templates/tree/main/src/postgres
 {
-	"name": "Python 3 & PostgreSQL",
+	"name": "TasteBook Development",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
-	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"workspaceFolder": "/workspaces/tastebook",
 	"features": {
 		"ghcr.io/devcontainers/features/github-cli:1": {
 			"installDirectlyFromGitHubRelease": true,
 			"version": "latest"
 		},
 		"ghcr.io/devcontainers/features/node:1": {
-			"nodeGypDependencies": true,
 			"version": "lts"
 		}
 	},
@@ -21,19 +19,27 @@
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or the host.
-	"forwardPorts": [3000, 3001],
-
-	"onCreateCommand": "(cp .env.example .env || echo \".env creation failed\"); (pipenv install || echo \"pipenv install failed\"); (bash database.sh || echo \"database.sh failed\");",
+	"forwardPorts": [3000, 3001, 5432],
+	
+	// Use 'onCreateCommand' to run commands when the container is being created.
+  	"onCreateCommand": "(cp .env.example .env || echo \".env creation failed\"); (bash database.sh || echo \"database.sh failed\");",
+	
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "npm install",
+
+	// Use 'postStartCommand' to run commands after the container starts (every time it does).
+	"postStartCommand": "git config --global core.filemode false && git config --global core.autocrlf input",
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"ms-python.python",
+				"ms-python.pylint",
+				"ms-python.black-formatter",
 				"esbenp.prettier-vscode",
-				"ms-python.autopep8"
+				"ms-vscode.vscode-json"
 			]
 		}
-	},
+	}
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
