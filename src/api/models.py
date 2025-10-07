@@ -25,9 +25,9 @@ from typing import List, Optional, Dict, Any
 db = SQLAlchemy()
 
 
-#############################################
-###########         USERS         ###########
-#############################################
+#######################################
+###########      USERS      ###########
+#######################################
 
 class User(db.Model):
     __tablename__ = "users"
@@ -600,7 +600,7 @@ class Comment(db.Model):
 
     # Content and State Fields
     content:         Mapped[str]      = mapped_column( Text,                         nullable=False)
-    date_created:    Mapped[date]     = mapped_column( Date,                         nullable=False,   default=func.current_date(),)
+    created_at:      Mapped[datetime] = mapped_column( DateTime,                     nullable=False,   default=func.now(),)
     is_edited:       Mapped[bool]     = mapped_column( Boolean,   default=False,     nullable=False)
     is_pinned:       Mapped[bool]     = mapped_column( Boolean,   default=False,     nullable=False)
 
@@ -715,16 +715,16 @@ class Comment(db.Model):
             current_user_id: ID of the current user to check if they liked the comment
         """
         serialized = {
-            "comment_id":       self.id,
-            "user_id":          self.user_id,
-            "recipe_id":        self.recipe_id,
+            "comment_id":        self.id,
+            "user_id":           self.user_id,
+            "recipe_id":         self.recipe_id,
             "parent_comment_id": self.parent_comment_id,
-            "content":          self.content,
-            "date_created":     self.date_created.isoformat() if self.date_created else None,
-            "is_edited":        self.is_edited,
-            "is_pinned":        self.is_pinned,
-            "like_count":       self.like_count,
-            "replies_count":    self.replies_count,
+            "content":           self.content,
+            "created_at":        self.created_at.isoformat() if self.created_at else None,
+            "is_edited":         self.is_edited,
+            "is_pinned":         self.is_pinned,
+            "like_count":        self.like_count,
+            "replies_count":     self.replies_count,
             
             # Author information
             "author": {
@@ -742,7 +742,7 @@ class Comment(db.Model):
         if include_replies and not self.parent_comment_id:
             serialized["replies"] = [
                 reply.serialize(include_replies=False, current_user_id=current_user_id)
-                for reply in sorted(self.replies, key=lambda r: r.date_created)
+                for reply in sorted(self.replies, key=lambda r: r.created_at)
             ]
         
         return serialized
@@ -776,7 +776,7 @@ class Like(db.Model):
     recipe_id:   Mapped[int] = mapped_column( Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
 
     # Timestamp
-    created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
+    created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(),                     nullable=False)
 
 
     #-------------------#
@@ -825,9 +825,9 @@ class Like(db.Model):
 
 
 
-##############################################
+#############################################
 ##########     COMMENT LIKES      ###########
-##############################################
+#############################################
 
 class CommentLike(db.Model):
     __tablename__ = "comment_likes"
@@ -1233,9 +1233,9 @@ class Message(db.Model):
 
     # Timestamps
     created_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
-    read_at:      Mapped[Optional[datetime]] = mapped_column( DateTime,     nullable=True)
-    edited_at:    Mapped[Optional[datetime]] = mapped_column( DateTime,     nullable=True)
-
+    read_at:      Mapped[Optional[datetime]] = mapped_column( DateTime,                nullable=True)
+    edited_at:    Mapped[Optional[datetime]] = mapped_column( DateTime,                nullable=True)
+           
 
     #-------------------#
     # Table Constraints #
@@ -1293,12 +1293,12 @@ class Message(db.Model):
             "is_read":     self.is_read,
             "is_edited":   self.is_edited,
             "created_at":  self.created_at.isoformat() if self.created_at else None,
-            "read_at":     self.read_at.isoformat()    if self.read_at else None,
-            "edited_at":   self.edited_at.isoformat()  if self.edited_at else None,
+            "read_at":     self.read_at.isoformat()    if self.read_at    else None,
+            "edited_at":   self.edited_at.isoformat()  if self.edited_at  else None,
             "sender": {
-                "user_id":        self.sender.id        if self.sender else None,
-                "username":       self.sender.username  if self.sender else None,
-                "full_name":      self.sender.full_name if self.sender else None,
+                "user_id":        self.sender.id             if self.sender else None,
+                "username":       self.sender.username       if self.sender else None,
+                "full_name":      self.sender.full_name      if self.sender else None,
                 "cloudinary_url": self.sender.cloudinary_url if self.sender else None
             } if self.sender else None
         }

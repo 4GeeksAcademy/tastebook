@@ -57,14 +57,14 @@ def get_recipe_comments(recipe_id):
             # Sort by like count (using the relationship)
             non_pinned_query = non_pinned_query.outerjoin(CommentLike).group_by(Comment.id)
             if sort_order == 'desc':
-                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).desc(), Comment.date_created.desc())
+                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).desc(), Comment.created_at.desc())
             else:
-                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).asc(), Comment.date_created.asc())
+                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).asc(), Comment.created_at.asc())
         else:  # default to date
             if sort_order == 'desc':
-                non_pinned_query = non_pinned_query.order_by(Comment.date_created.desc())
+                non_pinned_query = non_pinned_query.order_by(Comment.created_at.desc())
             else:
-                non_pinned_query = non_pinned_query.order_by(Comment.date_created.asc())
+                non_pinned_query = non_pinned_query.order_by(Comment.created_at.asc())
         
         # Get total count for pagination (excluding pinned from count since it's always shown)
         total_non_pinned = non_pinned_query.count()

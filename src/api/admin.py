@@ -75,11 +75,11 @@ def setup_admin(app):
 
     # Custom ModelView for Comment
     class CommentAdmin(ModelView):
-        column_list  = ['id', 'user_id', 'recipe_id', 'parent_comment_id', 'content', 'date_created', 'is_edited', 'is_pinned']
-        form_columns = [      'user_id', 'recipe_id', 'parent_comment_id', 'content', 'is_edited', 'is_pinned']
+        column_list  = ['id', 'user_id', 'recipe_id', 'parent_comment_id', 'content', 'created_at', 'is_edited', 'is_pinned']
+        form_columns = [      'user_id', 'recipe_id', 'parent_comment_id', 'content', 'is_edited',  'is_pinned']
 
         column_searchable_list = ['content']
-        column_filters = ['user_id', 'recipe_id', 'parent_comment_id', 'date_created', 'is_edited', 'is_pinned']
+        column_filters = ['user_id', 'recipe_id', 'parent_comment_id', 'created_at', 'is_edited', 'is_pinned']
 
 
     # Custom ModelView for Recipe Like
