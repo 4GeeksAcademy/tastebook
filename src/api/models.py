@@ -1,7 +1,7 @@
 from __future__ import annotations ## to allow forward references and then append Collection and CollectionRecipe models at the end of the file with relationships and serializations
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Boolean, DateTime, Date, ForeignKey, Integer, String, Text, JSON, func, UniqueConstraint, CheckConstraint, select
+from sqlalchemy import Boolean, DateTime, Date, ForeignKey, Integer, String, Text, JSON, func, UniqueConstraint, CheckConstraint, select, Index, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 # from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -40,7 +40,7 @@ class User(db.Model):
     id:              Mapped[int]      = mapped_column( Integer,      primary_key=True,                     autoincrement=True)
 
     # Remaining Attributes
-    email:           Mapped[str]      = mapped_column( String(100),   unique=True,         nullable=False)
+    email:           Mapped[str]      = mapped_column( String(100),  unique=True,         nullable=False)
     username:        Mapped[str]      = mapped_column( String(40),   unique=True,         nullable=False)
     full_name:       Mapped[str]      = mapped_column( String(80),                        nullable=False)
     description:     Mapped[str]      = mapped_column( Text,                              nullable=True)
@@ -612,10 +612,17 @@ class Comment(db.Model):
     # Table Constraints #
     #-------------------#
     __table_args__ = (
+
         # Ensure comment content is not empty
-        # Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
+        ### Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
         CheckConstraint("char_length(content) > 0", name='check_comment_content_not_empty'),
-        # Only one pinned comment per recipe (enforced in application logic)
+
+
+        # Only one pinned comment per recipe (now enforced at DB layer with partial unique index)
+        ### Note: This index is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
+        Index('unique_pinned_comment_per_recipe', 'recipe_id', unique=True, postgresql_where=text('is_pinned = true')),
+
+        
         # Prevent self-referencing at deeper than one level (enforced in application logic)
     )
 
