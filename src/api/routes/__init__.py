@@ -16,7 +16,7 @@ from .cloudinary import cloudinary_bp
 from .comments import comments_bp
 from .collections import collections_bp
 from .messaging import messaging_bp
-from .likes import likes_bp
+from .likes_recipes import likes_bp
 
 # Create the main API blueprint
 api = Blueprint('api', __name__)
