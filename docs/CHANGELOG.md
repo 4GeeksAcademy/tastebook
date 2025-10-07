@@ -2,6 +2,64 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 7, 2025) -- Database Schema Enhancement: Server-Side Default Timestamps
+
+**Problem encountered:**
+All DateTime columns with `default=func.now()` were only generating timestamps on the Python/ORM side, which could lead to inconsistencies when records are inserted through raw SQL, direct database operations, or other means that bypass the ORM's Python-side defaults.
+
+**Root cause:**
+SQLAlchemy's `default=func.now()` generates timestamps when objects are instantiated in Python, but `server_default=func.now()` ensures the database server itself handles timestamp generation. This provides better consistency and reliability, especially in distributed systems or when multiple applications interact with the same database.
+
+**Solution implemented:**
+
+**Added server_default=func.now() to all DateTime columns with default=func.now():**
+
+**All Models Updated:**
+- ✅ **User**: `created_at` - Server-side timestamp generation for user registration
+- ✅ **Recipe**: `created_at` - Server-side timestamp generation for recipe creation  
+- ✅ **RecipeImage**: `uploaded_at` - Server-side timestamp generation for image uploads
+- ✅ **Follow**: `created_at` - Server-side timestamp generation for follow relationships
+- ✅ **Comment**: `created_at` - Server-side timestamp generation for comment creation
+- ✅ **Like**: `created_at` - Server-side timestamp generation for recipe likes
+- ✅ **CommentLike**: `created_at` - Server-side timestamp generation for comment likes
+- ✅ **CollectionRecipe**: `added_at` - Server-side timestamp generation for recipe additions
+- ✅ **Collection**: `created_at` - Server-side timestamp generation for collection creation
+- ✅ **Chat**: `created_at`, `updated_at` - Server-side timestamp generation for chat operations
+- ✅ **Message**: `created_at` - Server-side timestamp generation for message creation
+
+**Benefits:**
+- 🔒 **Data consistency guarantee** - Database generates timestamps even for raw SQL inserts or direct database operations
+- 🛡️ **Application protection** - Guards against timestamp inconsistencies from any data insertion method
+- 🚀 **Performance optimization** - Database-level defaults don't require application-side timestamp generation
+- 🌍 **Production-ready** - Ensures consistent timestamps across all environments and insertion methods
+
+**Database migration required:**
+Since this adds server-side defaults to existing columns, you'll need to:
+1. Generate a migration: `alembic revision --autogenerate -m "Add server_default to DateTime columns"`
+2. Review the generated migration in `migrations/versions/`
+3. Apply the migration: `alembic upgrade head`
+
+**Backward compatibility:**
+- ✅ **No breaking changes** - Existing code continues to work unchanged
+- ✅ **Same API interface** - Datetime objects behave identically in Python
+- ✅ **Safe enhancement** - Only improves consistency without changing existing behavior
+
+**Logic impact:**
+- **No changes to application logic** - All existing code works exactly the same
+- **Improved reliability** - Timestamps are now guaranteed to be consistent regardless of how data is inserted
+- **Better distributed system support** - Multiple applications or services can insert data with consistent timestamps
+
+**Result:**
+- 🎉 **Stronger data integrity** - All timestamps now generated at database level for maximum consistency
+- 🗃️ **Production-ready enforcement** - Prevents timestamp inconsistencies from any source
+- 🧹 **Clean, documented schema** - All datetime columns follow SQLAlchemy best practices
+- 🎯 **Future-proof design** - Compatible with all data insertion methods and deployment scenarios
+
+**Files modified:**
+- `src/api/models.py` - Added `server_default=func.now()` to all DateTime columns with `default=func.now()`
+
+---
+
 ## (October 7, 2025) -- Database Constraint Enhancement: Prevent Deep Comment Nesting
 
 **Problem encountered:**
