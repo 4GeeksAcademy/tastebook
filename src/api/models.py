@@ -608,6 +608,7 @@ class Comment(db.Model):
 
     created_at:      Mapped[datetime] = mapped_column( DateTime(timezone=True),      nullable=False,   default=func.now(),)
 
+
     #-------------------#
     # Table Constraints #
     #-------------------#
@@ -622,8 +623,10 @@ class Comment(db.Model):
         ### Note: This index is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
         Index('unique_pinned_comment_per_recipe', 'recipe_id', unique=True, postgresql_where=text('is_pinned = true')),
 
-        
-        # Prevent self-referencing at deeper than one level (enforced in application logic)
+
+        # Prevent self-referencing at deeper than one level (now enforced at DB layer)
+        ### Note: This constraint is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
+        CheckConstraint("parent_comment_id IS NULL OR (SELECT c.parent_comment_id FROM comments c WHERE c.id = parent_comment_id) IS NULL", name='check_no_deep_comment_nesting'),
     )
 
 

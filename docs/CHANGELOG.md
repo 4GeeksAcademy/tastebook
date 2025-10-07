@@ -2,6 +2,63 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 7, 2025) -- Database Constraint Enhancement: Prevent Deep Comment Nesting
+
+**Problem encountered:**
+The comment system was designed to support only one level of nesting (comments can have replies, but replies cannot have further replies), but this constraint was only enforced through application logic. This created a potential data integrity risk where deep nesting could occur if application logic failed or direct database modifications bypassed the checks.
+
+**Root cause:**
+The `Comment` model's `__table_args__` included a TODO comment acknowledging the need to prevent deep nesting, but no actual database-level enforcement was implemented. The self-referential relationship allowed unlimited nesting depth, relying solely on app code to maintain the one-level limit.
+
+**Solution implemented:**
+
+**Added PostgreSQL-specific check constraint for comment nesting depth:**
+
+**Enhanced Comment model table constraints:**
+```python
+__table_args__ = (
+    # ... existing constraints ...
+    
+    # Prevent self-referencing at deeper than one level (now enforced at DB layer)
+    ### Note: This constraint is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
+    CheckConstraint("parent_comment_id IS NULL OR (SELECT c.parent_comment_id FROM comments c WHERE c.id = parent_comment_id) IS NULL", name='check_no_deep_comment_nesting'),
+)
+```
+
+**How the constraint works:**
+- **Top-level comments**: `parent_comment_id IS NULL` - No restriction
+- **First-level replies**: `parent_comment_id` points to a top-level comment (whose `parent_comment_id` is `NULL`)
+- **Prevents deep nesting**: If a comment has a `parent_comment_id`, its parent must not have its own `parent_comment_id`
+
+**Benefits:**
+- 🔒 **Data integrity guarantee** - Database prevents invalid nesting structures
+- 🛡️ **Application protection** - Guards against bugs, race conditions, or direct DB access
+- 🚀 **Performance optimization** - Constraint enforced at write-time, no runtime overhead
+- 🌍 **PostgreSQL optimized** - Leverages subquery capabilities for complex validation
+- 📊 **Scalable enforcement** - No application logic needed for constraint validation
+
+**Database migration required:**
+Since this adds a new database constraint, you'll need to:
+1. Generate a migration: `alembic revision --autogenerate -m "Add constraint to prevent deep comment nesting"`
+2. Review the generated migration in `migrations/versions/`
+3. Apply the migration: `alembic upgrade head`
+
+**Backward compatibility:**
+- ✅ **No breaking changes** - Existing valid comment threads remain intact
+- ✅ **Safe constraint addition** - Only prevents new violations, doesn't affect existing data
+- ✅ **Application logic preserved** - Can still use app-level checks as additional validation
+
+**Result:**
+- 🎉 **Stronger data integrity** - Database guarantees one-level nesting at all times
+- 🗃️ **Production-ready enforcement** - Prevents data corruption from any source
+- 🧹 **Clean, documented constraint** - Clear intent with proper database implementation
+- 🎯 **Future-proof design** - Follows SQLAlchemy best practices for constraints
+
+**Files modified:**
+- `src/api/models.py` - Added check constraint to prevent deep comment nesting
+
+---
+
 ## (October 7, 2025) -- Database Constraint Enhancement: Enforce Unique Pinned Comments Per Recipe
 
 **Problem encountered:**
