@@ -40,7 +40,7 @@ class User(db.Model):
     id:              Mapped[int]      = mapped_column( Integer,      primary_key=True,                     autoincrement=True)
 
     # Remaining Attributes
-    email:           Mapped[str]      = mapped_column( String(40),   unique=True,         nullable=False)
+    email:           Mapped[str]      = mapped_column( String(100),   unique=True,         nullable=False)
     username:        Mapped[str]      = mapped_column( String(40),   unique=True,         nullable=False)
     full_name:       Mapped[str]      = mapped_column( String(80),                        nullable=False)
     description:     Mapped[str]      = mapped_column( Text,                              nullable=True)
