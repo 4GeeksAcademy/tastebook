@@ -309,14 +309,14 @@ class Recipe(db.Model):
 
     ingredients = [
         {
-            "ingredient": "flour"
+            "ingredient": "flour",
             "quantity":    2,
-            "unit":       "cups",
+            "unit":       "cups"
         },
         {
-            "ingredient": "salt"
+            "ingredient": "salt",
             "quantity":    1,
-            "unit":       "tsp",
+            "unit":       "tsp"
         }
     ]
     """
