@@ -30,7 +30,12 @@ def generate_sitemap(app):
             if "/admin/" not in url:
                 links.append(url)
 
+
+
     links_html = "".join(["<li><a href='" + y + "'>" + y + "</a></li>" for y in links])
+
+
+    # This is the HTML template for the sitemap page with the Backend endpoints and URL
     return """
     <style>
         body {
