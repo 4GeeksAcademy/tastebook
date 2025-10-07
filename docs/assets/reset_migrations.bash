@@ -10,13 +10,13 @@ echo "🔧 Initializing Flask-Migrate..."
 pipenv run init
 
 echo "🗃️  Dropping existing database (if exists)..."
-dropdb -h localhost -U postgres tastebook || true
+dropdb -h localhost -U tastebook_user tastebook || true
 
 echo "🆕 Creating fresh database..."
-createdb -h localhost -U postgres tastebook || true
+createdb -h localhost -U tastebook_user tastebook || true
 
 echo "🔌 Installing unaccent extension..."
-psql -h localhost tastebook -U postgres -c 'CREATE EXTENSION IF NOT EXISTS unaccent;' || true
+psql -h localhost tastebook -U tastebook_user -c 'CREATE EXTENSION IF NOT EXISTS unaccent;' || true
 
 echo "📝 Generating new migration..."
 pipenv run migrate
