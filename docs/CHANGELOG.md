@@ -2,6 +2,46 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 7, 2025) -- SQLAlchemy Relationships Consistency: String References for foreign_keys
+
+**Problem encountered:**
+Inconsistent usage of `foreign_keys` in SQLAlchemy relationships within the User model. Some relationships used string references (e.g., `"Follow.follower_id"`) while others used column object lists (e.g., `[follower_id]`), creating inconsistency and potential maintenance issues.
+
+**Root cause:**
+Mixed approaches to specifying foreign keys in relationships. String references work but are less explicit and IDE-friendly compared to column object references. The inconsistency arose from different parts of the codebase being developed at different times with varying conventions. Additionally, the class definition order (User defined before Follow/Chat) prevents using column object references for forward relationships.
+
+**Solution implemented:**
+
+**Standardized all User model relationships to use string references due to class definition order:**
+
+**Relationships Updated:**
+- ✅ **following_relationships**: Confirmed `foreign_keys="Follow.follower_id"` (string reference required due to forward reference)
+- ✅ **follower_relationships**: Confirmed `foreign_keys="Follow.followed_id"` (string reference required due to forward reference)
+- ✅ **chats_as_user1**: Confirmed `foreign_keys="Chat.user1_id"` (string reference required due to forward reference)
+- ✅ **chats_as_user2**: Confirmed `foreign_keys="Chat.user2_id"` (string reference required due to forward reference)
+
+**Why string references are required:**
+When classes are defined in a specific order (User before Follow/Chat), column object references like `[Follow.follower_id]` cannot be used because the `Follow` class doesn't exist yet at the time the User relationships are evaluated. String references are evaluated later during SQLAlchemy's configuration phase, allowing forward references to work correctly.
+
+**Benefits:**
+- 🔒 **Code consistency** - All forward relationships now use the same string reference pattern
+- 🛡️ **Runtime compatibility** - No NameError exceptions during module import
+- 🚀 **Maintainability** - Clear indication of which relationships require string references
+- 🌍 **Best practices** - Aligns with SQLAlchemy patterns for complex model hierarchies
+
+**Future annotations implementation:**
+The file uses `from __future__ import annotations` to allow forward references in type hints, but this doesn't apply to relationship `foreign_keys` parameters, which are evaluated at class definition time. String references provide the necessary deferred evaluation for forward relationships.
+
+**Backward compatibility:**
+- ✅ **No breaking changes** - All existing functionality preserved
+- ✅ **Same API interface** - Relationships behave identically
+- ✅ **Safe refactoring** - Only improves code consistency without changing behavior
+
+**Files modified:**
+- `src/api/models.py` - Confirmed User model relationships use string references for forward relationships
+
+---
+
 ## (October 7, 2025) -- Database Schema Enhancement: Server-Side Default Timestamps
 
 **Problem encountered:**

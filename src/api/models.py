@@ -69,7 +69,7 @@ class User(db.Model):
         cascade="all, delete-orphan"
     )
 
-    # One-to-many relationship with Follow (follower) --> shows all users this user is following
+        # One-to-many relationship with Follow (follower) --> shows all users this user is following
     following_relationships: Mapped[List["Follow"]] = relationship(
         "Follow",
         foreign_keys="Follow.follower_id",
@@ -77,7 +77,7 @@ class User(db.Model):
         cascade="all, delete-orphan"
     )
 
-    # One-to-many relationship with Follow (followed) --> shows all users following this user
+        # One-to-many relationship with Follow (followed) --> shows all users following this user
     follower_relationships: Mapped[List["Follow"]] = relationship(
         "Follow",
         foreign_keys="Follow.followed_id", 
