@@ -1,9 +1,14 @@
 {
     // "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "workbench.editorAssociations": {   
-        "*.md": "vscode.markdown.preview.editor"
-    },
+
+
+    // --- STOPPED the built-in markdown preview editor for .md files ---
+    // "workbench.editorAssociations": {   
+    //     "*.md": "vscode.markdown.preview.editor"
+    // },
+
+
     "[javascriptreact]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
@@ -12,5 +17,9 @@
     // Set to pipenv so VS Code uses the project's Pipfile/Pipfile.lock
     // and automatically selects the correct interpreter/environment.
     "python-envs.defaultEnvManager": "ms-python.python:pipenv",
-    "python-envs.pythonProjects": []
+    "python-envs.pythonProjects": [],
+
+
+    // Set a default file icon theme for this workspace (change the id if different theme is preferred)
+    "workbench.iconTheme": "vscode-icons"
 }
