@@ -46,7 +46,8 @@ class User(db.Model):
     description:     Mapped[str]      = mapped_column( Text,                              nullable=True)
     country:         Mapped[str]      = mapped_column( String(100),                       nullable=True)
     is_active:       Mapped[bool]     = mapped_column( Boolean,      default=True,        nullable=False)
-    created_at:      Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
+
+    created_at:      Mapped[datetime] = mapped_column( DateTime(timezone=True),           nullable=False,  default=func.now())
 
     # Password - both plain (for testing) and hashed (for production)
     plain_psswrd:    Mapped[str]      = mapped_column( String(255),                       nullable=True)
@@ -304,7 +305,8 @@ class Recipe(db.Model):
     # Remaining Attributes                                                                       
     title:        Mapped[str]      = mapped_column( String(100),      nullable=False)
     description:  Mapped[str]      = mapped_column( Text,             nullable=True)
-    created_at:   Mapped[datetime] = mapped_column( DateTime,         nullable=False,   default=func.now())
+
+    created_at:   Mapped[datetime] = mapped_column( DateTime(timezone=True),        default=func.now(), nullable=False   )
 
     ingredients:  Mapped[List[Dict[str, Any]]] = mapped_column( JSON, nullable=False)
     """ Example structure for INGREDIENTS: 
@@ -476,7 +478,8 @@ class RecipeImage(db.Model):
     image_id:     Mapped[str]      = mapped_column( String(100),                      nullable=False)
     is_primary:   Mapped[bool]     = mapped_column( Boolean,     default=False,       nullable=False)
     display_order: Mapped[int]     = mapped_column( Integer,     default=0,           nullable=False)
-    uploaded_at:  Mapped[datetime] = mapped_column( DateTime,    default=func.now(),  nullable=False)
+
+    uploaded_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True),          nullable=False,   default=func.now())
 
     # Relation Many-to-One with Recipe --> shows the recipe this image is associated with
     recipe: Mapped["Recipe"] = relationship(
@@ -526,7 +529,7 @@ class Follow(db.Model):
     followed_id: Mapped[int] = mapped_column( Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     # Remaining Attributes
-    created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
+    created_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True), default=func.now(),    nullable=False)
 
 
     #-------------------#
@@ -600,10 +603,10 @@ class Comment(db.Model):
 
     # Content and State Fields
     content:         Mapped[str]      = mapped_column( Text,                         nullable=False)
-    created_at:      Mapped[datetime] = mapped_column( DateTime,                     nullable=False,   default=func.now(),)
     is_edited:       Mapped[bool]     = mapped_column( Boolean,   default=False,     nullable=False)
     is_pinned:       Mapped[bool]     = mapped_column( Boolean,   default=False,     nullable=False)
 
+    created_at:      Mapped[datetime] = mapped_column( DateTime(timezone=True),      nullable=False,   default=func.now(),)
 
     #-------------------#
     # Table Constraints #
@@ -776,7 +779,7 @@ class Like(db.Model):
     recipe_id:   Mapped[int] = mapped_column( Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
 
     # Timestamp
-    created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(),                     nullable=False)
+    created_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True), default=func.now(),      nullable=False)
 
 
     #-------------------#
@@ -844,7 +847,7 @@ class CommentLike(db.Model):
     comment_id:  Mapped[int] = mapped_column( Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=False)
 
     # Timestamp
-    created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
+    created_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True),  default=func.now(),      nullable=False)
 
 
     #-------------------#
@@ -921,8 +924,8 @@ class CollectionRecipe(db.Model):
     recipe_id:     Mapped[int] = mapped_column( Integer, ForeignKey("recipes.id",      ondelete="CASCADE"), nullable=False)
 
     # Optional ordering / metadata
-    display_order: Mapped[int]      = mapped_column( Integer,  default=0,          nullable=False)
-    added_at:      Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
+    display_order: Mapped[int]      = mapped_column( Integer,  default=0,                                   nullable=False)
+    added_at:      Mapped[datetime] = mapped_column( DateTime(timezone=True), default=func.now(),           nullable=False)
 
     __table_args__ = (
         # Prevent duplicate recipe entries in the same collection
@@ -975,7 +978,7 @@ class Collection(db.Model):
     title:         Mapped[str]           = mapped_column( String(120),                  nullable=False)
     description:   Mapped[Optional[str]] = mapped_column( Text,                         nullable=True)
     is_public:     Mapped[bool]          = mapped_column( Boolean,  default=False,      nullable=False)
-    created_at:    Mapped[datetime]      = mapped_column( DateTime, default=func.now(), nullable=False)
+    created_at:    Mapped[datetime]      = mapped_column( DateTime(timezone=True),      nullable=False,  default=func.now())
 
     __table_args__ = (
         # Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
@@ -1063,8 +1066,8 @@ class Chat(db.Model):
     user2_id:     Mapped[int]      = mapped_column( Integer,      ForeignKey("users.id", ondelete="CASCADE"),  nullable=False)
 
     # Timestamps
-    created_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),                          nullable=False)
-    updated_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  onupdate=func.now(),    nullable=False)
+    created_at:   Mapped[datetime] = mapped_column( DateTime(timezone=True),     default=func.now(),                          nullable=False)
+    updated_at:   Mapped[datetime] = mapped_column( DateTime(timezone=True),     default=func.now(),  onupdate=func.now(),    nullable=False)
 
 
     #-------------------#
@@ -1225,16 +1228,16 @@ class Message(db.Model):
     sender_id:    Mapped[int]      = mapped_column( Integer,      ForeignKey("users.id", ondelete="CASCADE"),    nullable=False)
 
     # Message content
-    content:      Mapped[str]      = mapped_column( Text,                              nullable=False)
+    content:      Mapped[str]      = mapped_column( Text,                               nullable=False)
 
     # Message state
-    is_read:      Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
-    is_edited:    Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
+    is_read:      Mapped[bool]     = mapped_column( Boolean,      default=False,        nullable=False)
+    is_edited:    Mapped[bool]     = mapped_column( Boolean,      default=False,        nullable=False)
 
     # Timestamps
-    created_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
-    read_at:      Mapped[Optional[datetime]] = mapped_column( DateTime,                nullable=True)
-    edited_at:    Mapped[Optional[datetime]] = mapped_column( DateTime,                nullable=True)
+    created_at:   Mapped[datetime] = mapped_column( DateTime(timezone=True),            nullable=False,   default=func.now())
+    read_at:      Mapped[Optional[datetime]] = mapped_column( DateTime(timezone=True),  nullable=True)
+    edited_at:    Mapped[Optional[datetime]] = mapped_column( DateTime(timezone=True),  nullable=True)
            
 
     #-------------------#

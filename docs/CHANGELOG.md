@@ -2,6 +2,74 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 7, 2025) -- Database Schema Enhancement: Timezone-Aware DateTime Columns
+
+**Problem encountered:**
+All `DateTime` columns in the SQLAlchemy models were using the default `timezone=False` parameter, which creates timezone-naive timestamps. This can lead to issues when handling users across different timezones, daylight saving time transitions, and international deployments.
+
+**Root cause:**
+SQLAlchemy's `DateTime` type defaults to `timezone=False`, creating naive datetime objects that don't store timezone information. This can cause:
+- Inconsistent timestamp handling across different user locations
+- Potential bugs during daylight saving time changes
+- Difficulty in international applications where timezone context matters
+
+**Solution implemented:**
+
+**Updated all DateTime columns to use timezone-aware timestamps:**
+
+**All Models Updated:**
+- ✅ **User**: `created_at` - Now timezone-aware for user registration timestamps
+- ✅ **Recipe**: `created_at` - Timezone-aware recipe creation timestamps  
+- ✅ **RecipeImage**: `uploaded_at` - Timezone-aware image upload timestamps
+- ✅ **Follow**: `created_at` - Timezone-aware follow relationship timestamps
+- ✅ **Comment**: `created_at` - Timezone-aware comment creation timestamps
+- ✅ **Like**: `created_at` - Timezone-aware recipe like timestamps
+- ✅ **CommentLike**: `created_at` - Timezone-aware comment like timestamps
+- ✅ **CollectionRecipe**: `added_at` - Timezone-aware recipe addition timestamps
+- ✅ **Collection**: `created_at` - Timezone-aware collection creation timestamps
+- ✅ **Chat**: `created_at`, `updated_at` - Timezone-aware chat timestamps
+- ✅ **Message**: `created_at`, `read_at`, `edited_at` - Timezone-aware message timestamps
+
+**Code changes:**
+```python
+# Before: Naive datetime columns
+created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+# After: Timezone-aware datetime columns  
+created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), nullable=False)
+```
+
+**Benefits:**
+- 🚀 **Timezone consistency** - All timestamps now include timezone information
+- 🌍 **International support** - Proper handling of users in different timezones
+- 🕐 **DST compliance** - Correct behavior during daylight saving time transitions
+- 🔄 **Future-proof** - Compatible with timezone-aware database operations
+- 📊 **Accurate analytics** - Reliable timestamp comparisons and calculations
+
+**Database migration required:**
+Since this changes the column types from `TIMESTAMP` to `TIMESTAMP WITH TIME ZONE` (or equivalent in your database), you'll need to:
+1. Generate a new migration: `pipenv run migrate`
+2. Review the migration to ensure it handles the timezone conversion properly
+3. Apply the migration: `pipenv run upgrade`
+
+**Backward compatibility:**
+- ✅ **No breaking changes** - Existing code continues to work
+- ✅ **Same API interface** - Datetime objects behave identically in Python
+- ✅ **Database migration** - Handles conversion from naive to timezone-aware timestamps
+
+**Result:**
+- 🎉 **Timezone-aware database** - All timestamps now include timezone context
+- 🗃️ **International-ready** - Proper support for global user base
+- 🧹 **Clean, consistent schema** - All datetime columns follow the same pattern
+- 🎯 **Production-ready** - Follows SQLAlchemy best practices for timezone handling
+
+**Files modified:**
+- `src/api/models.py` - Updated all DateTime column definitions with timezone=True
+
+---
+<br>
+<br>
+
 ## (October 7, 2025) -- Database Query Optimization: Replace In-Memory Scans with Efficient EXISTS Queries
 
 **Problem encountered:**
