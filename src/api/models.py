@@ -40,12 +40,14 @@ class User(db.Model):
     email:           Mapped[str]      = mapped_column( String(40),   unique=True,         nullable=False)
     username:        Mapped[str]      = mapped_column( String(40),   unique=True,         nullable=False)
     full_name:       Mapped[str]      = mapped_column( String(80),                        nullable=False)
-    plain_psswrd:    Mapped[str]      = mapped_column( String(255),                       nullable=True)
-    hashed_psswrd:   Mapped[str]      = mapped_column( String(255),                       nullable=False)
     description:     Mapped[str]      = mapped_column( Text,                              nullable=True)
     country:         Mapped[str]      = mapped_column( String(100),                       nullable=True)
     is_active:       Mapped[bool]     = mapped_column( Boolean,      default=True,        nullable=False)
     created_at:      Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
+
+    # Password - both plain (for testing) and hashed (for production)
+    plain_psswrd:    Mapped[str]      = mapped_column( String(255),                       nullable=True)
+    hashed_psswrd:   Mapped[str]      = mapped_column( String(255),                       nullable=False)
 
     # Cloudinary attributes
     cloudinary_url:         Mapped[str]      = mapped_column( String(255), nullable=True)
@@ -150,8 +152,8 @@ class User(db.Model):
             # Social network metrics
             "followers_count":   len(self.follower_relationships),
             "following_count":   len(self.following_relationships),
-            
-            "plain_psswrd":      self.plain_psswrd # THIS IS FOR TESTING PURPOSES
+            "recipes_count":     len(self.recipes),
+            "collections_count": len(self.collections)
             # do not serialize the hashed password, its a security breach
         }
 
@@ -213,7 +215,7 @@ class User(db.Model):
     # __repr__ Method #
     #-----------------#
     def __repr__(self):
-        return f"<User ID {self.id} | Username: {self.username} | Email: {self.email} | Name: {self.full_name} | Plain Password: {self.plain_psswrd}>"
+        return f"<User ID {self.id} | Username: {self.username} | Email: {self.email} | Name: {self.full_name}>"
 
 
 
