@@ -2,8 +2,10 @@ from __future__ import annotations ## to allow forward references and then appen
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Boolean, DateTime, Date, ForeignKey, Integer, String, Text, JSON, func, UniqueConstraint, CheckConstraint, select
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+# from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.hybrid import hybrid_property
+
 
 from datetime import datetime, date
 from typing import List, Optional, Dict, Any
@@ -23,12 +25,12 @@ from typing import List, Optional, Dict, Any
 db = SQLAlchemy()
 
 
-############################################
-###########         USER         ###########
-############################################
+#############################################
+###########         USERS         ###########
+#############################################
 
 class User(db.Model):
-    __tablename__ = "user"
+    __tablename__ = "users"
 
     #------------#
     # Attributes #
@@ -51,8 +53,8 @@ class User(db.Model):
     hashed_psswrd:   Mapped[str]      = mapped_column( String(255),                       nullable=False)
 
     # Cloudinary attributes
-    cloudinary_url:         Mapped[str]      = mapped_column( String(255), nullable=True)
-    cloudinary_img_id:      Mapped[str]      = mapped_column( String(100), nullable=True)
+    cloudinary_url:     Mapped[str]   = mapped_column( String(255),                       nullable=True)
+    cloudinary_img_id:  Mapped[str]   = mapped_column( String(100),                       nullable=True)
 
 
     #-----------#
@@ -134,16 +136,16 @@ class User(db.Model):
     )
 
 
-    #-----------------#
+    #-------------------#
     # Hybrid Properties #
-    #-----------------#
+    #-------------------#
     
     @hybrid_property
     def followers_count(self):
         return len(self.follower_relationships)
     
     @followers_count.expression
-    def followers_count(cls):
+    def followers_count_expression(cls):
         return (
             select(func.count(Follow.id))
             .where(Follow.followed_id == cls.id)
@@ -155,7 +157,7 @@ class User(db.Model):
         return len(self.following_relationships)
     
     @following_count.expression
-    def following_count(cls):
+    def following_count_expression(cls):
         return (
             select(func.count(Follow.id))
             .where(Follow.follower_id == cls.id)
@@ -167,7 +169,7 @@ class User(db.Model):
         return len(self.recipes)
     
     @recipes_count.expression
-    def recipes_count(cls):
+    def recipes_count_expression(cls):
         return (
             select(func.count(Recipe.id))
             .where(Recipe.author_id == cls.id)
@@ -179,7 +181,7 @@ class User(db.Model):
         return len(self.collections)
     
     @collections_count.expression
-    def collections_count(cls):
+    def collections_count_expression(cls):
         return (
             select(func.count(Collection.id))
             .where(Collection.owner_id == cls.id)
@@ -189,7 +191,7 @@ class User(db.Model):
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self):
+    def serialize(self) -> Dict[str, Any]:
         return {
             "user_id":     self.id,
             "email":       self.email,
@@ -211,11 +213,11 @@ class User(db.Model):
         }
 
 
-    #-----------------#
-    # Helper Methods  #
-    #-----------------#
+    #----------------#
+    # Helper Methods #
+    #----------------#
     
-    def is_following(self, user):
+    def is_following(self, user: Optional["User"]) -> bool:
         """Check if this user is following another user"""
         if user is None or user.id is None:
             return False
@@ -284,20 +286,20 @@ class User(db.Model):
 
 
 
-############################################
-##########        RECIPE         ###########
-############################################
+#############################################
+##########         RECIPES         ##########
+#############################################
 
 class Recipe(db.Model):
-    __tablename__ = "recipe"
+    __tablename__ = "recipes"
 
     #------------#
     # Attributes #
     #------------#
 
     # Primary Key and Foreign Keys
-    id:           Mapped[int] = mapped_column( Integer,  primary_key=True,      autoincrement=True)
-    author_id:    Mapped[int] = mapped_column( Integer,  ForeignKey("user.id",  ondelete="CASCADE"),  nullable=False)
+    id:           Mapped[int] = mapped_column( Integer,  primary_key=True,       autoincrement=True)
+    author_id:    Mapped[int] = mapped_column( Integer,  ForeignKey("users.id",  ondelete="CASCADE"),  nullable=False)
 
     # Remaining Attributes                                                                       
     title:        Mapped[str]      = mapped_column( String(100),      nullable=False)
@@ -391,9 +393,9 @@ class Recipe(db.Model):
     )
 
 
-    #-----------------#
+    #-------------------#
     # Hybrid Properties #
-    #-----------------#
+    #-------------------#
     
     @hybrid_property
     def like_count(self):
@@ -401,7 +403,7 @@ class Recipe(db.Model):
         return len(self.likes)
     
     @like_count.expression
-    def like_count(cls):
+    def like_count_expression(cls):
         return (
             select(func.count(Like.id))
             .where(Like.recipe_id == cls.id)
@@ -426,7 +428,7 @@ class Recipe(db.Model):
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self, current_user_id=None):
+    def serialize(self, current_user_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Serialize recipe data
         
@@ -456,18 +458,18 @@ class Recipe(db.Model):
 
 
 
-############################################
-#########       RECIPE IMAGE       #########
-############################################
+#############################################
+#########       RECIPE IMAGES       #########
+#############################################
 
 class RecipeImage(db.Model):
-    __tablename__ = "recipe_image"
+    __tablename__ = "recipe_images"
 
     # Primary Key
     id:        Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
  
     # Foreign Key to Recipe 
-    recipe_id: Mapped[int] = mapped_column( Integer, ForeignKey("recipe.id", ondelete="CASCADE"), nullable=False)
+    recipe_id: Mapped[int] = mapped_column( Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
 
     # Cloudinary fields
     url:          Mapped[str]      = mapped_column( String(255),                      nullable=False)
@@ -486,7 +488,7 @@ class RecipeImage(db.Model):
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self):
+    def serialize(self) -> Dict[str, Any]:
         return {
             "id":            self.id,
             "recipe_id":     self.recipe_id,
@@ -505,12 +507,12 @@ class RecipeImage(db.Model):
 
 
 
-############################################
-##########         FOLLOW        ###########
-############################################
+#############################################
+##########         FOLLOWS        ###########
+#############################################
 
 class Follow(db.Model):
-    __tablename__ = "follow"
+    __tablename__ = "follows"
 
     #------------#
     # Attributes #
@@ -520,8 +522,8 @@ class Follow(db.Model):
     id:          Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
-    follower_id: Mapped[int] = mapped_column( Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
-    followed_id: Mapped[int] = mapped_column( Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    follower_id: Mapped[int] = mapped_column( Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    followed_id: Mapped[int] = mapped_column( Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     # Remaining Attributes
     created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
@@ -532,7 +534,7 @@ class Follow(db.Model):
     #-------------------#
     __table_args__ = (
         # Prevent users from following themselves
-        CheckConstraint("follower_id != followed_id", name='check_no_self_follow'),
+        CheckConstraint("follower_id != followed_id",  name='check_no_self_follow'),
         # Each follow relationship should be unique (no duplicate follows)
         UniqueConstraint('follower_id', 'followed_id', name='unique_follow_relationship')
     )
@@ -560,7 +562,7 @@ class Follow(db.Model):
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self):
+    def serialize(self) -> Dict[str, Any]:
         return {
             "follow_id":   self.id,
             "follower_id": self.follower_id,
@@ -577,30 +579,30 @@ class Follow(db.Model):
 
 
 
-############################################
-##########        COMMENT        ###########
-############################################
+#############################################
+##########        COMMENTS        ###########
+#############################################
 
 class Comment(db.Model):
-    __tablename__ = "comment"
+    __tablename__ = "comments"
 
     #------------#
     # Attributes #
     #------------#
 
     # Primary Key
-    id:              Mapped[int]      = mapped_column( Integer,      primary_key=True,                     autoincrement=True)
+    id:              Mapped[int]      = mapped_column( Integer,        primary_key=True, autoincrement=True)
 
     # Foreign Keys
-    user_id:         Mapped[int]      = mapped_column( Integer,        ForeignKey("user.id",   ondelete="CASCADE"),  nullable=False)
-    recipe_id:       Mapped[int]      = mapped_column( Integer,        ForeignKey("recipe.id", ondelete="CASCADE"),  nullable=False)
-    parent_comment_id: Mapped[Optional[int]] = mapped_column( Integer, ForeignKey("comment.id", ondelete="CASCADE"), nullable=True)
+    user_id:         Mapped[int]      = mapped_column( Integer,        ForeignKey("users.id",    ondelete="CASCADE"),  nullable=False)
+    recipe_id:       Mapped[int]      = mapped_column( Integer,        ForeignKey("recipes.id",  ondelete="CASCADE"),  nullable=False)
+    parent_comment_id: Mapped[Optional[int]] = mapped_column( Integer, ForeignKey("comments.id", ondelete="CASCADE"),  nullable=True)
 
     # Content and State Fields
-    content:         Mapped[str]      = mapped_column( Text,                              nullable=False)
-    date_created:    Mapped[date]     = mapped_column( Date,         default=func.current_date(),  nullable=False)
-    is_edited:       Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
-    is_pinned:       Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
+    content:         Mapped[str]      = mapped_column( Text,                         nullable=False)
+    date_created:    Mapped[date]     = mapped_column( Date,                         nullable=False,   default=func.current_date(),)
+    is_edited:       Mapped[bool]     = mapped_column( Boolean,   default=False,     nullable=False)
+    is_pinned:       Mapped[bool]     = mapped_column( Boolean,   default=False,     nullable=False)
 
 
     #-------------------#
@@ -656,9 +658,9 @@ class Comment(db.Model):
     )
 
 
-    #-----------------#
+    #-------------------#
     # Hybrid Properties #
-    #-----------------#
+    #-------------------#
     
     @hybrid_property
     def like_count(self):
@@ -666,7 +668,7 @@ class Comment(db.Model):
         return len(self.likes)
     
     @like_count.expression
-    def like_count(cls):
+    def like_count_expression(cls):
         return (
             select(func.count(CommentLike.id))
             .where(CommentLike.comment_id == cls.id)
@@ -679,16 +681,16 @@ class Comment(db.Model):
         return len(self.replies)
     
     @replies_count.expression
-    def replies_count(cls):
+    def replies_count_expression(cls):
         return (
             select(func.count(Comment.id))
             .where(Comment.parent_comment_id == cls.id)
             .scalar_subquery()
         )
 
-    #-----------------#
-    # Helper Methods  #
-    #-----------------#
+    #----------------#
+    # Helper Methods #
+    #----------------#
     
     def is_liked_by(self, user_id: int) -> bool:
         """Check if a specific user has liked this comment"""
@@ -704,7 +706,7 @@ class Comment(db.Model):
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self, include_replies=True, current_user_id=None):
+    def serialize(self, include_replies: bool = True, current_user_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Serialize comment data
         
@@ -755,12 +757,12 @@ class Comment(db.Model):
 
 
 
-############################################
-##########      RECIPE LIKE      ###########
-############################################
+#############################################
+##########      RECIPE LIKES      ###########
+#############################################
 
 class Like(db.Model):
-    __tablename__ = "like"
+    __tablename__ = "recipe_likes"
 
     #------------#
     # Attributes #
@@ -770,8 +772,8 @@ class Like(db.Model):
     id:          Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
-    user_id:     Mapped[int] = mapped_column( Integer, ForeignKey("user.id",   ondelete="CASCADE"), nullable=False)
-    recipe_id:   Mapped[int] = mapped_column( Integer, ForeignKey("recipe.id", ondelete="CASCADE"), nullable=False)
+    user_id:     Mapped[int] = mapped_column( Integer, ForeignKey("users.id",   ondelete="CASCADE"), nullable=False)
+    recipe_id:   Mapped[int] = mapped_column( Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
 
     # Timestamp
     created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
@@ -806,7 +808,7 @@ class Like(db.Model):
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self):
+    def serialize(self) -> Dict[str, Any]:
         return {
             "like_id":    self.id,
             "user_id":    self.user_id,
@@ -823,12 +825,12 @@ class Like(db.Model):
 
 
 
-############################################
-##########     COMMENT LIKE      ###########
-############################################
+##############################################
+##########     COMMENT LIKES      ###########
+##############################################
 
 class CommentLike(db.Model):
-    __tablename__ = "comment_like"
+    __tablename__ = "comment_likes"
 
     #------------#
     # Attributes #
@@ -838,8 +840,8 @@ class CommentLike(db.Model):
     id:          Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
-    user_id:     Mapped[int] = mapped_column( Integer, ForeignKey("user.id",    ondelete="CASCADE"), nullable=False)
-    comment_id:  Mapped[int] = mapped_column( Integer, ForeignKey("comment.id", ondelete="CASCADE"), nullable=False)
+    user_id:     Mapped[int] = mapped_column( Integer, ForeignKey("users.id",    ondelete="CASCADE"), nullable=False)
+    comment_id:  Mapped[int] = mapped_column( Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=False)
 
     # Timestamp
     created_at:  Mapped[datetime] = mapped_column( DateTime, default=func.now(), nullable=False)
@@ -874,7 +876,7 @@ class CommentLike(db.Model):
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self):
+    def serialize(self) -> Dict[str, Any]:
         return {
             "like_id":    self.id,
             "user_id":    self.user_id,
@@ -891,9 +893,15 @@ class CommentLike(db.Model):
 
 
 ############################################
-##########      COLLECTIONS       ###########
+##########      COLLECTIONS      ###########
+##########   Association table   ###########
+##########      and TABLE        ###########
 ############################################
 
+
+    #-------------------#
+    # Association Table #
+    #-------------------#
 
 class CollectionRecipe(db.Model):
     """Association table between Collection and Recipe.
@@ -906,11 +914,11 @@ class CollectionRecipe(db.Model):
     __tablename__ = "collection_recipe"
 
     # Primary Key
-    id:         Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
+    id:            Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
-    collection_id: Mapped[int] = mapped_column( Integer, ForeignKey("collection.id", ondelete="CASCADE"), nullable=False)
-    recipe_id:     Mapped[int] = mapped_column( Integer, ForeignKey("recipe.id",     ondelete="CASCADE"), nullable=False)
+    collection_id: Mapped[int] = mapped_column( Integer, ForeignKey("collections.id",  ondelete="CASCADE"), nullable=False)
+    recipe_id:     Mapped[int] = mapped_column( Integer, ForeignKey("recipes.id",      ondelete="CASCADE"), nullable=False)
 
     # Optional ordering / metadata
     display_order: Mapped[int]      = mapped_column( Integer,  default=0,          nullable=False)
@@ -932,19 +940,22 @@ class CollectionRecipe(db.Model):
         back_populates="collection_recipes"
     )
 
-    def serialize(self):
+    def serialize(self) -> Dict[str, Any]:
         return {
-            "id": self.id,
+            "id":            self.id,
             "collection_id": self.collection_id,
-            "recipe_id": self.recipe_id,
+            "recipe_id":     self.recipe_id,
             "display_order": self.display_order,
-            "added_at": self.added_at.isoformat() if self.added_at else None
+            "added_at":      self.added_at.isoformat() if self.added_at else None
         }
 
     def __repr__(self):
         return f"<CollectionRecipe ID {self.id} | Collection: {self.collection_id} | Recipe: {self.recipe_id}>"
 
 
+    #-------#
+    # TABLE #
+    #-------#
 
 class Collection(db.Model):
     """User-created collection of recipes (similar to YouTube playlists).
@@ -952,14 +963,13 @@ class Collection(db.Model):
     A collection belongs to one user (owner) and can contain many recipes.
     Collections can be public or private.
     """
-
-    __tablename__ = "collection"
+    __tablename__ = "collections"
 
     # Primary Key
     id:        Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
 
     # Foreign Key to User (owner)
-    owner_id:  Mapped[int] = mapped_column( Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    owner_id:  Mapped[int] = mapped_column( Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     # Attributes
     title:         Mapped[str]           = mapped_column( String(120),                  nullable=False)
@@ -995,7 +1005,7 @@ class Collection(db.Model):
     )
 
     # Serialization
-    def serialize(self, include_recipes=False, current_user_id=None):
+    def serialize(self, include_recipes: bool = False, current_user_id: Optional[int] = None) -> Dict[str, Any]:
         data = {
             "collection_id": self.id,
             "owner_id":      self.owner_id,
@@ -1004,8 +1014,8 @@ class Collection(db.Model):
             "is_public":     self.is_public,
             "created_at":    self.created_at.isoformat() if self.created_at else None,
             "owner": {
-                "user_id": self.owner.id,
-                "username": self.owner.username,
+                "user_id":  self.owner.id,
+                "username":  self.owner.username,
                 "cloudinary_url": self.owner.cloudinary_url
             } if self.owner else None,
             "recipe_count": len(self.collection_recipes)
@@ -1029,32 +1039,32 @@ class Collection(db.Model):
         return f"<Collection ID {self.id} | Title: {self.title} | Owner: {self.owner_id} | Public: {self.is_public}>"
 
 
-############################################
-##########        CHAT          ###########
-############################################
+
+######################################
+##########      CHATS      ###########
+######################################
 
 class Chat(db.Model):
     """Chat represents a conversation between two users.
     
     Each chat has exactly two participants. Direct messaging is 1-on-1.
     """
-    
-    __tablename__ = "chat"
+    __tablename__ = "chats"
 
     #------------#
     # Attributes #
     #------------#
 
     # Primary Key
-    id:           Mapped[int]      = mapped_column( Integer,      primary_key=True,                     autoincrement=True)
+    id:           Mapped[int]      = mapped_column( Integer,      primary_key=True,  autoincrement=True)
 
     # Foreign Keys (the two participants)
-    user1_id:     Mapped[int]      = mapped_column( Integer,      ForeignKey("user.id", ondelete="CASCADE"),  nullable=False)
-    user2_id:     Mapped[int]      = mapped_column( Integer,      ForeignKey("user.id", ondelete="CASCADE"),  nullable=False)
+    user1_id:     Mapped[int]      = mapped_column( Integer,      ForeignKey("users.id", ondelete="CASCADE"),  nullable=False)
+    user2_id:     Mapped[int]      = mapped_column( Integer,      ForeignKey("users.id", ondelete="CASCADE"),  nullable=False)
 
     # Timestamps
-    created_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  nullable=False)
-    updated_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  onupdate=func.now(), nullable=False)
+    created_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),                          nullable=False)
+    updated_at:   Mapped[datetime] = mapped_column( DateTime,     default=func.now(),  onupdate=func.now(),    nullable=False)
 
 
     #-------------------#
@@ -1094,9 +1104,9 @@ class Chat(db.Model):
     )
 
 
-    #-----------------#
-    # Helper Methods  #
-    #-----------------#
+    #----------------#
+    # Helper Methods #
+    #----------------#
     
     @property
     def last_message(self):
@@ -1149,7 +1159,7 @@ class Chat(db.Model):
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self, current_user_id=None, include_messages=False):
+    def serialize(self, current_user_id: Optional[int] = None, include_messages: bool = False) -> Dict[str, Any]:
         print(f"[DEBUG SERIALIZE] Chat.serialize called")
         print(f"[DEBUG SERIALIZE] Chat ID: {self.id}")
         print(f"[DEBUG SERIALIZE] Current user ID: {current_user_id}")
@@ -1191,9 +1201,9 @@ class Chat(db.Model):
         return f"<Chat ID {self.id} | Users: {self.user1_id}, {self.user2_id}>"
 
 
-############################################
-##########       MESSAGE        ###########
-############################################
+#########################################
+##########      MESSAGES      ###########
+#########################################
 
 class Message(db.Model):
     """Message represents a single message within a chat.
@@ -1201,7 +1211,7 @@ class Message(db.Model):
     Each message belongs to a chat and has a sender.
     """
     
-    __tablename__ = "message"
+    __tablename__ = "messages"
 
     #------------#
     # Attributes #
@@ -1211,8 +1221,8 @@ class Message(db.Model):
     id:           Mapped[int]      = mapped_column( Integer,      primary_key=True,                     autoincrement=True)
 
     # Foreign Keys
-    chat_id:      Mapped[int]      = mapped_column( Integer,      ForeignKey("chat.id", ondelete="CASCADE"),    nullable=False)
-    sender_id:    Mapped[int]      = mapped_column( Integer,      ForeignKey("user.id", ondelete="CASCADE"),    nullable=False)
+    chat_id:      Mapped[int]      = mapped_column( Integer,      ForeignKey("chats.id", ondelete="CASCADE"),    nullable=False)
+    sender_id:    Mapped[int]      = mapped_column( Integer,      ForeignKey("users.id", ondelete="CASCADE"),    nullable=False)
 
     # Message content
     content:      Mapped[str]      = mapped_column( Text,                              nullable=False)
@@ -1273,7 +1283,8 @@ class Message(db.Model):
     #---------------#
     # Serialization #
     #---------------#
-    def serialize(self):
+    def serialize(self) -> Dict[str, Any]:
+        
         data = {
             "message_id":  self.id,
             "chat_id":     self.chat_id,
@@ -1282,16 +1293,15 @@ class Message(db.Model):
             "is_read":     self.is_read,
             "is_edited":   self.is_edited,
             "created_at":  self.created_at.isoformat() if self.created_at else None,
-            "read_at":     self.read_at.isoformat() if self.read_at else None,
-            "edited_at":   self.edited_at.isoformat() if self.edited_at else None,
+            "read_at":     self.read_at.isoformat()    if self.read_at else None,
+            "edited_at":   self.edited_at.isoformat()  if self.edited_at else None,
             "sender": {
-                "user_id":        self.sender.id if self.sender else None,
-                "username":       self.sender.username if self.sender else None,
+                "user_id":        self.sender.id        if self.sender else None,
+                "username":       self.sender.username  if self.sender else None,
                 "full_name":      self.sender.full_name if self.sender else None,
                 "cloudinary_url": self.sender.cloudinary_url if self.sender else None
             } if self.sender else None
         }
-        
         return data
 
 

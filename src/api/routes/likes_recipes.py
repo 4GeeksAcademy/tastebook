@@ -47,20 +47,20 @@ def toggle_recipe_like(recipe_id):
             is_liked = False
         else:
             # Like the recipe (add new like)
-            new_like = Like(
-                user_id=current_user_id,
-                recipe_id=recipe_id
-            )
+            new_like = Like()
+            new_like.user_id = current_user_id
+            new_like.recipe_id = recipe_id
             db.session.add(new_like)
             action = "liked"
             is_liked = True
+            
         
         # Save to database
         db.session.commit()
         
         # Get updated like count
         updated_recipe = Recipe.query.get(recipe_id)
-        like_count = updated_recipe.like_count
+        like_count = updated_recipe.like_count if updated_recipe else 0
         
         return jsonify({
             "msg": f"Recipe {action} successfully",
@@ -128,7 +128,7 @@ def get_user_liked_recipes():
             query = query.order_by(Like.created_at.desc())
         
         # Paginate results
-        paginated_recipes = query.paginate(
+        paginated_recipes = query.paginate(  # type: ignore
             page=page,
             per_page=per_page,
             error_out=False
