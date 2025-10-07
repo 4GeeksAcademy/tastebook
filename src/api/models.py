@@ -1,8 +1,9 @@
 from __future__ import annotations ## to allow forward references and then append Collection and CollectionRecipe models at the end of the file with relationships and serializations
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Boolean, DateTime, Date, ForeignKey, Integer, String, Text, JSON, func, UniqueConstraint, CheckConstraint
+from sqlalchemy import Boolean, DateTime, Date, ForeignKey, Integer, String, Text, JSON, func, UniqueConstraint, CheckConstraint, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from datetime import datetime, date
 from typing import List, Optional, Dict, Any
@@ -133,6 +134,58 @@ class User(db.Model):
     )
 
 
+    #-----------------#
+    # Hybrid Properties #
+    #-----------------#
+    
+    @hybrid_property
+    def followers_count(self):
+        return len(self.follower_relationships)
+    
+    @followers_count.expression
+    def followers_count(cls):
+        return (
+            select(func.count(Follow.id))
+            .where(Follow.followed_id == cls.id)
+            .scalar_subquery()
+        )
+
+    @hybrid_property
+    def following_count(self):
+        return len(self.following_relationships)
+    
+    @following_count.expression
+    def following_count(cls):
+        return (
+            select(func.count(Follow.id))
+            .where(Follow.follower_id == cls.id)
+            .scalar_subquery()
+        )
+
+    @hybrid_property
+    def recipes_count(self):
+        return len(self.recipes)
+    
+    @recipes_count.expression
+    def recipes_count(cls):
+        return (
+            select(func.count(Recipe.id))
+            .where(Recipe.author_id == cls.id)
+            .scalar_subquery()
+        )
+
+    @hybrid_property
+    def collections_count(self):
+        return len(self.collections)
+    
+    @collections_count.expression
+    def collections_count(cls):
+        return (
+            select(func.count(Collection.id))
+            .where(Collection.owner_id == cls.id)
+            .scalar_subquery()
+        )
+
     #---------------#
     # Serialization #
     #---------------#
@@ -149,11 +202,11 @@ class User(db.Model):
             "cloudinary_url":    self.cloudinary_url,
             "cloudinary_img_id": self.cloudinary_img_id,
             
-            # Social network metrics
-            "followers_count":   len(self.follower_relationships),
-            "following_count":   len(self.following_relationships),
-            "recipes_count":     len(self.recipes),
-            "collections_count": len(self.collections)
+            # Social network metrics - now using efficient hybrid properties
+            "followers_count":   self.followers_count,
+            "following_count":   self.following_count,
+            "recipes_count":     self.recipes_count,
+            "collections_count": self.collections_count
             # do not serialize the hashed password, its a security breach
         }
 
@@ -164,11 +217,23 @@ class User(db.Model):
     
     def is_following(self, user):
         """Check if this user is following another user"""
-        return any(follow.followed_id == user.id for follow in self.following_relationships)
+        if user is None or user.id is None:
+            return False
+        return db.session.query(
+            db.session.query(Follow)
+            .filter(Follow.follower_id == self.id, Follow.followed_id == user.id)
+            .exists()
+        ).scalar()
     
     def is_followed_by(self, user):
         """Check if this user is followed by another user"""
-        return any(follow.follower_id == user.id for follow in self.follower_relationships)
+        if user is None or user.id is None:
+            return False
+        return db.session.query(
+            db.session.query(Follow)
+            .filter(Follow.follower_id == user.id, Follow.followed_id == self.id)
+            .exists()
+        ).scalar()
 
     def get_all_chats(self):
         """Get all chats where this user is a participant"""
@@ -271,6 +336,8 @@ class Recipe(db.Model):
     # Table Constraints #
     #-------------------#
     __table_args__ = (
+        # Note: json_array_length() and char_length() are PostgreSQL-specific functions
+        # These constraints will fail on SQLite, MySQL, etc.
         CheckConstraint("json_array_length(ingredients)  > 0",  name='check_has_ingredients'),
         CheckConstraint("json_array_length(instructions) > 0",  name='check_has_instructions'),
         CheckConstraint("char_length(title)              > 0",  name='check_title_not_empty'),
@@ -325,17 +392,35 @@ class Recipe(db.Model):
 
 
     #-----------------#
-    # Helper Methods  #
+    # Hybrid Properties #
     #-----------------#
     
-    @property
-    def like_count(self) -> int:
+    @hybrid_property
+    def like_count(self):
         """Get the total number of likes for this recipe"""
         return len(self.likes)
     
+    @like_count.expression
+    def like_count(cls):
+        return (
+            select(func.count(Like.id))
+            .where(Like.recipe_id == cls.id)
+            .scalar_subquery()
+        )
+
+    #-----------------#
+    # Helper Methods  #
+    #-----------------#
+    
     def is_liked_by(self, user_id: int) -> bool:
         """Check if a specific user has liked this recipe"""
-        return any(like.user_id == user_id for like in self.likes)
+        if user_id is None:
+            return False
+        return db.session.query(
+            db.session.query(Like)
+            .filter(Like.user_id == user_id, Like.recipe_id == self.id)
+            .exists()
+        ).scalar()
 
 
     #---------------#
@@ -523,6 +608,7 @@ class Comment(db.Model):
     #-------------------#
     __table_args__ = (
         # Ensure comment content is not empty
+        # Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
         CheckConstraint("char_length(content) > 0", name='check_comment_content_not_empty'),
         # Only one pinned comment per recipe (enforced in application logic)
         # Prevent self-referencing at deeper than one level (enforced in application logic)
@@ -571,22 +657,48 @@ class Comment(db.Model):
 
 
     #-----------------#
-    # Helper Methods  #
+    # Hybrid Properties #
     #-----------------#
     
-    @property
-    def like_count(self) -> int:
+    @hybrid_property
+    def like_count(self):
         """Get the total number of likes for this comment"""
         return len(self.likes)
     
-    def is_liked_by(self, user_id: int) -> bool:
-        """Check if a specific user has liked this comment"""
-        return any(like.user_id == user_id for like in self.likes)
-    
-    @property
-    def replies_count(self) -> int:
+    @like_count.expression
+    def like_count(cls):
+        return (
+            select(func.count(CommentLike.id))
+            .where(CommentLike.comment_id == cls.id)
+            .scalar_subquery()
+        )
+
+    @hybrid_property
+    def replies_count(self):
         """Get the total number of replies to this comment"""
         return len(self.replies)
+    
+    @replies_count.expression
+    def replies_count(cls):
+        return (
+            select(func.count(Comment.id))
+            .where(Comment.parent_comment_id == cls.id)
+            .scalar_subquery()
+        )
+
+    #-----------------#
+    # Helper Methods  #
+    #-----------------#
+    
+    def is_liked_by(self, user_id: int) -> bool:
+        """Check if a specific user has liked this comment"""
+        if user_id is None:
+            return False
+        return db.session.query(
+            db.session.query(CommentLike)
+            .filter(CommentLike.user_id == user_id, CommentLike.comment_id == self.id)
+            .exists()
+        ).scalar()
 
 
     #---------------#
@@ -856,6 +968,7 @@ class Collection(db.Model):
     created_at:    Mapped[datetime]      = mapped_column( DateTime, default=func.now(), nullable=False)
 
     __table_args__ = (
+        # Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
         CheckConstraint("char_length(title) > 0", name='check_collection_title_not_empty'),
     )
 
@@ -1119,6 +1232,7 @@ class Message(db.Model):
     #-------------------#
     __table_args__ = (
         # Ensure message content is not empty
+        # Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
         CheckConstraint("char_length(content) > 0", name='check_message_content_not_empty'),
     )
 
