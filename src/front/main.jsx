@@ -14,7 +14,7 @@ import './styles/scss-bootstrap-custom-theme.scss'; // COMPLETE Custom Bootstrap
 
 
 // JS Bootstrap module (or it can be in `index.html`)
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';  // Bootstrap JS components
+// import 'bootstrap/dist/js/bootstrap.bundle.min.js';  // Bootstrap JS components
 
 import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
 import { router } from "./routes";  // Import the router configuration
