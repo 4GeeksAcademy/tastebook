@@ -30,8 +30,10 @@ export default defineConfig({
 
         hmr: {
             clientPort: 3000 // Often more reliable than setting host
-            // host: 'localhost' // This works if accessing via localhost, ensures HMR websocket connects back to host
-            // BUT if accessing via container IP, this should match how you access the app
+            
+            // host: 'localhost', // This works if accessing via localhost, ensures HMR websocket connects back to host
+            // protocol: 'ws', // Force WebSocket over ws (not wss) since dev server is http
+            // overlay: true // Show HMR errors in browser overlay
         }
     },
 
