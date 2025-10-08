@@ -4,6 +4,8 @@ This server runs separately from the main Flask API.
 """
 import os
 import logging
+import signal
+import sys
 from flask import Flask, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_cors import CORS
@@ -25,6 +27,16 @@ socketio = SocketIO(
     logger=True,
     engineio_logger=True
 )
+
+# Graceful shutdown handler
+def signal_handler(sig, frame):
+    logger.info("🛑 Received shutdown signal (%s), shutting down gracefully...", sig)
+    socketio.stop()
+    sys.exit(0)
+
+# Register signal handlers for graceful shutdown
+signal.signal(signal.SIGINT, signal_handler)   # Ctrl+C
+signal.signal(signal.SIGTERM, signal_handler)  # Kill/stop command
 
 ############################################################################
 ### WEBSOCKET EVENT HANDLERS ###

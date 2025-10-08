@@ -3,7 +3,11 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
+
+
 [dev-packages]
+
+
 
 [packages]
 flask = "*"
@@ -24,13 +28,26 @@ flask-socketio = "*"
 eventlet = "*"
 requests = "*"
 
+
+
 [requires]
 python_version = "3.13"
 
+
+
 [scripts]
-start="flask run -p 3001 -h 0.0.0.0"
-socket="python src/socket_app.py"
-both="bash -c 'pipenv run start & pipenv run socket & wait'"
+# Main commands - Use these!
+api="flask run -p 3001 -h 0.0.0.0"
+dev="bash -c 'trap \"kill 0\" EXIT; flask run -p 3001 -h 0.0.0.0 & python src/socket_app.py & wait'"
+
+# Service management commands
+start="bash ./dev_server.sh start"
+stop="bash ./dev_server.sh stop"
+force-stop="bash ./dev_server.sh force-stop"
+status="bash ./dev_server.sh status"
+restart="bash ./dev_server.sh restart"
+
+# Database commands
 init="flask db init"
 migrate="flask db migrate"
 upgrade="flask db upgrade"

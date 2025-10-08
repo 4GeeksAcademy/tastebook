@@ -2,6 +2,79 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 8, 2025) -- Development Server Management: Added Process Control Scripts
+
+**Problem encountered:**
+WebSocket processes were continuing to run in the background after stopping development with `Ctrl+C`, causing port conflicts and resource usage. Manual process cleanup was required to fully stop all services.
+
+**Solution implemented:**
+- ✅ **Created development server management script** (`dev_server.sh`) with proper process tracking and cleanup
+- ✅ **Added signal handling** to WebSocket server (`socket_app.py`) for graceful shutdown on SIGTERM/SIGINT
+- ✅ **Enhanced Pipfile scripts** with process management commands accessible via `pipenv run`
+- ✅ **Improved process cleanup** using trap handlers to kill all child processes on exit
+
+**Configuration changes:**
+- **Script**: Added `dev_server.sh` with start/stop/status/restart/force-stop commands
+- **Pipfile**: Added service management scripts: `start`, `stop`, `force-stop`, `status`, `restart`  
+- **Signal handling**: Enhanced `socket_app.py` with proper SIGTERM/SIGINT handlers for production
+
+**Usage:**
+```bash
+# Start both services
+pipenv run start
+
+# Stop all services  
+pipenv run stop
+
+# Check service status
+pipenv run status
+
+# Force stop (if stuck)
+pipenv run force-stop
+```
+
+**Result:**
+- 🎉 **Clean service shutdown** - No more zombie WebSocket processes
+- ⚡ **Easy process management** - Simple commands for development workflow
+- 🛡️ **Production-ready** - Proper signal handling for Render deployment
+- 🧹 **Developer-friendly** - Clear status reporting and error handling
+
+---
+
+## (October 8, 2025) -- WebSocket Service Isolation: Separated Real-time Features into Independent Service
+
+**Problem encountered:**
+The WebSocket functionality was tightly coupled with the main Flask REST API, causing resource conflicts and making it difficult to scale real-time features independently. Users had no control over WebSocket connections, leading to unnecessary resource usage.
+
+**Solution implemented:**
+- ✅ **Created standalone WebSocket server** (`src/socket_app.py`) running on separate port (3002)
+- ✅ **Removed SocketIO from main API** (`src/app.py`) - now pure REST API on port 3001  
+- ✅ **Added manual connection control** - Users can connect/disconnect WebSocket via UI buttons
+- ✅ **Implemented HTTP-based inter-service communication** using requests library
+- ✅ **Updated Render deployment** to support two separate web services with proper gunicorn configuration
+- ✅ **Enhanced frontend UX** with WebSocket status indicators and manual controls
+
+**Configuration changes:**
+- **Pipenv**: Added `requests` dependency, simplified scripts to `dev` (both services) and `api` (REST only)
+- **Docker**: Added separate `socket` service in docker-compose.yml
+- **Environment**: Added `SOCKET_PORT`, `SOCKET_SERVER_URL`, `VITE_SOCKET_URL` variables
+- **Render**: Updated `render.yaml` to deploy two services with eventlet worker for WebSocket service
+
+**Files modified:**
+- `src/socket_app.py`, `src/socket_wsgi.py` - New standalone WebSocket server
+- `src/app.py` - Removed all SocketIO dependencies  
+- `src/api/websocket_events.py` - HTTP-based communication to WebSocket service
+- `src/front/` - Updated components for manual WebSocket control with status indicators
+- `Pipfile`, `.env`, `render.yaml` - Updated configuration for microservices architecture
+
+**Result:**
+- 🎉 **Independent scalability** - WebSocket and REST API can be scaled separately
+- ⚡ **Resource efficiency** - Users control when real-time features are active
+- 🛡️ **Better isolation** - WebSocket issues don't affect main API functionality
+- 🚀 **Production-ready** - Proper gunicorn + eventlet configuration for Render deployment
+
+---
+
 ## (October 7, 2025) -- SQLAlchemy Relationships Consistency: String References for foreign_keys
 
 **Problem encountered:**
