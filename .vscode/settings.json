@@ -21,7 +21,5 @@
 
 
     // Set a default file icon theme for this workspace (change the id if different theme is preferred)
-    "workbench.iconTheme": "vscode-icons",
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.typeCheckingMode": "basic"
+    "workbench.iconTheme": "vscode-icons"
 }
