@@ -1,6 +1,6 @@
 /**
  * WebSocket service for real-time messaging functionality
- * Handles connection, events, and communication with the Flask-SocketIO backend
+ * Connects to dedicated WebSocket server (separate from REST API)
  */
 
 import { io } from 'socket.io-client';
@@ -21,113 +21,104 @@ class SocketService {
     connect() {
         if (this.socket && this.isConnected) {
             console.log('[SOCKET] Already connected');
-            return;
+            return Promise.resolve();
         }
 
         // Reset manual disconnect flag
         this.isManuallyDisconnected = false;
 
-        // Get backend URL from environment variable (same as React app uses)
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+        // Get WebSocket URL from environment variable (DIFFERENT from REST API)
+        const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3002';
 
-        console.log('[SOCKET] Connecting to:', backendUrl);
+        console.log('[SOCKET] Connecting to WebSocket server:', socketUrl);
 
-        this.socket = io(backendUrl, {
-            transports: ['websocket', 'polling'],
-            timeout: 20000,
-            forceNew: true,
-            autoConnect: true,
-            // Limit reconnection attempts
-            reconnection: true,
-            reconnectionAttempts: this.maxReconnectAttempts,
-            reconnectionDelay: 1000,
-            reconnectionDelayMax: 5000
-        });
+        return new Promise((resolve, reject) => {
+            this.socket = io(socketUrl, {
+                transports: ['websocket', 'polling'],
+                timeout: 20000,
+                forceNew: true,
+                autoConnect: true,
+                reconnection: true,
+                reconnectionAttempts: this.maxReconnectAttempts,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000
+            });
 
-        this.socket.on('connect', () => {
-            console.log('[SOCKET] ✅ Connected to server:', this.socket.id);
-            this.isConnected = true;
-            this.reconnectAttempts = 0; // Reset on successful connection
-        });
+            this.socket.on('connect', () => {
+                console.log('[SOCKET] ✅ Connected to WebSocket server:', this.socket.id);
+                this.isConnected = true;
+                this.reconnectAttempts = 0;
+                this.emit('connection_status_changed', { connected: true });
+                resolve();
+            });
 
-        this.socket.on('disconnect', (reason) => {
-            console.log('[SOCKET] ❌ Disconnected from server. Reason:', reason);
-            this.isConnected = false;
-            
-            // If manually disconnected, don't attempt to reconnect
-            if (this.isManuallyDisconnected) {
-                console.log('[SOCKET] Manual disconnect - stopping reconnection attempts');
-                return;
-            }
-            
-            // If server initiated disconnect, respect it
-            if (reason === 'io server disconnect') {
-                console.log('[SOCKET] Server initiated disconnect - stopping reconnection');
-                this.socket.disconnect();
-            }
-        });
+            this.socket.on('disconnect', (reason) => {
+                console.log('[SOCKET] ❌ Disconnected from server. Reason:', reason);
+                this.isConnected = false;
+                this.emit('connection_status_changed', { connected: false });
+                
+                if (this.isManuallyDisconnected) {
+                    console.log('[SOCKET] Manual disconnect - stopping reconnection attempts');
+                    return;
+                }
+                
+                if (reason === 'io server disconnect') {
+                    console.log('[SOCKET] Server initiated disconnect - stopping reconnection');
+                    this.socket.disconnect();
+                }
+            });
 
-        this.socket.on('connect_error', (error) => {
-            console.error('[SOCKET] ❌ Connection error:', error);
-            this.isConnected = false;
-            this.reconnectAttempts++;
-            
-            // Stop trying after max attempts
-            if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-                console.warn('[SOCKET] ⚠️ Max reconnection attempts reached. Stopping reconnection.');
+            this.socket.on('connect_error', (error) => {
+                console.error('[SOCKET] ❌ Connection error:', error);
+                this.isConnected = false;
+                this.reconnectAttempts++;
+                this.emit('connection_status_changed', { connected: false, error });
+                
+                if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+                    console.warn('[SOCKET] ⚠️ Max reconnection attempts reached.');
+                    this.forceDisconnect();
+                    reject(error);
+                }
+            });
+
+            this.socket.on('reconnect_attempt', (attemptNumber) => {
+                console.log(`[SOCKET] 🔄 Reconnection attempt ${attemptNumber}/${this.maxReconnectAttempts}`);
+            });
+
+            this.socket.on('reconnect_failed', () => {
+                console.error('[SOCKET] ❌ All reconnection attempts failed');
                 this.forceDisconnect();
-            }
-        });
+                reject(new Error('Reconnection failed'));
+            });
 
-        this.socket.on('reconnect_attempt', (attemptNumber) => {
-            console.log(`[SOCKET] 🔄 Reconnection attempt ${attemptNumber}/${this.maxReconnectAttempts}`);
-        });
+            this.socket.on('connected', (data) => {
+                console.log('[SOCKET] ✅ Server confirmation:', data);
+            });
 
-        this.socket.on('reconnect_failed', () => {
-            console.error('[SOCKET] ❌ All reconnection attempts failed');
-            this.forceDisconnect();
-        });
+            // Listen for real-time events
+            this.socket.on('message_received', (data) => {
+                console.log('[SOCKET] 📨 New message received:', data);
+                this.emit('message_received', data);
+            });
 
-        this.socket.on('connected', (data) => {
-            console.log('[SOCKET] ✅ Server confirmation:', data);
-        });
+            this.socket.on('messages_marked_read', (data) => {
+                console.log('[SOCKET] 👀 Messages marked as read:', data);
+                this.emit('messages_marked_read', data);
+            });
 
-        // Listen for real-time events
-        this.socket.on('message_received', (data) => {
-            console.log('[SOCKET] 📨 New message received:', data);
-            this.emit('message_received', data);
-        });
+            this.socket.on('chat_was_deleted', (data) => {
+                console.log('[SOCKET] 🗑️ Chat was deleted:', data);
+                this.emit('chat_was_deleted', data);
+            });
 
-        this.socket.on('messages_marked_read', (data) => {
-            console.log('[SOCKET] 👀 Messages marked as read:', data);
-            this.emit('messages_marked_read', data);
-        });
+            this.socket.on('joined_chat', (data) => {
+                console.log('[SOCKET] ✅ Joined chat room:', data);
+            });
 
-        this.socket.on('chat_was_deleted', (data) => {
-            console.log('[SOCKET] 🗑️ Chat was deleted:', data);
-            this.emit('chat_was_deleted', data);
+            this.socket.on('left_chat', (data) => {
+                console.log('[SOCKET] ⬅️ Left chat room:', data);
+            });
         });
-
-        this.socket.on('joined_chat', (data) => {
-            console.log('[SOCKET] ✅ Joined chat room:', data);
-        });
-
-        this.socket.on('left_chat', (data) => {
-            console.log('[SOCKET] ⬅️ Left chat room:', data);
-        });
-    }
-
-    /**
-     * Disconnect from the WebSocket server
-     */
-    disconnect() {
-        if (this.socket) {
-            console.log('[SOCKET] Disconnecting...');
-            this.socket.disconnect();
-            this.socket = null;
-            this.isConnected = false;
-            this.listeners.clear();
-        }
     }
 
     /**
@@ -135,7 +126,7 @@ class SocketService {
      */
     disconnect() {
         console.log('[SOCKET] 🔌 Disconnecting...');
-        this.isManuallyDisconnected = true; // Mark as manual disconnect
+        this.isManuallyDisconnected = true;
         
         if (this.socket) {
             this.socket.disconnect();
@@ -144,6 +135,7 @@ class SocketService {
         
         this.isConnected = false;
         this.reconnectAttempts = 0;
+        this.emit('connection_status_changed', { connected: false });
         this.removeAllListeners();
         console.log('[SOCKET] ✅ Disconnected and cleaned up');
     }
@@ -156,15 +148,16 @@ class SocketService {
         this.isManuallyDisconnected = true;
         
         if (this.socket) {
-            this.socket.off(); // Remove all listeners
+            this.socket.off();
             this.socket.disconnect();
             this.socket = null;
         }
         
         this.isConnected = false;
-        this.reconnectAttempts = this.maxReconnectAttempts; // Prevent further attempts
+        this.reconnectAttempts = this.maxReconnectAttempts;
+        this.emit('connection_status_changed', { connected: false });
         this.removeAllListeners();
-        console.log('[SOCKET] ✅ Force disconnected and stopped all reconnection attempts');
+        console.log('[SOCKET] ✅ Force disconnected');
     }
 
     /**

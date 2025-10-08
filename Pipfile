@@ -3,11 +3,7 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
-
-
 [dev-packages]
-
-
 
 [packages]
 flask = "*"
@@ -26,18 +22,15 @@ wtforms = "==3.1.2"
 sqlalchemy = "*"
 flask-socketio = "*"
 eventlet = "*"
-
-
+requests = "*"
 
 [requires]
 python_version = "3.13"
 
-
-
-
 [scripts]
 start="flask run -p 3001 -h 0.0.0.0"
-socket="python src/app.py" 
+socket="python src/socket_app.py"
+both="bash -c 'pipenv run start & pipenv run socket & wait'"
 init="flask db init"
 migrate="flask db migrate"
 upgrade="flask db upgrade"

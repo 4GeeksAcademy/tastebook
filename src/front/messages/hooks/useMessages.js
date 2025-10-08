@@ -71,6 +71,7 @@ export const useMessages = (chatId) => {
     const [showSuccessToast, setShowSuccessToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [connectionError, setConnectionError] = useState(false);
+    const [isSocketConnected, setIsSocketConnected] = useState(false);
     
     // Loading state management with reducer
     const [loadingState, dispatchLoading] = useReducer(loadingReducer, initialLoadingState);
@@ -641,48 +642,48 @@ export const useMessages = (chatId) => {
         fetchCurrentUser();
     }, [fetchCurrentUser]);
 
-    // Initialize WebSocket connection and event listeners
+    // WebSocket connection setup - MANUAL CONTROL
     useEffect(() => {
-        if (!currentUser) {
+        // Don't auto-connect - wait for user action
+        
+        // Listen for connection status changes
+        const handleConnectionStatus = (data) => {
+            setIsSocketConnected(data.connected);
+        };
+        
+        socketService.on('connection_status_changed', handleConnectionStatus);
+        
+        // Initial status check
+        setIsSocketConnected(socketService.getConnectionStatus());
+        
+        return () => {
+            socketService.off('connection_status_changed', handleConnectionStatus);
+        };
+    }, []);
+
+    // Setup event handlers when connected
+    useEffect(() => {
+        if (!isSocketConnected || !currentUser) {
             return;
         }
-
-        // Only connect once per user session
-        if (!socketConnectedRef.current) {
-            console.log('[WEBSOCKET] Initializing connection for user:', currentUser.user_id);
-            
-            // Connect to WebSocket server
-            socketService.connect();
-            
-            // Wait a moment for connection to establish, then register handlers
-            const setupTimeout = setTimeout(() => {
-                console.log('[WEBSOCKET] Registering event handlers');
-                socketService.on('message_received', handleNewMessage);
-                socketService.on('messages_marked_read', handleMessagesRead);
-                socketService.on('chat_was_deleted', handleChatDeleted);
-                socketConnectedRef.current = true;
-            }, 200);
-
-            return () => clearTimeout(setupTimeout);
-        }
-
-        // Cleanup function
+        
+        console.log('[WEBSOCKET] Setting up event handlers for user:', currentUser.user_id);
+        
+        socketService.on('message_received', handleNewMessage);
+        socketService.on('messages_marked_read', handleMessagesRead);
+        socketService.on('chat_was_deleted', handleChatDeleted);
+        
         return () => {
-            // Only cleanup when component unmounts, not on user changes
-            if (socketConnectedRef.current) {
-                console.log('[WEBSOCKET] Cleaning up connection');
-                socketService.off('message_received', handleNewMessage);
-                socketService.off('messages_marked_read', handleMessagesRead);
-                socketService.off('chat_was_deleted', handleChatDeleted);
-                socketService.disconnect();
-                socketConnectedRef.current = false;
-            }
+            console.log('[WEBSOCKET] Cleaning up event handlers');
+            socketService.off('message_received', handleNewMessage);
+            socketService.off('messages_marked_read', handleMessagesRead);
+            socketService.off('chat_was_deleted', handleChatDeleted);
         };
-    }, [currentUser?.user_id]); // ✅ Only depend on user_id, callbacks are now stable
+    }, [isSocketConnected, currentUser?.user_id]);
 
     // Join/leave chat rooms when current chat changes
     useEffect(() => {
-        if (!currentUser || !currentChat || !socketConnectedRef.current) {
+        if (!currentUser || !currentChat || !isSocketConnected) {
             return;
         }
 
@@ -695,12 +696,12 @@ export const useMessages = (chatId) => {
         // Leave room when component unmounts or chat changes
         return () => {
             clearTimeout(joinTimer);
-            if (currentChat && socketConnectedRef.current) {
+            if (currentChat && isSocketConnected) {
                 console.log('[WEBSOCKET] Leaving chat room:', currentChat.chat_id);
                 socketService.leaveChat(currentChat.chat_id, currentUser.user_id);
             }
         };
-    }, [currentUser?.user_id, currentChat?.chat_id]);
+    }, [currentUser?.user_id, currentChat?.chat_id, isSocketConnected]);
 
     // Fetch chats when component mounts and user is available
     useEffect(() => {
@@ -738,6 +739,21 @@ export const useMessages = (chatId) => {
         chat.participant?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+
+    // WebSocket control functions
+    const connectWebSocket = useCallback(async () => {
+        try {
+            await socketService.connect();
+            showToast('WebSocket connected! 🟢', 3000);
+        } catch (error) {
+            showToast('Failed to connect WebSocket ❌', 3000);
+        }
+    }, [showToast]);
+
+    const disconnectWebSocket = useCallback(() => {
+        socketService.disconnect();
+        showToast('WebSocket disconnected ��', 3000);
+    }, [showToast]);
     // Return state and actions for components
     return {
         // State
@@ -753,6 +769,7 @@ export const useMessages = (chatId) => {
         showSuccessToast,
         toastMessage,
         confirmState,
+        isSocketConnected,
         
         // Actions
         setNewMessage,
@@ -767,6 +784,8 @@ export const useMessages = (chatId) => {
         hideConfirmation,
         showToast,
         dispatchLoading,
-        navigate
+        navigate,
+        connectWebSocket,
+        disconnectWebSocket,
     };
 };

@@ -31,6 +31,7 @@ export const Messages = () => {
         showSuccessToast,
         toastMessage,
         confirmState,
+        isSocketConnected,
         
         // Actions
         setNewMessage,
@@ -45,7 +46,9 @@ export const Messages = () => {
         hideConfirmation,
         showToast,
         dispatchLoading,
-        navigate
+        navigate,
+        connectWebSocket,
+        disconnectWebSocket,
     } = useMessages(chatId);
 
     // Handle chat selection
@@ -96,6 +99,15 @@ export const Messages = () => {
                 overflow: "hidden"
             }}
         >
+            
+            {/* WebSocket Status Banner */}
+            <div className="container-fluid px-3 pt-3">
+                <WebSocketStatus 
+                    isConnected={isSocketConnected}
+                    onConnect={connectWebSocket}
+                    onDisconnect={disconnectWebSocket}
+                />
+            </div>
             
             <div className="row g-0 flex-grow-1" style={{ height: "100%" }}>
 
