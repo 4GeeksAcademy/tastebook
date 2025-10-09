@@ -9,8 +9,8 @@ export { default as ChatHeader } from './components/ChatHeader';
 export { default as MessageList } from './components/MessageList';
 export { default as MessageBubble } from './components/MessageBubble';
 export { default as MessageInput } from './components/MessageInput';
-export { default as Toast } from './components/Toast';
-export { default as ConfirmationModal } from './components/ConfirmationModal';
+export { default as Toast } from './components/Modals-and-Toasts/Toast';
+export { default as ConfirmationModal } from './components/Modals-and-Toasts/ConfirmationModal';
 
 // Export the hook for potential reuse
 export { useMessages } from './hooks/useMessages';

@@ -60,6 +60,16 @@ export const useMessages = (chatId) => {
     const currentUserRef = useRef(null);
     const currentChatRef = useRef(null);
     
+
+    // Configuration constants (centralized)
+    
+    // Prefer explicit VITE_SOCKET_URL, fall back to VITE_DEFAULT_SOCKET_URL, then local default
+    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? import.meta.env.VITE_DEFAULT_SOCKET_URL ?? 'http://localhost:3002';
+    
+    // Backend URL for REST API
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? '';
+    
+
     // State management
     const [chats, setChats] = useState([]);
     const [currentChat, setCurrentChat] = useState(null);
@@ -72,6 +82,7 @@ export const useMessages = (chatId) => {
     const [toastMessage, setToastMessage] = useState("");
     const [connectionError, setConnectionError] = useState(false);
     const [isSocketConnected, setIsSocketConnected] = useState(false);
+    const [isSocketServerAvailable, setIsSocketServerAvailable] = useState(null); // null = checking, true = available, false = not available
     
     // Loading state management with reducer
     const [loadingState, dispatchLoading] = useReducer(loadingReducer, initialLoadingState);
@@ -79,7 +90,6 @@ export const useMessages = (chatId) => {
     // Confirmation modal state
     const [confirmState, dispatchConfirm] = useReducer(confirmationReducer, initialConfirmState);
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     // Keep currentUser reference up to date
     useEffect(() => {
@@ -111,16 +121,48 @@ export const useMessages = (chatId) => {
         dispatchConfirm({ type: 'HIDE_CONFIRM' });
     }, []);
 
+    // Check if WebSocket server is available
+    const checkWebSocketServerAvailability = useCallback(async () => {
+        const socketUrl = SOCKET_URL;
+        
+        try {
+            // Use the dedicated /health endpoint for availability check
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const response = await fetch(`${socketUrl}/health`, {
+                method: 'GET',
+                signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.status === 'healthy') {
+                    setIsSocketServerAvailable(true);
+                    return true;
+                }
+            }
+            
+            // If response is not ok or status is not 'healthy', treat as unavailable
+            setIsSocketServerAvailable(false);
+            return false;
+        } catch (error) {
+            // If the request fails completely (including timeout), the server is not available
+            setIsSocketServerAvailable(false);
+            return false;
+        }
+    }, []);
+
     // API Functions
     const fetchCurrentUser = useCallback(async () => {
-        if (!token || !backendUrl) {
+        if (!token || !BACKEND_URL) {
             setCurrentUser(null);
             setConnectionError(true);
             return;
         }
 
         try {
-            const response = await fetch(`${backendUrl}/api/settings`, {
+            const response = await fetch(`${BACKEND_URL}/api/settings`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -141,13 +183,13 @@ export const useMessages = (chatId) => {
             setCurrentUser(null);
             setConnectionError(true);
         }
-    }, [token, backendUrl]);
+    }, [token, BACKEND_URL]);
 
     const fetchChats = useCallback(async () => {
         if (!token) return;
         
         try {
-            const response = await fetch(`${backendUrl}/api/chats`, {
+            const response = await fetch(`${BACKEND_URL}/api/chats`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -169,7 +211,7 @@ export const useMessages = (chatId) => {
             console.error("Error fetching chats:", error);
             setConnectionError(true);
         }
-    }, [token, backendUrl]);
+    }, [token, BACKEND_URL]);
 
     const fetchChat = useCallback(async (chatIdToFetch) => {
         if (!token || !chatIdToFetch) return;
@@ -177,7 +219,7 @@ export const useMessages = (chatId) => {
         dispatchLoading({ type: 'SET_CHAT_LOADING', payload: true });
         
         try {
-            const response = await fetch(`${backendUrl}/api/chat/${chatIdToFetch}`, {
+            const response = await fetch(`${BACKEND_URL}/api/chat/${chatIdToFetch}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -215,14 +257,14 @@ export const useMessages = (chatId) => {
         } finally {
             dispatchLoading({ type: 'SET_CHAT_LOADING', payload: false });
         }
-    }, [token, backendUrl, showToast]);
+    }, [token, BACKEND_URL, showToast]);
 
     const handleNewChatFromId = useCallback(async (chatIdToFetch) => {
         try {
             // For new chats that don't exist yet, we need to get the chat info from the backend
             // The backend should have created the chat, so let's try fetching it again with a delay
             setTimeout(async () => {
-                const response = await fetch(`${backendUrl}/api/chat/${chatIdToFetch}`, {
+                const response = await fetch(`${BACKEND_URL}/api/chat/${chatIdToFetch}`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`
@@ -246,13 +288,13 @@ export const useMessages = (chatId) => {
             console.error("Error handling new chat:", error);
             dispatchLoading({ type: 'SET_CHAT_LOADING', payload: false });
         }
-    }, [token, backendUrl, navigate]);
+    }, [token, BACKEND_URL, navigate]);
 
     const markMessagesAsRead = useCallback(async (chatIdToMark) => {
         if (!token) return;
         
         try {
-            const response = await fetch(`${backendUrl}/api/chat/${chatIdToMark}/mark-read`, {
+            const response = await fetch(`${BACKEND_URL}/api/chat/${chatIdToMark}/mark-read`, {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -289,7 +331,7 @@ export const useMessages = (chatId) => {
         } catch (error) {
             console.error("Error marking messages as read:", error);
         }
-    }, [token, backendUrl]);
+    }, [token, BACKEND_URL]);
 
     const sendMessage = useCallback(async (e) => {
         e.preventDefault();
@@ -321,7 +363,7 @@ export const useMessages = (chatId) => {
         setNewMessage("");
 
         try {
-            const response = await fetch(`${backendUrl}/api/chat/${currentChat.chat_id}/message`, {
+            const response = await fetch(`${BACKEND_URL}/api/chat/${currentChat.chat_id}/message`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -372,13 +414,13 @@ export const useMessages = (chatId) => {
         } finally {
             dispatchLoading({ type: 'SET_SENDING_MESSAGE', payload: false });
         }
-    }, [newMessage, currentChat, token, backendUrl, fetchChats, showToast, loadingState.sendingMessage]);
+    }, [newMessage, currentChat, token, BACKEND_URL, fetchChats, showToast, loadingState.sendingMessage]);
 
     const updateMessage = useCallback(async (messageId, newContent) => {
         if (!token || !newContent.trim()) return;
         
         try {
-            const response = await fetch(`${backendUrl}/api/message/${messageId}`, {
+            const response = await fetch(`${BACKEND_URL}/api/message/${messageId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -405,13 +447,13 @@ export const useMessages = (chatId) => {
             console.error("Error updating message:", error);
             showToast("Failed to update message. Please try again.", 3000);
         }
-    }, [token, backendUrl, showToast]);
+    }, [token, BACKEND_URL, showToast]);
 
     const deleteMessage = useCallback(async (messageId) => {
         const confirmDelete = () => {
             hideConfirmation();
             
-            fetch(`${backendUrl}/api/message/${messageId}`, {
+            fetch(`${BACKEND_URL}/api/message/${messageId}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -434,13 +476,13 @@ export const useMessages = (chatId) => {
         };
         
         showConfirmation("Are you sure you want to delete this message?", confirmDelete, 'danger');
-    }, [token, backendUrl, showConfirmation, hideConfirmation, fetchChats, showToast]);
+    }, [token, BACKEND_URL, showConfirmation, hideConfirmation, fetchChats, showToast]);
 
     const deleteChat = useCallback(async (chatIdToDelete) => {
         const confirmDelete = () => {
             hideConfirmation();
             
-            fetch(`${backendUrl}/api/chat/${chatIdToDelete}`, {
+            fetch(`${BACKEND_URL}/api/chat/${chatIdToDelete}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -483,7 +525,7 @@ export const useMessages = (chatId) => {
         };
         
         showConfirmation("Are you sure you want to delete this entire conversation?", confirmDelete, 'danger');
-    }, [token, backendUrl, currentChat, navigate, showConfirmation, hideConfirmation, showToast]);
+    }, [token, BACKEND_URL, currentChat, navigate, showConfirmation, hideConfirmation, showToast]);
 
     // WebSocket event handlers - Use refs to avoid dependency issues
     const handleNewMessage = useCallback((data) => {
@@ -637,14 +679,22 @@ export const useMessages = (chatId) => {
     }, [navigate, showToast]);
 
     // Effects with proper dependency arrays
+    // Check WebSocket server availability on mount
+    useEffect(() => {
+        checkWebSocketServerAvailability();
+    }, [checkWebSocketServerAvailability]);
+
     // Fetch current user on component mount
     useEffect(() => {
         fetchCurrentUser();
     }, [fetchCurrentUser]);
 
-    // WebSocket connection setup - MANUAL CONTROL
+    // WebSocket connection setup - AUTO-CONNECT FOR REAL-TIME MESSAGING
     useEffect(() => {
-        // Don't auto-connect - wait for user action
+        // Only set up WebSocket if server is available
+        if (isSocketServerAvailable !== true) {
+            return;
+        }
         
         // Listen for connection status changes
         const handleConnectionStatus = (data) => {
@@ -653,13 +703,25 @@ export const useMessages = (chatId) => {
         
         socketService.on('connection_status_changed', handleConnectionStatus);
         
+        // Check if already connected (from global initialization)
+        if (!socketService.getConnectionStatus()) {
+            // If not connected globally, try to connect here
+            console.log('[WEBSOCKET] Connecting WebSocket for real-time messaging...');
+            socketService.connect().catch(error => {
+                console.error('[WEBSOCKET] Auto-connect failed:', error);
+                showToast('Failed to connect to real-time messaging ⚠️', 4000);
+            });
+        } else {
+            console.log('[WEBSOCKET] WebSocket already connected globally ✅');
+        }
+        
         // Initial status check
         setIsSocketConnected(socketService.getConnectionStatus());
         
         return () => {
             socketService.off('connection_status_changed', handleConnectionStatus);
         };
-    }, []);
+    }, [isSocketServerAvailable, showToast]);
 
     // Setup event handlers when connected
     useEffect(() => {
@@ -742,17 +804,26 @@ export const useMessages = (chatId) => {
 
     // WebSocket control functions
     const connectWebSocket = useCallback(async () => {
+        // Check if server is available before attempting connection
+        if (isSocketServerAvailable !== true) {
+            const isAvailable = await checkWebSocketServerAvailability();
+            if (!isAvailable) {
+                showToast('WebSocket server is not available ❌', 3000);
+                return;
+            }
+        }
+        
         try {
             await socketService.connect();
-            showToast('WebSocket connected! 🟢', 3000);
+            showToast('WebSocket connected! 🟢', 7000);
         } catch (error) {
             showToast('Failed to connect WebSocket ❌', 3000);
         }
-    }, [showToast]);
+    }, [showToast, isSocketServerAvailable, checkWebSocketServerAvailability]);
 
     const disconnectWebSocket = useCallback(() => {
         socketService.disconnect();
-        showToast('WebSocket disconnected ��', 3000);
+        showToast('WebSocket disconnected 🔴', 7000);
     }, [showToast]);
     // Return state and actions for components
     return {
@@ -770,6 +841,7 @@ export const useMessages = (chatId) => {
         toastMessage,
         confirmState,
         isSocketConnected,
+        isSocketServerAvailable,
         
         // Actions
         setNewMessage,
@@ -787,5 +859,6 @@ export const useMessages = (chatId) => {
         navigate,
         connectWebSocket,
         disconnectWebSocket,
+        checkWebSocketServerAvailability,
     };
 };

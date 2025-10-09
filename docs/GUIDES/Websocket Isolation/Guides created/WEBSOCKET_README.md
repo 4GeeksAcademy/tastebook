@@ -100,7 +100,7 @@ WebSocket disconnects, messaging still works via REST API
 ### Frontend
 - `src/front/utils/socketService.js` - **MODIFIED** Manual control
 - `src/front/messages/hooks/useMessages.js` - **MODIFIED** Connection state
-- `src/front/messages/components/WebSocketStatus.jsx` - **MODIFIED** UI
+- `src/front/messages/components/WebSocketConnectButton.jsx` - **MODIFIED** UI
 - `src/front/messages/pages/Messages.jsx` - **MODIFIED** Status banner
 
 ### Configuration

@@ -7,15 +7,16 @@ import WebSocketStatus from "./WebSocketStatus";
 
 /**
  * Chat Sidebar component with search and chat list
- * @param {Array} chats - List of chat objects
- * @param {string} currentChatId - ID of currently selected chat
- * @param {string} searchTerm - Current search term
- * @param {function} onSearch - Function to handle search input change
- * @param {function} onSelectChat - Function to handle chat selection
- * @param {boolean} loading - Whether chats are loading
- * @param {boolean} connectionError - Whether there's a connection error
- * @param {boolean} isVisible - Whether sidebar is visible (responsive)
+ * @param {Array}    chats           - List of chat objects
+ * @param {string}   currentChatId   - ID of currently selected chat
+ * @param {string}   searchTerm      - Current search term
+ * @param {function} onSearch        - Function to handle search input change
+ * @param {function} onSelectChat    - Function to handle chat selection
+ * @param {boolean}  loading         - Whether chats are loading
+ * @param {boolean}  connectionError - Whether there's a connection error
+ * @param {boolean}  isVisible       - Whether sidebar is visible (responsive)
  */
+
 const ChatSidebar = ({ 
     chats, 
     currentChatId, 
@@ -26,21 +27,22 @@ const ChatSidebar = ({
     connectionError = false,
     isVisible = true 
 }) => {
+
     return (
         <div 
-            className={`col-md-4 col-lg-3 border-end d-flex flex-column bg-light ${!isVisible ? 'd-none d-md-flex' : ''}`} 
+            className={`col-md-4 col-lg-3 border-end d-flex flex-column ${!isVisible ? 'd-none d-md-flex' : ''}`} 
             style={{
                 height: "calc(100vh - 120px)", // Account for navbar and footer
                 maxHeight: "calc(100vh - 120px)",
                 position: "relative"
             }}
         >
-            {/* Header with Search */}
-            <div className="p-3 border-bottom bg-white flex-shrink-0">
+            {/* Header with Search bar */}
+            <div className="p-3 border-bottom flex-shrink-0">
 
                 <h2 className="mb-3"> Messages </h2>
 
-                {/* WebSocket Status Connection testing - OPTION TO ONLY SHOW IN PRODUCTION */}
+                {/* WebSocket Status Connection - OPTION TO ONLY SHOW IN DEVELOPMENT */}
                 <div className="mb-3">
                     {/* {import.meta.env.MODE === 'development' && <WebSocketStatus />} */}
                     <WebSocketStatus />
@@ -84,6 +86,7 @@ const ChatSidebar = ({
                             Retry Connection
                         </button>
                     </div>
+
                 ) : loading ? (
                     <div className="text-center py-5">
                         <div className="spinner-border text-primary mb-3" role="status">
@@ -95,7 +98,7 @@ const ChatSidebar = ({
                     <div className="text-center py-5">
 
                         <div className="mb-4">
-                            <div className="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style={{width: "60px", height: "60px"}}>
+                            <div className="bg-green bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style={{width: "60px", height: "60px"}}>
                                 <MessageCircleMore size={30} className="text-white" />
                             </div>
                         </div>

@@ -143,7 +143,7 @@ src/
         ├── pages/
         │   └── Messages.jsx        # ✨ MODIFIED - WebSocket status banner
         └── components/
-            └── WebSocketStatus.jsx # ✨ MODIFIED - Connection UI
+            └── WebSocketConnectButton.jsx # ✨ MODIFIED - Connection UI
 
 .devcontainer/
 └── docker-compose.yml              # ✨ MODIFIED - Added 'socket' service

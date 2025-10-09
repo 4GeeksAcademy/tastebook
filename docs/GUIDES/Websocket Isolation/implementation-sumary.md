@@ -37,7 +37,7 @@ Added isSocketConnected state
 Added connectWebSocket() function
 Added disconnectWebSocket() function
 No auto-connect on mount
-Updated WebSocketStatus.jsx - Visual connection UI
+Updated WebSocketConnectButton.jsx - Visual connection UI
 
 Yellow warning when disconnected
 Green success when connected

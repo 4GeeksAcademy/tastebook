@@ -46,13 +46,13 @@ All changes have been successfully implemented to isolate the WebSocket logic in
    - Added `disconnectWebSocket()` function
    - WebSocket doesn't auto-connect
 
-8. **Updated `src/front/messages/components/WebSocketStatus.jsx`** - Connection UI
+8. **Updated `src/front/messages/components/WebSocketConnectButton.jsx`** - Connection UI
    - Shows connection status with icons
    - Provides connect/disconnect buttons
    - Yellow alert when disconnected, green when connected
 
 9. **Modified `src/front/messages/pages/Messages.jsx`** - Added status banner
-   - Displays WebSocketStatus component
+   - Displays WebSocketConnectButton component
    - Passes connect/disconnect handlers
 
 ### Docker Changes
@@ -142,7 +142,7 @@ pipenv run socket  # WebSocket on port 3002
 - src/api/websocket_events.py
 - src/front/utils/socketService.js
 - src/front/messages/hooks/useMessages.js
-- src/front/messages/components/WebSocketStatus.jsx
+- src/front/messages/components/WebSocketConnectButton.jsx
 - src/front/messages/pages/Messages.jsx
 - .devcontainer/docker-compose.yml
 - .devcontainer/devcontainer.json

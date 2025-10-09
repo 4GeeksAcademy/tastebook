@@ -15,7 +15,7 @@ src/front/messages/
 │   ├── MessageBubble.jsx    # Single message bubble (with edit/delete)
 │   ├── MessageInput.jsx     # Input box + send button
 │   ├── Toast.jsx            # Reusable toast component
-│   └── ConfirmationModal.jsx # Reusable confirmation dialog
+│   └── Modals-and-Toasts/ConfirmationModal.jsx # Reusable confirmation dialog
 ├── hooks/
 │   └── useMessages.js       # Custom hook with all business logic
 ├── utils/
@@ -59,7 +59,7 @@ src/front/messages/
 
 #### Reusable Components
 - **Toast**: Receives `show`, `message`, `onClose`, `type`
-- **ConfirmationModal**: Receives `show`, `message`, `onConfirm`, `onCancel`, `type`
+- **Modals-and-Toasts/ConfirmationModal**: Receives `show`, `message`, `onConfirm`, `onCancel`, `type`
 
 ### Utilities
 - **formatTime.js**: Pure function for timestamp formatting

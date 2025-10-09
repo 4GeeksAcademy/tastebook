@@ -1,44 +1,34 @@
-import React from 'react';
-import { WifiOff, Wifi } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import socketService from '../../utils/socketService';
 
 /**
  * WebSocket Status Component
- * Shows connection status and provides connect/disconnect controls
+ * A minimal component to show WebSocket connection status
  */
-const WebSocketStatus = ({ isConnected, onConnect, onDisconnect }) => {
-    if (isConnected) {
-        return (
-            <div className="alert alert-success d-flex align-items-center justify-content-between mb-3">
-                <div className="d-flex align-items-center">
-                    <Wifi size={20} className="me-2" />
-                    <span>WebSocket connected - Real-time messaging active</span>
-                </div>
-                <button 
-                    className="btn btn-sm btn-outline-success"
-                    onClick={onDisconnect}
-                >
-                    Disconnect
-                </button>
-            </div>
-        );
-    }
+const WebSocketStatus = () => {
+    const [connectionStatus, setConnectionStatus] = useState('Disconnected');
+
+    useEffect(() => {
+        // Check connection status
+        const checkConnection = () => {
+            const status = socketService.getConnectionStatus();
+            setConnectionStatus(status ? 'Connected' : 'Disconnected');
+        };
+
+        // Check connection every second
+        const interval = setInterval(checkConnection, 1000);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, []);
 
     return (
-        <div className="alert alert-warning d-flex align-items-center justify-content-between mb-3">
-            <div className="d-flex align-items-center">
-                <WifiOff size={24} className="me-2" />
-                <div>
-                    <strong>WebSocket Disconnected</strong>
-                    <p className="mb-0 small">Connect to enable real-time messaging features</p>
-                </div>
-            </div>
-            <button 
-                className="btn btn-sm btn-warning"
-                onClick={onConnect}
-            >
-                <Wifi size={16} className="me-1" />
-                Connect WebSocket
-            </button>
+        <div className="d-inline-block">
+            <small className="fw-bold me-2">WebSocket Status:</small>
+            <span className={`badge badge-sm ${connectionStatus === 'Connected' ? 'bg-success' : 'bg-danger'}`}>
+                {connectionStatus}
+            </span>
         </div>
     );
 };

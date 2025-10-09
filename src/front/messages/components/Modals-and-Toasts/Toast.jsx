@@ -7,6 +7,7 @@ import React from "react";
  * @param {function} onClose - Function to call when closing the toast
  * @param {string} type - Type of toast (success, error, warning, info)
  */
+
 const Toast = ({ show, message, onClose, type = "success" }) => {
     if (!show) return null;
 

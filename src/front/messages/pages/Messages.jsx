@@ -3,9 +3,10 @@ import { useParams } from "react-router-dom";
 import { useMessages } from "../hooks/useMessages";
 import ChatSidebar from "../components/ChatSidebar";
 import ChatWindow from "../components/ChatWindow";
-import Toast from "../components/Toast";
-import ConfirmationModal from "../components/ConfirmationModal";
-import WebSocketStatus from "../components/WebSocketStatus";
+import Toast from "../components/Modals-and-Toasts/Toast";
+import ConfirmationModal from "../components/Modals-and-Toasts/ConfirmationModal";
+import WebSocketConnectButton from "../components/WebSocketConnectButton";
+import NoWebSocket from "../components/NoWebSocket";
 
 
 
@@ -16,6 +17,7 @@ import WebSocketStatus from "../components/WebSocketStatus";
  */
 export const Messages = () => {
     const { chatId } = useParams();
+    const [isRetryingServer, setIsRetryingServer] = React.useState(false);
     
     // Get all state and actions from the useMessages hook
     const {
@@ -32,6 +34,7 @@ export const Messages = () => {
         toastMessage,
         confirmState,
         isSocketConnected,
+        isSocketServerAvailable,
         
         // Actions
         setNewMessage,
@@ -49,6 +52,7 @@ export const Messages = () => {
         navigate,
         connectWebSocket,
         disconnectWebSocket,
+        checkWebSocketServerAvailability,
     } = useMessages(chatId);
 
     // Handle chat selection
@@ -77,6 +81,16 @@ export const Messages = () => {
         dispatchLoading({ type: 'SET_EDITING_MESSAGE', payload: null });
     };
 
+    // Handle retry WebSocket server check
+    const handleRetryServerCheck = async () => {
+        setIsRetryingServer(true);
+        try {
+            await checkWebSocketServerAvailability();
+        } finally {
+            setIsRetryingServer(false);
+        }
+    };
+
     // Show loading spinner while main data is loading
     if (loadingState.main) {
         return (
@@ -90,7 +104,47 @@ export const Messages = () => {
         );
     }
 
+    // Show NoWebSocket component if WebSocket server is not available
+    if (isSocketServerAvailable === false) {
+        return (
+            <div 
+                className="d-flex flex-column" 
+                style={{
+                    minHeight: "calc(100vh - 120px)", // Account for navbar and footer
+                    overflow: "auto"
+                }}
+            >
+                <NoWebSocket 
+                    onRetry={handleRetryServerCheck}
+                    isRetrying={isRetryingServer}
+                />
+                
+                {/* Toast notifications still work */}
+                <Toast
+                    show={showSuccessToast}
+                    message={toastMessage}
+                    onClose={() => showToast('')}
+                    type="success"
+                />
+            </div>
+        );
+    }
+
+    // Show loading spinner while checking WebSocket server availability
+    if (isSocketServerAvailable === null) {
+        return (
+            <div className="container-fluid py-4">
+                <div className="d-flex justify-content-center">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Checking WebSocket server...</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
+
         <div 
             className="d-flex flex-column" 
             style={{
@@ -99,16 +153,30 @@ export const Messages = () => {
                 overflow: "hidden"
             }}
         >
+
+
+        {/* Different version for testing */}
+        
+        {/* <div 
+            className="d-flex flex-column" 
+            style={{
+                minHeight: "calc(100vh - 120px)", // Account for navbar and footer
+                overflow: "auto"
+            }}
+        > */}
             
-            {/* WebSocket Status Banner */}
-            <div className="container-fluid px-3 pt-3">
-                <WebSocketStatus 
-                    isConnected={isSocketConnected}
-                    onConnect={connectWebSocket}
-                    onDisconnect={disconnectWebSocket}
-                />
-            </div>
+            {/* WebSocket Status Banner - TESTING - ONLY SHOWS IN DEVELOPMENT MODE */}
+            {import.meta.env.MODE === 'development' && (
+                <div className="container-fluid px-3 pt-3 border">
+                    <WebSocketConnectButton 
+                        isConnected={isSocketConnected}
+                        onConnect={connectWebSocket}
+                        onDisconnect={disconnectWebSocket}
+                    />
+                </div>
+            )}
             
+
             <div className="row g-0 flex-grow-1" style={{ height: "100%" }}>
 
                 {/* Chat Sidebar */}
