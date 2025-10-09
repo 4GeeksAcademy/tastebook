@@ -6,6 +6,7 @@ import socketService from "../utils/socketService";
 
 import ThemeToggle from "./ThemeToggle"; //Imported for final CSS styling implementation
 
+const UNREAD_COUNT_CACHE_MS = 5000;
 
 export const Navbar = () => {
 	const navigate = useNavigate();
@@ -67,7 +68,7 @@ export const Navbar = () => {
 		
 		// Prevent too frequent API calls (cache for 5 seconds unless forced)
 		const now = Date.now();
-		if (!force && (now - lastFetchTime.current) < 5000) {
+		if (!force && (now - lastFetchTime.current) < UNREAD_COUNT_CACHE_MS) {
 			return;
 		}
 		lastFetchTime.current = now;
@@ -126,7 +127,7 @@ export const Navbar = () => {
 			fetchUnreadCount(true);
 			console.log('[NAVBAR] 👀 Messages marked read - refreshing count');
 		}
-	}, []); // Remove fetchUnreadCount dependency
+	}, [fetchUnreadCount]);
 
 	const handleChatDeleted = useCallback(() => {
 		// Refresh count when chat is deleted using stable reference
@@ -252,7 +253,7 @@ export const Navbar = () => {
 			socketService.off('global_chat_deleted', handleChatDeleted);
 			console.log('[NAVBAR] Listeners after cleanup:', socketService.listeners.get('global_message_received')?.length || 0);
 		};
-	}, [isSocketConnected, userData?.user_id]); // Removed the handler functions from dependencies
+	}, [isSocketConnected, userData?.user_id, handleNewMessage, handleMessagesRead, handleChatDeleted]);
 
 	const handleLogout = () => {
 		if (localStorage.getItem("token")) {
