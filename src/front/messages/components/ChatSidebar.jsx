@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Search, MessageCircleMore } from "lucide-react";
 import ChatItem from "./ChatItem";
-import WebSocketStatus from "./WebSocketStatus";
+import WebSocketStatus from "./Websocket-Status/WebSocketStatus";
 // import "./messages.css";
 
 /**

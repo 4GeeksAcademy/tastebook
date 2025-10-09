@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { WifiOff, Wifi, RefreshCw, AlertCircle } from 'lucide-react';
-import socketService from '../../utils/socketService';
+import socketService from '../../../utils/socketService';
 
 /**
  * WebSocket Connection Management Component
@@ -18,28 +18,32 @@ const WebSocketConnectButton = ({ onConnect, onDisconnect }) => {
 
     // Listen to real-time connection status changes
     useEffect(() => {
-        // Check connection status
-        const checkConnection = () => {
-            const status = socketService.getConnectionStatus();
-            setIsConnected(status);
+        // Handler for connection status changes
+        const handleConnectionStatusChange = (data) => {
+            setIsConnected(data.connected);
             
             // Clear error when successfully connected
-            if (status) {
+            if (data.connected) {
                 setLastError(null);
                 setIsConnecting(false);
+            } else if (data.error && !isConnecting) {
+                // Only set error if we're not currently trying to connect
+                // (to avoid overwriting connection attempt feedback)
+                setLastError(data.error.message || 'Connection lost');
             }
         };
 
-        // Initial check
-        checkConnection();
+        // Listen to real-time connection status changes
+        socketService.on('connection_status_changed', handleConnectionStatusChange);
 
-        // Check connection every second
-        const interval = setInterval(checkConnection, 1000);
+        // Set initial status
+        const initialStatus = socketService.getConnectionStatus();
+        setIsConnected(initialStatus);
 
         return () => {
-            clearInterval(interval);
+            socketService.off('connection_status_changed', handleConnectionStatusChange);
         };
-    }, []);
+    }, [isConnecting]);
 
     const handleConnect = async () => {
         if (isConnecting) return;
@@ -131,7 +135,7 @@ const WebSocketConnectButton = ({ onConnect, onDisconnect }) => {
             >
                 {isConnecting ? (
                     <>
-                        <RefreshCw size={14} className="me-1 spinner-border spinner-border-sm" />
+                        <div className="spinner-border spinner-border-sm me-1" role="status"></div>
                         Connecting...
                     </>
                 ) : lastError ? (

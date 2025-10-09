@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import socketService from '../../utils/socketService';
+import socketService from '../../../utils/socketService';
 
 /**
  * WebSocket Status Component
@@ -9,17 +9,20 @@ const WebSocketStatus = () => {
     const [connectionStatus, setConnectionStatus] = useState('Disconnected');
 
     useEffect(() => {
-        // Check connection status
-        const checkConnection = () => {
-            const status = socketService.getConnectionStatus();
-            setConnectionStatus(status ? 'Connected' : 'Disconnected');
+        // Handler for connection status changes
+        const handleConnectionStatusChange = (data) => {
+            setConnectionStatus(data.connected ? 'Connected' : 'Disconnected');
         };
 
-        // Check connection every second
-        const interval = setInterval(checkConnection, 1000);
+        // Listen to real-time connection status changes
+        socketService.on('connection_status_changed', handleConnectionStatusChange);
+
+        // Set initial status
+        const initialStatus = socketService.getConnectionStatus();
+        setConnectionStatus(initialStatus ? 'Connected' : 'Disconnected');
 
         return () => {
-            clearInterval(interval);
+            socketService.off('connection_status_changed', handleConnectionStatusChange);
         };
     }, []);
 

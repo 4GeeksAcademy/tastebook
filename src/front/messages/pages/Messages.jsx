@@ -5,7 +5,7 @@ import ChatSidebar from "../components/ChatSidebar";
 import ChatWindow from "../components/ChatWindow";
 import Toast from "../components/Modals-and-Toasts/Toast";
 import ConfirmationModal from "../components/Modals-and-Toasts/ConfirmationModal";
-import WebSocketConnectButton from "../components/WebSocketConnectButton";
+import WebSocketConnectButton from "../components/Websocket-Status/WebSocketConnectButton";
 import NoWebSocket from "../components/NoWebSocket";
 
 
