@@ -4,18 +4,18 @@
  * Used for marking messages as read when visible
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 
 export const useIntersectionObserver = (options = {}) => {
     const [entries, setEntries] = useState(new Map());
     const observer = useRef(null);
     const elements = useRef(new Map());
 
-    const defaultOptions = {
+    const defaultOptions = useMemo(() => ({
         threshold: 0.5, // Element must be 50% visible
         rootMargin: '0px',
         ...options
-    };
+    }), [options]);
 
     // Initialize observer
     useEffect(() => {
