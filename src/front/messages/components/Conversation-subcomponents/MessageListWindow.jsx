@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import MessageBubble from "../MessageBubble";
-// import "./messages.css";
 
 /**
  * Scrollable list of messages component

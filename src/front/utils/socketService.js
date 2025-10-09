@@ -328,6 +328,7 @@ class SocketService {
 const socketService = new SocketService();
 
 // Add global access for debugging purposes (only in development)
+// if (typeof window !== 'undefined' && import.meta.env && import.meta.env.DEV) {
 if (import.meta.env.DEV) {
     window.socketService = socketService;
     window.stopSocket = () => {
