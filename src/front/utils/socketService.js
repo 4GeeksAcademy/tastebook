@@ -136,7 +136,7 @@ class SocketService {
         this.isConnected = false;
         this.reconnectAttempts = 0;
         this.emit('connection_status_changed', { connected: false });
-        this.removeAllListeners();
+        // Don't remove listeners on manual disconnect - components may still need them
         console.log('[SOCKET] ✅ Disconnected and cleaned up');
     }
 
@@ -156,7 +156,10 @@ class SocketService {
         this.isConnected = false;
         this.reconnectAttempts = this.maxReconnectAttempts;
         this.emit('connection_status_changed', { connected: false });
-        this.removeAllListeners();
+
+        // Don't remove listeners on force disconnect - components may still need them
+        // this.removeAllListeners();
+        
         console.log('[SOCKET] ✅ Force disconnected');
     }
 
@@ -165,6 +168,17 @@ class SocketService {
      */
     removeAllListeners() {
         this.listeners.clear();
+    }
+
+    /**
+     * Destroy the socket service completely (removes all listeners and disconnects)
+     * Only use this when the service is no longer needed (e.g., app shutdown)
+     */
+    destroy() {
+        console.log('[SOCKET] 🔥 Destroying socket service...');
+        this.disconnect();
+        this.removeAllListeners();
+        console.log('[SOCKET] ✅ Socket service destroyed');
     }
 
     /**
@@ -320,6 +334,11 @@ if (import.meta.env.DEV) {
         console.log('🛑 Manually stopping socket service...');
         socketService.forceDisconnect();
         console.log('✅ Socket service stopped');
+    };
+    window.destroySocket = () => {
+        console.log('🔥 Manually destroying socket service...');
+        socketService.destroy();
+        console.log('✅ Socket service destroyed');
     };
 }
 

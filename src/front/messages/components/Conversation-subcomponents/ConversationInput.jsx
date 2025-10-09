@@ -1,16 +1,17 @@
 import React, { useRef, useEffect } from "react";
+
 import { Send } from "lucide-react";
 
 /**
  * Message input component with send button
- * @param {string} value - Current input value
- * @param {function} onChange - Function to handle input change
- * @param {function} onSubmit - Function to handle form submission
- * @param {boolean} loading - Whether message is being sent
- * @param {string} placeholder - Input placeholder text
- * @param {boolean} autoFocus - Whether to auto-focus the input
+ * @param {string}   value       - Current input value
+ * @param {function} onChange    - Function to handle input change
+ * @param {function} onSubmit    - Function to handle form submission
+ * @param {boolean}  loading     - Whether message is being sent
+ * @param {string}   placeholder - Input placeholder text
+ * @param {boolean}  autoFocus   - Whether to auto-focus the input
  */
-const MessageInput = ({ 
+const ConversationInput = ({ 
     value, 
     onChange, 
     onSubmit, 
@@ -83,4 +84,4 @@ const MessageInput = ({
     );
 };
 
-export default MessageInput;
+export default ConversationInput;

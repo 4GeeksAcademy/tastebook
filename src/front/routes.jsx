@@ -33,7 +33,7 @@ import { PublicCollections } from "./pages/PublicCollections";
 import { LikedRecipes }  from "./pages/LikedRecipes.jsx";
 import { MyCollections } from "./pages/MyCollections";
 
-import { Messages }      from "./messages";
+import { Messages }      from "./messages/pages/Messages";
 
 import { Theme } from "./pages/Theme";
 

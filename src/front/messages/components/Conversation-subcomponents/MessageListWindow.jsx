@@ -1,22 +1,22 @@
 import React, { useEffect, useRef } from "react";
 import { Send } from "lucide-react";
-import MessageBubble from "./MessageBubble";
+import MessageBubble from "../MessageBubble";
 // import "./messages.css";
 
 /**
  * Scrollable list of messages component
- * @param {Array} messages - Array of message objects
- * @param {Object} currentUser - Current user object
- * @param {Object} currentChat - Current chat object
- * @param {string|null} editingMessageId - ID of message being edited
- * @param {function} onEditMessage - Function to handle message editing
- * @param {function} onDeleteMessage - Function to handle message deletion
- * @param {function} onStartEdit - Function to start editing a message
- * @param {function} onCancelEdit - Function to cancel editing
- * @param {function} onMarkAsRead - Function to mark messages as read
- * @param {function} onNewMessageChange - Function to set a new message (for conversation starters)
+ * @param {Array}        messages           - Array of message objects
+ * @param {Object}       currentUser        - Current user object
+ * @param {Object}       currentChat        - Current chat object
+ * @param {string|null}  editingMessageId   - ID of message being edited
+ * @param {function}     onEditMessage      - Function to handle message editing
+ * @param {function}     onDeleteMessage    - Function to handle message deletion
+ * @param {function}     onStartEdit        - Function to start editing a message
+ * @param {function}     onCancelEdit       - Function to cancel editing
+ * @param {function}     onMarkAsRead       - Function to mark messages as read
+ * @param {function}     onNewMessageChange - Function to set a new message (for conversation starters)
  */
-const MessageList = ({ 
+const MessageListWindow = ({ 
     messages, 
     currentUser, 
     currentChat,
@@ -154,4 +154,4 @@ const MessageList = ({
     );
 };
 
-export default MessageList;
+export default MessageListWindow;

@@ -1,12 +1,14 @@
 import React from "react";
+
 import { useParams } from "react-router-dom";
 import { useMessages } from "../hooks/useMessages";
-import ChatSidebar from "../components/ChatSidebar";
-import ChatWindow from "../components/ChatWindow";
-import Toast from "../components/Modals-and-Toasts/Toast";
-import ConfirmationModal from "../components/Modals-and-Toasts/ConfirmationModal";
+
+import ChatSidebar            from "../components/ChatSidebar";
+import ChatConversation       from "../components/ChatConversation";
+import Toast                  from "../components/Modals-and-Toasts/Toast";
+import ConfirmationModal      from "../components/Modals-and-Toasts/ConfirmationModal";
 import WebSocketConnectButton from "../components/Websocket-Status/WebSocketConnectButton";
-import NoWebSocket from "../components/NoWebSocket";
+import NoWebSocketServer      from "../components/Websocket-Status/NoWebSocketServer";
 
 
 
@@ -104,7 +106,7 @@ export const Messages = () => {
         );
     }
 
-    // Show NoWebSocket component if WebSocket server is not available
+    // Show NoWebSocketServer component if WebSocket server is not available
     if (isSocketServerAvailable === false) {
         return (
             <div 
@@ -114,7 +116,7 @@ export const Messages = () => {
                     overflow: "auto"
                 }}
             >
-                <NoWebSocket 
+                <NoWebSocketServer 
                     onRetry={handleRetryServerCheck}
                     isRetrying={isRetryingServer}
                 />
@@ -150,7 +152,8 @@ export const Messages = () => {
             style={{
                 height: "calc(100vh - 120px)", // Account for navbar and footer
                 maxHeight: "calc(100vh - 120px)",
-                overflow: "hidden"
+                // allow the page to scroll so sticky elements can remain visible
+                overflow: "auto"
             }}
         >
 
@@ -167,9 +170,9 @@ export const Messages = () => {
             
             {/* WebSocket Status Banner - TESTING - ONLY SHOWS IN DEVELOPMENT MODE */}
             {import.meta.env.MODE === 'development' && (
-                <div className="container-fluid px-3 pt-3 border">
+                <div className="container-fluid px-3 pt-3 border sticky-top bg-white" style={{ zIndex: 2000 }}>
                     <WebSocketConnectButton 
-                        isConnected={isSocketConnected}
+                        // isConnected={isSocketConnected} --- IGNORE ---
                         onConnect={connectWebSocket}
                         onDisconnect={disconnectWebSocket}
                     />
@@ -191,7 +194,7 @@ export const Messages = () => {
                 />
 
                 {/* Chat Window */}
-                <ChatWindow
+                <ChatConversation
                     currentChat={currentChat}
                     messages={messages}
                     currentUser={currentUser}

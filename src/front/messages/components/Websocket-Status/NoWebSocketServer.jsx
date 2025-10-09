@@ -2,12 +2,12 @@ import React from 'react';
 import { WifiOff, Terminal, Play, RefreshCw } from 'lucide-react';
 
 /**
- * NoWebSocket Component
+ * NoWebSocketServer Component
  * Shows when WebSocket server is not available/running
  * Takes up the full page space, with instructions
  */
 
-const NoWebSocket = ({ onRetry, isRetrying = false }) => {
+const NoWebSocketServer = ({ onRetry, isRetrying = false }) => {
     return (
         <div 
             className="d-flex flex-column justify-content-center align-items-center text-center w-100 h-100"
@@ -21,7 +21,7 @@ const NoWebSocket = ({ onRetry, isRetrying = false }) => {
             <div className="mb-4">
                 <WifiOff 
                     size={80} 
-                    className="text-muted"
+                    className=""
                     style={{ opacity: 0.7 }}
                 />
             </div>
@@ -109,4 +109,4 @@ const NoWebSocket = ({ onRetry, isRetrying = false }) => {
     );
 };
 
-export default NoWebSocket;
+export default NoWebSocketServer;

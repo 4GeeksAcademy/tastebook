@@ -1,30 +1,30 @@
 import React from "react";
-import ChatHeader from "./ChatHeader";
-import MessageList from "./MessageList";
-import MessageInput from "./MessageInput";
+import ConversationHeader from "./Conversation-subcomponents/ConversationHeader";
+import MessageListWindow  from "./Conversation-subcomponents/MessageListWindow";
+import ConversationInput  from "./Conversation-subcomponents/ConversationInput";
 
 /**
  * Chat area container component
- * @param {Object} currentChat - Current chat object
- * @param {Array} messages - Array of messages in current chat
- * @param {Object} currentUser - Current user object
- * @param {boolean} loading - Whether chat is loading
- * @param {string} newMessage - Current new message input value
- * @param {function} onNewMessageChange - Function to handle new message input change
- * @param {function} onSendMessage - Function to handle sending a message
- * @param {function} onEditMessage - Function to handle editing a message
- * @param {function} onDeleteMessage - Function to handle deleting a message
- * @param {function} onDeleteChat - Function to handle deleting the chat
- * @param {function} onMarkAsRead - Function to mark messages as read
- * @param {boolean} sendingMessage - Whether a message is being sent
- * @param {string|null} editingMessageId - ID of message being edited
- * @param {function} onStartEdit - Function to start editing a message
- * @param {function} onCancelEdit - Function to cancel editing
- * @param {function} onNavigateBack - Function to navigate back to chat list
- * @param {boolean} connectionError - Whether there's a connection error
- * @param {boolean} isVisible - Whether chat window is visible (responsive)
+ * @param {Object}       currentChat        - Current chat object
+ * @param {Array}        messages           - Array of messages in current chat
+ * @param {Object}       currentUser        - Current user object
+ * @param {boolean}      loading            - Whether chat is loading
+ * @param {string}       newMessage         - Current new message input value
+ * @param {function}     onNewMessageChange - Function to handle new message input change
+ * @param {function}     onSendMessage      - Function to handle sending a message
+ * @param {function}     onEditMessage      - Function to handle editing a message
+ * @param {function}     onDeleteMessage    - Function to handle deleting a message
+ * @param {function}     onDeleteChat       - Function to handle deleting the chat
+ * @param {function}     onMarkAsRead       - Function to mark messages as read
+ * @param {boolean}      sendingMessage     - Whether a message is being sent
+ * @param {string|null}  editingMessageId   - ID of message being edited
+ * @param {function}     onStartEdit        - Function to start editing a message
+ * @param {function}     onCancelEdit       - Function to cancel editing
+ * @param {function}     onNavigateBack     - Function to navigate back to chat list
+ * @param {boolean}      connectionError    - Whether there's a connection error
+ * @param {boolean}      isVisible          - Whether chat window is visible (responsive)
  */
-const ChatWindow = ({ 
+const ChatConversation = ({ 
     currentChat, 
     messages, 
     currentUser,
@@ -107,16 +107,20 @@ const ChatWindow = ({
             //     maxHeight: "calc(100vh - 130px)"
             // }}
         >
+
             <div className="d-flex flex-column h-100 px-0">
+
+
                 {/* Chat Header */}
-                <ChatHeader
+                <ConversationHeader
                     participant={currentChat.participant}
                     onDeleteChat={() => onDeleteChat(currentChat.chat_id)}
                     onNavigateBack={onNavigateBack}
                 />
 
+
                 {/* Messages Area */}
-                <MessageList
+                <MessageListWindow
                     messages={messages}
                     currentUser={currentUser}
                     currentChat={currentChat}
@@ -129,17 +133,21 @@ const ChatWindow = ({
                     onNewMessageChange={onNewMessageChange}
                 />
 
+
                 {/* Message Input */}
-                <MessageInput
+                <ConversationInput
                     value={newMessage}
                     onChange={onNewMessageChange}
                     onSubmit={onSendMessage}
                     loading={sendingMessage}
                     placeholder={`Message ${currentChat?.participant?.full_name || currentChat?.participant?.username || 'user'}...`}
                 />
+
+
             </div>
+
         </div>
     );
 };
 
-export default ChatWindow;
+export default ChatConversation;

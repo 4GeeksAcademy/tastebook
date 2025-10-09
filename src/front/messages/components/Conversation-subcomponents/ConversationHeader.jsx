@@ -1,14 +1,14 @@
 import React from "react";
 import { MoreVertical, ArrowLeft, Trash2 } from "lucide-react";
-import UserAvatar from "../../components/UserAvatar";
+import UserAvatar from "../../../components/UserAvatar";
 
 /**
  * Chat header component with participant info and actions
- * @param {Object} participant - Participant user object
- * @param {function} onDeleteChat - Function to handle chat deletion
+ * @param {Object}   participant    - Participant user object
+ * @param {function} onDeleteChat   - Function to handle chat deletion
  * @param {function} onNavigateBack - Function to navigate back (mobile)
  */
-const ChatHeader = ({ participant, onDeleteChat, onNavigateBack }) => {
+const ConversationHeader = ({ participant, onDeleteChat, onNavigateBack }) => {
     return (
         <div className="p-3 border-bottom bg-white d-flex align-items-center justify-content-between flex-shrink-0">
             <div className="d-flex align-items-center">
@@ -62,4 +62,4 @@ const ChatHeader = ({ participant, onDeleteChat, onNavigateBack }) => {
     );
 };
 
-export default ChatHeader;
+export default ConversationHeader;

@@ -1,12 +1,12 @@
 import React from "react";
-import UserAvatar from "../../components/UserAvatar";
-import { formatTime } from "../utils/formatTime";
+import UserAvatar from "../../../components/UserAvatar";
+import { formatTime } from "../../utils/formatTime";
 
 /**
  * Single chat row item
- * @param {Object} chat - Chat object with participant info
- * @param {boolean} isActive - Whether this chat is currently selected
- * @param {function} onClick - Function to call when chat is clicked
+ * @param {Object}   chat     - Chat object with participant info
+ * @param {boolean}  isActive - Whether this chat is currently selected
+ * @param {function} onClick  - Function to call when chat is clicked
  */
 const ChatItem = ({ chat, isActive, onClick }) => {
     return (
@@ -17,6 +17,7 @@ const ChatItem = ({ chat, isActive, onClick }) => {
             onClick={onClick}
             style={{ cursor: "pointer" }}
         >
+
             <UserAvatar
                 imageUrl={chat.participant?.cloudinary_url}
                 username={chat.participant?.username}
@@ -25,7 +26,9 @@ const ChatItem = ({ chat, isActive, onClick }) => {
                 className="me-3"
             />
             
+
             <div className="flex-grow-1 min-width-0">
+                
                 <div className="d-flex justify-content-between align-items-start">
                     <h6 className="mb-1 text-truncate">
                         { chat.participant?.full_name || chat.participant?.username }
@@ -35,6 +38,7 @@ const ChatItem = ({ chat, isActive, onClick }) => {
                     </small>
                 </div>
                 
+
                 <div className="d-flex justify-content-between align-items-center">
                     <p className="mb-0 text-muted text-truncate small">
                         { chat.last_message?.content || 'No messages yet' }
@@ -45,7 +49,10 @@ const ChatItem = ({ chat, isActive, onClick }) => {
                         </span>
                     )}
                 </div>
+
             </div>
+
+
         </div>
     );
 };

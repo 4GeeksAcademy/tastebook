@@ -4,13 +4,13 @@ import { formatTime } from "../utils/formatTime";
 
 /**
  * Single message bubble component
- * @param {Object} message - Message object
- * @param {boolean} isCurrentUser - Whether message is from current user
- * @param {boolean} isEditing - Whether this message is being edited
- * @param {function} onEdit - Function to handle message editing
- * @param {function} onDelete - Function to handle message deletion
- * @param {function} onStartEdit - Function to start editing this message
- * @param {function} onCancelEdit - Function to cancel editing
+ * @param {Object}   message       - Message object
+ * @param {boolean}  isCurrentUser - Whether message is from current user
+ * @param {boolean}  isEditing     - Whether this message is being edited
+ * @param {function} onEdit        - Function to handle message editing
+ * @param {function} onDelete      - Function to handle message deletion
+ * @param {function} onStartEdit   - Function to start editing this message
+ * @param {function} onCancelEdit  - Function to cancel editing
  */
 const MessageBubble = ({ 
     message, 
