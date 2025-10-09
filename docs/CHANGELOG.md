@@ -2,6 +2,54 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 9, 2025) -- WebSocket Real-Time Messaging Fix: Resolved Duplicate Function Override Issue
+
+**Problem encountered:**
+Real-time messages were not appearing in the UI despite WebSocket connections being established successfully. Users could send messages, but recipients wouldn't see them in real-time, requiring page refreshes to view new messages.
+
+**Root cause:**
+The `websocket_events.py` file contained duplicate function definitions where a second implementation was overriding the first. The working HTTP-based implementation (which sends requests to the WebSocket server) was being replaced by a broken implementation that relied on an uninitialized `socketio_instance` global variable.
+
+**Solution implemented:**
+- ✅ **Removed duplicate/broken functions** - Eliminated the second set of `emit_new_message`, `emit_messages_read`, and `emit_chat_deleted` functions
+- ✅ **Preserved HTTP-based communication** - Kept the working implementation that uses `requests.post()` to communicate with the WebSocket server
+- ✅ **Enhanced debugging tools** - Added WebSocket event monitoring and testing functions for development
+- ✅ **Verified message flow** - Confirmed complete flow: Flask API → HTTP request → WebSocket server → Socket.IO emission → Client reception
+
+**Technical details:**
+- **Architecture**: Flask REST API (port 3001) communicates with standalone WebSocket server (port 3002) via HTTP
+- **Message flow**: API endpoint → `emit_new_message()` → HTTP POST `/emit/message_received` → Socket.IO room emission → Connected clients
+- **Room-based messaging**: Users must join chat rooms (`chat_{chat_id}`) to receive messages for specific conversations
+- **Event handling**: Client-side event listeners properly configured with stale closure prevention using refs
+
+**Configuration verified:**
+- WebSocket server running on port 3002 ✅
+- HTTP emission endpoints responding correctly ✅  
+- Client WebSocket connections established ✅
+- Chat room joining/leaving functionality working ✅
+- Environment variables properly configured ✅
+
+**Debugging tools added:**
+```javascript
+// Available in browser console during development
+window.testSocketEvent()    // Test event reception
+window.socketService       // Access service instance
+window.stopSocket()         // Manual disconnect
+```
+
+**Result:**
+- 🎉 **Real-time messaging fully functional** - Messages appear instantly for all users in a conversation
+- ⚡ **Zero configuration changes needed** - Fix was purely code-level, no environment or setup changes required
+- 🛡️ **Robust message delivery** - HTTP-based inter-service communication ensures reliable message emission
+- 🧹 **Clean codebase** - Removed duplicate code and clarified the communication architecture
+- 🔧 **Enhanced debugging** - Added tools for developers to monitor WebSocket functionality
+
+**Files modified:**
+- `src/api/websocket_events.py` - Removed duplicate function definitions, kept HTTP-based implementation
+- `src/front/utils/socketService.js` - Added debugging tools and enhanced logging for development
+
+---
+
 ## (October 8, 2025) -- Development Server Management: Added Process Control Scripts
 
 **Problem encountered:**

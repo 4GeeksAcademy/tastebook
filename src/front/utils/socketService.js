@@ -97,7 +97,10 @@ class SocketService {
 
             // Listen for real-time events
             this.socket.on('message_received', (data) => {
-                console.log('[SOCKET] 📨 New message received:', data);
+                if (import.meta.env.DEV) {
+                    console.log('[SOCKET] 📨 New message received:', data);
+                    console.log('[SOCKET] 📨 Event listeners count:', this.listeners.get('message_received')?.length || 0);
+                }
                 this.emit('message_received', data);
             });
 
@@ -327,9 +330,16 @@ class SocketService {
 // Create a singleton instance
 const socketService = new SocketService();
 
+
+
+
 // Add global access for debugging purposes (only in development)
-// if (typeof window !== 'undefined' && import.meta.env && import.meta.env.DEV) {
-if (import.meta.env.DEV) {
+
+// Adding debugging functions to the global window object in production code creates global pollution and potential naming conflicts.
+// Consider wrapping these in a development-only condition or moving to a separate debug utility.
+
+if (typeof window !== 'undefined' && import.meta.env && import.meta.env.DEV) {
+// if (import.meta.env.DEV) {
     window.socketService = socketService;
     window.stopSocket = () => {
         console.log('🛑 Manually stopping socket service...');
@@ -340,6 +350,18 @@ if (import.meta.env.DEV) {
         console.log('🔥 Manually destroying socket service...');
         socketService.destroy();
         console.log('✅ Socket service destroyed');
+    };
+    window.testSocketEvent = () => {
+        console.log('🧪 Testing socket event reception...');
+        console.log('Connected:', socketService.getConnectionStatus());
+        console.log('Listeners:', socketService.listeners);
+        
+        // Add a test listener
+        socketService.on('message_received', (data) => {
+            console.log('🧪 TEST LISTENER - Message received:', data);
+        });
+        
+        console.log('Test listener added. Send a message to see if it triggers.');
     };
 }
 
