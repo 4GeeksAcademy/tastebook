@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { WifiOff, Wifi, RefreshCw, AlertCircle } from 'lucide-react';
 import socketService from '../../../utils/socketService';
 
@@ -20,6 +20,7 @@ const WebSocketConnectButton = ({ onConnect, onDisconnect }) => {
     useEffect(() => {
         // Handler for connection status changes
         const handleConnectionStatusChange = (data) => {
+            console.log('[WEBSOCKET BUTTON] Connection status changed:', data);
             setIsConnected(data.connected);
             
             // Clear error when successfully connected
@@ -36,8 +37,9 @@ const WebSocketConnectButton = ({ onConnect, onDisconnect }) => {
         // Listen to real-time connection status changes
         socketService.on('connection_status_changed', handleConnectionStatusChange);
 
-        // Set initial status
+        // Set initial status immediately
         const initialStatus = socketService.getConnectionStatus();
+        console.log('[WEBSOCKET BUTTON] Initial status:', initialStatus);
         setIsConnected(initialStatus);
 
         return () => {
@@ -106,14 +108,14 @@ const WebSocketConnectButton = ({ onConnect, onDisconnect }) => {
     // Disconnected State - Warning Alert with Action
     return (
         <div
-            className="alert alert-warning d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 mx-auto py-2"
+            className="alert alert-danger d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 mx-auto py-2"
             style={wrapperStyle}
             role="status"
         >
             <div className="d-flex align-items-center text-center text-md-start">
-                <WifiOff size={20} className="me-2 text-warning" />
+                <WifiOff size={20} className="me-2 text-danger" />
                 <div>
-                    <strong className="d-block small text-warning">WebSocket Disconnected - Real-time messaging deactivated</strong>
+                    <strong className="d-block small text-danger">WebSocket Disconnected - Real-time messaging deactivated</strong>
                     <p className="mb-0 small text-muted">
                         {lastError ? (
                             <>
