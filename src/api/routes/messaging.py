@@ -201,7 +201,15 @@ def send_message(chat_id):
 @messaging_bp.route('/chat/<int:chat_id>/mark-read', methods=['PUT'])
 @jwt_required()
 def mark_messages_as_read(chat_id):
-    """Mark all unread messages in a chat as read for the current user."""
+    """Mark messages in a chat as read for the current user.
+    
+    Optional JSON body:
+    {
+        "message_ids": [123, 456, 789]  // Specific message IDs to mark as read
+    }
+    
+    If no message_ids provided, marks ALL unread messages as read.
+    """
     
     try:
         current_user_id = int(get_jwt_identity())
@@ -214,23 +222,46 @@ def mark_messages_as_read(chat_id):
         if not chat.is_participant(current_user_id):
             return jsonify({"error": "Access denied"}), 403
         
-        # Find all unread messages in this chat that were not sent by current user
-        unread_messages = Message.query.filter(
+        # Get request data (optional)
+        data = request.get_json() or {}
+        specific_message_ids = data.get('message_ids')
+        
+        # Build query for messages to mark as read
+        query = Message.query.filter(
             Message.chat_id == chat_id,
             Message.sender_id != current_user_id,
             Message.is_read == False
-        ).all()
+        )
         
-        # Mark all as read
+        # If specific message IDs provided, filter by them
+        if specific_message_ids:
+            query = query.filter(Message.id.in_(specific_message_ids))
+        
+        unread_messages = query.all()
+        
+        # Mark all selected messages as read
+        marked_count = 0
         for message in unread_messages:
             message.is_read = True
+            marked_count += 1
             
         db.session.commit()
+
+        # Get remaining unread count for this chat
+        remaining_unread = Message.query.filter(
+            Message.chat_id == chat_id,
+            Message.sender_id != current_user_id,
+            Message.is_read == False
+        ).count()
 
         # Emit messages read event
         emit_messages_read(chat_id, current_user_id)
         
-        return jsonify({"msg": f"All messages in chat {chat_id} marked as read"}), 200
+        return jsonify({
+            "msg": f"{marked_count} messages marked as read",
+            "marked_count": marked_count,
+            "remaining_unread": remaining_unread
+        }), 200
         
     except Exception as e:
         print(f"[ERROR] Failed to mark messages as read: {str(e)}")

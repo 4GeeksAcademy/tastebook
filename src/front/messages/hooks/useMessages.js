@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useReducer, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import socketService from "../../utils/socketService";
 import { normalizeMessage, normalizeChat } from "../utils/normalize";
+import { useMessageReadStatus } from "./useMessageReadStatus";
 
 // State management for loading states
 const loadingReducer = (state, action) => {
@@ -290,48 +291,66 @@ export const useMessages = (chatId) => {
         }
     }, [token, BACKEND_URL, navigate]);
 
-    const markMessagesAsRead = useCallback(async (chatIdToMark) => {
+    const markMessagesAsRead = useCallback(async (chatIdToMark, specificMessageIds = null) => {
         if (!token) return;
         
         try {
+            const requestBody = specificMessageIds ? { message_ids: specificMessageIds } : {};
+            
             const response = await fetch(`${BACKEND_URL}/api/chat/${chatIdToMark}/mark-read`, {
                 method: "PUT",
                 headers: {
+                    "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
-                }
+                },
+                body: JSON.stringify(requestBody)
             });
             
             if (response.ok) {
+                const data = await response.json();
+                
                 // Update the chats state immediately to reflect read status
                 setChats(prevChats => 
                     prevChats.map(chat => 
                         chat.chat_id === chatIdToMark 
-                            ? { ...chat, unread_count: 0 }
+                            ? { ...chat, unread_count: data.remaining_unread || 0 }
                             : chat
                     )
                 );
                 
-                // Update total unread count
-                setTotalUnreadCount(prev => {
-                    // Find the chat being marked as read in current state
-                    setChats(currentChats => {
-                        const currentChatInList = currentChats.find(chat => chat.chat_id === chatIdToMark);
-                        const previousUnread = currentChatInList?.unread_count || 0;
-                        setTotalUnreadCount(prevTotal => Math.max(0, prevTotal - previousUnread));
-                        return currentChats;
-                    });
-                    return prev;
-                });
+                // Update messages state if we're in the current chat
+                if (currentChatRef.current && currentChatRef.current.chat_id === chatIdToMark) {
+                    setMessages(prevMessages => 
+                        prevMessages.map(msg => {
+                            if (!specificMessageIds || specificMessageIds.includes(msg.message_id)) {
+                                return { ...msg, is_read: true };
+                            }
+                            return msg;
+                        })
+                    );
+                }
                 
-                // Notify Navbar to update its unread count
-                window.dispatchEvent(new CustomEvent('messageUpdate'));
+                // Update total unread count
+                const previousUnread = data.marked_count || 0;
+                setTotalUnreadCount(prev => Math.max(0, prev - previousUnread));
+                
+                // Emit WebSocket event for real-time updates to other users
+                if (isSocketConnected && currentUserRef.current) {
+                    socketService.emitMessagesRead(chatIdToMark, currentUserRef.current.user_id);
+                }
+                
+                console.log('[READ_STATUS] Messages marked as read:', {
+                    chatId: chatIdToMark,
+                    messageIds: specificMessageIds,
+                    markedCount: data.marked_count
+                });
             } else {
-                console.error("Failed to mark messages as read");
+                console.error("[MARK_READ] Failed to mark messages as read:", response.status);
             }
         } catch (error) {
-            console.error("Error marking messages as read:", error);
+            console.error("[MARK_READ] Error marking messages as read:", error);
         }
-    }, [token, BACKEND_URL]);
+    }, [token, BACKEND_URL, isSocketConnected]);
 
     const sendMessage = useCallback(async (e) => {
         e.preventDefault();
@@ -825,6 +844,16 @@ export const useMessages = (chatId) => {
         socketService.disconnect();
         showToast('WebSocket disconnected 🔴', 7000);
     }, [showToast]);
+
+    // Initialize read status management for viewport-based read receipts
+    const { registerMessage, unregisterMessage, markAllVisibleAsRead } = useMessageReadStatus({
+        messages,
+        currentUser,
+        currentChatId: currentChat?.chat_id,
+        onMarkAsRead: markMessagesAsRead,
+        isSocketConnected
+    });
+
     // Return state and actions for components
     return {
         // State
@@ -860,5 +889,10 @@ export const useMessages = (chatId) => {
         connectWebSocket,
         disconnectWebSocket,
         checkWebSocketServerAvailability,
+        
+        // Read status management
+        registerMessage,
+        unregisterMessage,
+        markAllVisibleAsRead,
     };
 };

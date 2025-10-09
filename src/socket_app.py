@@ -146,8 +146,15 @@ def emit_message_received():
     
     if chat_id and message:
         room_name = f"chat_{chat_id}"
+        
+        # Broadcast to specific chat room
         socketio.emit('message_received', {'chat_id': chat_id, 'message': message}, room=room_name)
         logger.info("[HTTP->WS] Emitted message_received to room %s", room_name)
+        
+        # ALSO broadcast globally for unread count updates (Navbar, etc.)
+        socketio.emit('global_message_received', {'chat_id': chat_id, 'message': message})
+        logger.info("[HTTP->WS] Emitted global_message_received for unread count updates")
+        
         return {'status': 'success'}, 200
     return {'status': 'error', 'message': 'Invalid data'}, 400
 
@@ -161,8 +168,15 @@ def emit_messages_read_endpoint():
     
     if chat_id and user_id:
         room_name = f"chat_{chat_id}"
+        
+        # Broadcast to specific chat room
         socketio.emit('messages_marked_read', {'chat_id': chat_id, 'user_id': user_id}, room=room_name)
         logger.info("[HTTP->WS] Emitted messages_marked_read to room %s", room_name)
+        
+        # ALSO broadcast globally for unread count updates (Navbar, etc.)
+        socketio.emit('global_messages_read', {'chat_id': chat_id, 'user_id': user_id})
+        logger.info("[HTTP->WS] Emitted global_messages_read for unread count updates")
+        
         return {'status': 'success'}, 200
     return {'status': 'error', 'message': 'Invalid data'}, 400
 
@@ -176,8 +190,15 @@ def emit_chat_deleted_endpoint():
     
     if chat_id and deleted_by:
         room_name = f"chat_{chat_id}"
+        
+        # Broadcast to specific chat room
         socketio.emit('chat_was_deleted', {'chat_id': chat_id, 'deleted_by': deleted_by}, room=room_name)
         logger.info("[HTTP->WS] Emitted chat_was_deleted to room %s", room_name)
+        
+        # ALSO broadcast globally for unread count updates (Navbar, etc.)
+        socketio.emit('global_chat_deleted', {'chat_id': chat_id, 'deleted_by': deleted_by})
+        logger.info("[HTTP->WS] Emitted global_chat_deleted for unread count updates")
+        
         return {'status': 'success'}, 200
     return {'status': 'error', 'message': 'Invalid data'}, 400
 

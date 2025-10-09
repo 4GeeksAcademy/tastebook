@@ -55,6 +55,11 @@ export const Messages = () => {
         connectWebSocket,
         disconnectWebSocket,
         checkWebSocketServerAvailability,
+        
+        // Read status management
+        registerMessage,
+        unregisterMessage,
+        markAllVisibleAsRead,
     } = useMessages(chatId);
 
     // Handle chat selection
@@ -213,6 +218,7 @@ export const Messages = () => {
                     onNavigateBack={handleNavigateBack}
                     connectionError={connectionError}
                     isVisible={!!chatId}
+                    onRegisterMessage={registerMessage}
                 />
             </div>
 

@@ -23,6 +23,7 @@ import ConversationInput  from "./Conversation-subcomponents/ConversationInput";
  * @param {function}     onNavigateBack     - Function to navigate back to chat list
  * @param {boolean}      connectionError    - Whether there's a connection error
  * @param {boolean}      isVisible          - Whether chat window is visible (responsive)
+ * @param {function}     onRegisterMessage  - Function to register message for read tracking
  */
 const ChatConversation = ({ 
     currentChat, 
@@ -42,7 +43,8 @@ const ChatConversation = ({
     onCancelEdit,
     onNavigateBack,
     connectionError = false,
-    isVisible = true
+    isVisible = true,
+    onRegisterMessage
 }) => {
     if (loading) {
         return (
@@ -131,6 +133,7 @@ const ChatConversation = ({
                     onCancelEdit={onCancelEdit}
                     onMarkAsRead={onMarkAsRead}
                     onNewMessageChange={onNewMessageChange}
+                    onRegisterMessage={onRegisterMessage}
                 />
 
 

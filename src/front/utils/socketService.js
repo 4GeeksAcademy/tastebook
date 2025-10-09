@@ -104,14 +104,34 @@ class SocketService {
                 this.emit('message_received', data);
             });
 
+            // Listen for GLOBAL message events (for Navbar unread count updates)
+            this.socket.on('global_message_received', (data) => {
+                if (import.meta.env.DEV) {
+                    console.log('[SOCKET] 🌐📨 Global message received:', data);
+                }
+                this.emit('global_message_received', data); // Use different event name to avoid duplication
+            });
+
             this.socket.on('messages_marked_read', (data) => {
                 console.log('[SOCKET] 👀 Messages marked as read:', data);
                 this.emit('messages_marked_read', data);
             });
 
+            // Listen for GLOBAL messages read events (for Navbar unread count updates)
+            this.socket.on('global_messages_read', (data) => {
+                console.log('[SOCKET] 🌐👀 Global messages marked as read:', data);
+                this.emit('global_messages_read', data); // Use different event name to avoid duplication
+            });
+
             this.socket.on('chat_was_deleted', (data) => {
                 console.log('[SOCKET] 🗑️ Chat was deleted:', data);
                 this.emit('chat_was_deleted', data);
+            });
+
+            // Listen for GLOBAL chat deleted events (for Navbar unread count updates)
+            this.socket.on('global_chat_deleted', (data) => {
+                console.log('[SOCKET] 🌐🗑️ Global chat was deleted:', data);
+                this.emit('global_chat_deleted', data); // Use different event name to avoid duplication
             });
 
             this.socket.on('joined_chat', (data) => {

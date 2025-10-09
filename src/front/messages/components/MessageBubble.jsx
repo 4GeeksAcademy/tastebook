@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { MoreVertical, Edit3, Trash2 } from "lucide-react";
 import { formatTime } from "../utils/formatTime";
 
@@ -11,6 +11,7 @@ import { formatTime } from "../utils/formatTime";
  * @param {function} onDelete      - Function to handle message deletion
  * @param {function} onStartEdit   - Function to start editing this message
  * @param {function} onCancelEdit  - Function to cancel editing
+ * @param {function} onRegisterForReadTracking - Function to register message for read status tracking
  */
 const MessageBubble = ({ 
     message, 
@@ -19,8 +20,18 @@ const MessageBubble = ({
     onEdit, 
     onDelete, 
     onStartEdit, 
-    onCancelEdit 
+    onCancelEdit,
+    onRegisterForReadTracking
 }) => {
+    const messageRef = useRef(null);
+
+    // Register this message for viewport tracking (for read status)
+    useEffect(() => {
+        if (messageRef.current && message.message_id && onRegisterForReadTracking) {
+            onRegisterForReadTracking(message.message_id, messageRef.current);
+        }
+    }, [message.message_id, onRegisterForReadTracking]);
+
     const handleEditSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -28,7 +39,10 @@ const MessageBubble = ({
     };
 
     return (
-        <div className={`d-flex mb-2 ${isCurrentUser ? 'justify-content-end' : 'justify-content-start'}`}>
+        <div 
+            ref={messageRef}
+            className={`d-flex mb-2 ${isCurrentUser ? 'justify-content-end' : 'justify-content-start'}`}
+        >
             <div
                 className={`message-bubble py-2 px-3 rounded-3 position-relative shadow-sm ${
                     isCurrentUser 

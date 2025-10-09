@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat, Moon, Sun, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle } from "lucide-react";
+import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle } from "lucide-react";
 import UserAvatar from "./UserAvatar";
+import socketService from "../utils/socketService";
 
 import ThemeToggle from "./ThemeToggle"; //Imported for final CSS styling implementation
 
@@ -11,12 +12,159 @@ export const Navbar = () => {
 	const token = localStorage.getItem("token");
 	const [userData, setUserData] = useState(null);
 	const [unreadCount, setUnreadCount] = useState(0);
+	const [isSocketConnected, setIsSocketConnected] = useState(false);
+	const currentUserRef = useRef(null);
+	const lastFetchTime = useRef(0);
+
+	// Helper function to update user data consistently
+	const updateUserData = useCallback((newUserData) => {
+		setUserData(newUserData);
+		currentUserRef.current = newUserData;
+	}, []);
+
+	// WebSocket connection status tracking and auto-connection
+	useEffect(() => {
+		const handleConnectionChange = (data) => {
+			setIsSocketConnected(data.connected);
+			console.log('[NAVBAR] Socket connection status:', data.connected);
+		};
+
+		// Set initial connection status
+		setIsSocketConnected(socketService.getConnectionStatus());
+
+		// Listen for connection changes
+		socketService.on('connection_status_changed', handleConnectionChange);
+
+		// Auto-connect if not already connected and user is logged in
+		const initializeConnection = async () => {
+			if (!socketService.getConnectionStatus() && token) {
+				console.log('[NAVBAR] Auto-connecting to WebSocket for real-time updates...');
+				try {
+					await socketService.connect();
+					console.log('[NAVBAR] ✅ WebSocket connected successfully');
+				} catch (error) {
+					console.warn('[NAVBAR] ⚠️ Failed to connect to WebSocket:', error.message || error);
+					// Non-critical error - app can work without real-time features
+				}
+			}
+		};
+
+		// Small delay to let global initialization complete first
+		const connectionTimer = setTimeout(initializeConnection, 500);
+
+		return () => {
+			clearTimeout(connectionTimer);
+			socketService.off('connection_status_changed', handleConnectionChange);
+		};
+	}, [token]);
+
+	// Optimized unread count fetcher with caching
+	const fetchUnreadCount = useCallback(async (force = false) => {
+		if (!token) {
+			setUnreadCount(0);
+			return;
+		}
+		
+		// Prevent too frequent API calls (cache for 5 seconds unless forced)
+		const now = Date.now();
+		if (!force && (now - lastFetchTime.current) < 5000) {
+			return;
+		}
+		lastFetchTime.current = now;
+		
+		const backendUrl = import.meta.env.VITE_BACKEND_URL;
+		if (!backendUrl) return;
+		
+		try {
+			const resp = await fetch(`${backendUrl}/api/messages/unread-count`, {
+				method: "GET",
+				headers: {
+					"Authorization": `Bearer ${token}`
+				}
+			});
+			
+			if (resp.ok) {
+				const data = await resp.json();
+				setUnreadCount(data.unread_count);
+			} else {
+				setUnreadCount(0);
+			}
+		} catch (error) {
+			console.error("Error fetching unread count:", error);
+			setUnreadCount(0);
+		}
+	}, [token]);
+
+	// Real-time WebSocket handlers for instant updates (using useCallback for stability)
+	const handleNewMessage = useCallback((data) => {
+		console.log('[NAVBAR] 📨 GLOBAL MESSAGE HANDLER TRIGGERED:', data);
+		const { chat_id, message } = data;
+		const isCurrentUserMessage = message.sender_id === currentUserRef.current?.user_id;
+		
+		console.log('[NAVBAR] Current user ID:', currentUserRef.current?.user_id);
+		console.log('[NAVBAR] Message sender ID:', message.sender_id);
+		console.log('[NAVBAR] Is current user message:', isCurrentUserMessage);
+		
+		// Only increment if message is NOT from current user
+		if (!isCurrentUserMessage) {
+			setUnreadCount(prev => {
+				const newCount = prev + 1;
+				console.log('[NAVBAR] 📨 Incrementing unread count from', prev, 'to', newCount);
+				return newCount;
+			});
+		} else {
+			console.log('[NAVBAR] 📨 Skipping count increment - message is from current user');
+		}
+	}, []);
+
+	const handleMessagesRead = useCallback((data) => {
+		const { user_id } = data;
+		
+		// Only decrement if current user marked messages as read
+		if (user_id === currentUserRef.current?.user_id) {
+			// Refresh count from server to get accurate number
+			fetchUnreadCount(true);
+			console.log('[NAVBAR] 👀 Messages marked read - refreshing count');
+		}
+	}, []); // Remove fetchUnreadCount dependency
+
+	const handleChatDeleted = useCallback(() => {
+		// Refresh count when chat is deleted using stable reference
+		const fetchCount = async () => {
+			if (!token) {
+				setUnreadCount(0);
+				return;
+			}
+			
+			const backendUrl = import.meta.env.VITE_BACKEND_URL;
+			if (!backendUrl) return;
+			
+			try {
+				const resp = await fetch(`${backendUrl}/api/messages/unread-count`, {
+					method: "GET",
+					headers: {
+						"Authorization": `Bearer ${token}`
+					}
+				});
+				
+				if (resp.ok) {
+					const data = await resp.json();
+					setUnreadCount(data.unread_count);
+				}
+			} catch (error) {
+				console.error("Error fetching unread count:", error);
+			}
+		};
+		
+		fetchCount();
+		console.log('[NAVBAR] 🗑️ Chat deleted - refreshing count');
+	}, [token]); // Only depend on token
 
 	useEffect(() => {
 		// Fetch user data if logged in
 		const fetchUserData = async () => {
 			if (!token) {
-				setUserData(null);
+				updateUserData(null);
 				setUnreadCount(0);
 				return;
 			}
@@ -35,92 +183,82 @@ export const Navbar = () => {
 				
 				if (resp.ok) {
 					const data = await resp.json();
-					setUserData(data.current_user);
+					updateUserData(data.current_user);
+					
+					// Fetch unread count immediately after user data is loaded
+					await fetchUnreadCount(true);
+					console.log('[NAVBAR] ✅ User data and unread count loaded');
 				} else {
 					console.error("Failed to fetch user data");
-					setUserData(null);
+					updateUserData(null);
 				}
 			} catch (error) {
 				console.error("Failed to fetch user data:", error);
-				setUserData(null);
-			}
-		};
-
-		// Fetch unread message count
-		const fetchUnreadCount = async () => {
-			if (!token) {
-				console.log("[DEBUG NAVBAR] No token, setting unread count to 0");
-				setUnreadCount(0);
-				return;
-			}
-			
-			const backendUrl = import.meta.env.VITE_BACKEND_URL;
-			if (!backendUrl) {
-				console.log("[DEBUG NAVBAR] No backend URL");
-				return;
-			}
-			
-			console.log("[DEBUG NAVBAR] Fetching unread count...");
-			
-			try {
-				const resp = await fetch(`${backendUrl}/api/messages/unread-count`, {
-					method: "GET",
-					headers: {
-						"Authorization": `Bearer ${token}`
-					}
-				});
-				
-				console.log("[DEBUG NAVBAR] Unread count response status:", resp.status);
-				
-				if (resp.ok) {
-					const data = await resp.json();
-					console.log("[DEBUG NAVBAR] Unread count data:", data);
-					console.log("[DEBUG NAVBAR] Setting unread count to:", data.unread_count);
-					setUnreadCount(data.unread_count);
-				} else {
-					const errorData = await resp.json();
-					console.error("[DEBUG NAVBAR] Error fetching unread count:", errorData);
-					setUnreadCount(0);
-				}
-			} catch (error) {
-				console.error("[DEBUG NAVBAR] Exception fetching unread count:", error);
-				setUnreadCount(0);
+				updateUserData(null);
 			}
 		};
 
 		fetchUserData();
-		fetchUnreadCount();
 
-		// Refresh unread count periodically
-		const interval = setInterval(fetchUnreadCount, 30000); // every 30 seconds
+		// Listen for manual refresh events (e.g., from Messages page)
+		const handleMessageUpdate = () => {
+			fetchUnreadCount(true);
+		};
 
 		// Listen for user data updates from Settings page
 		const handleUserUpdate = (event) => {
 			if (event.detail && event.detail.userData) {
-				setUserData(event.detail.userData);
+				updateUserData(event.detail.userData);
 			}
-		};
-
-		// Listen for message updates to refresh unread count
-		const handleMessageUpdate = () => {
-			console.log("[DEBUG NAVBAR] Message update event received, refreshing unread count");
-			fetchUnreadCount();
 		};
 
 		window.addEventListener('userDataUpdated', handleUserUpdate);
 		window.addEventListener('messageUpdate', handleMessageUpdate);
 
+		// Fallback polling every 2 minutes (much less frequent than before)
+		const interval = setInterval(() => fetchUnreadCount(), 120000);
+
 		return () => {
-			clearInterval(interval);
+			// Clean up event listeners
 			window.removeEventListener('userDataUpdated', handleUserUpdate);
 			window.removeEventListener('messageUpdate', handleMessageUpdate);
+			clearInterval(interval);
 		};
-	}, [token]);
+	}, [token, fetchUnreadCount, updateUserData]);
+
+	// Setup WebSocket event handlers when connected and user is available
+	useEffect(() => {
+		if (!isSocketConnected || !userData?.user_id) {
+			console.log('[NAVBAR] Not setting up WebSocket handlers - Socket connected:', isSocketConnected, 'User ID:', userData?.user_id);
+			return;
+		}
+
+		console.log('[NAVBAR] Setting up WebSocket event handlers for user:', userData.user_id);
+		console.log('[NAVBAR] Current listeners before adding:', socketService.listeners.get('global_message_received')?.length || 0);
+
+		// Set up WebSocket listeners for real-time updates (using GLOBAL events for Navbar)
+		socketService.on('global_message_received', handleNewMessage);
+		socketService.on('global_messages_read', handleMessagesRead);
+		socketService.on('global_chat_deleted', handleChatDeleted);
+
+		console.log('[NAVBAR] Current listeners after adding:', socketService.listeners.get('global_message_received')?.length || 0);
+
+		return () => {
+			console.log('[NAVBAR] Cleaning up WebSocket event handlers');
+			console.log('[NAVBAR] Listeners before cleanup:', socketService.listeners.get('global_message_received')?.length || 0);
+			// Clean up WebSocket listeners
+			socketService.off('global_message_received', handleNewMessage);
+			socketService.off('global_messages_read', handleMessagesRead);
+			socketService.off('global_chat_deleted', handleChatDeleted);
+			console.log('[NAVBAR] Listeners after cleanup:', socketService.listeners.get('global_message_received')?.length || 0);
+		};
+	}, [isSocketConnected, userData?.user_id]); // Removed the handler functions from dependencies
 
 	const handleLogout = () => {
 		if (localStorage.getItem("token")) {
 			localStorage.removeItem("token");
-			setUserData(null);
+			updateUserData(null);
+			setUnreadCount(0);
 			alert("You have successfully logged out ✅");
 		}
 		navigate("/");
@@ -142,7 +280,7 @@ export const Navbar = () => {
 
 				{/* Logo and Name */}
 				<Link to="/" className="navbar-brand mb-0 h1 d-flex align-items-center gap-2">
-					<ChefHat size={32} strokeWidth={2.2} className="text-primary" />
+					<ChefHat size={32} strokeWidth={2.7} className="text-primary" />
 					<span className="fw-bold">Tastebook</span>
 				</Link>
 
@@ -182,17 +320,17 @@ export const Navbar = () => {
 						{!token ? (
 
 							<>
+								{/* Auth Links */}
 								<ul className="navbar-nav ms-auto align-items-lg-center gap-2">
 
-
-
+									{/* Log In */}
 									<li className="nav-item">
 										<Link to="/login" className="btn btn-primary ms-lg-2">
 											Log in
 										</Link>
 									</li>
 
-
+									{/* Sign Up */}
 									<li className="nav-item">
 										<Link to="/signup" className="btn btn-outline-primary">
 											Sign up
@@ -201,55 +339,51 @@ export const Navbar = () => {
 
 								</ul>
 							</>
-
-							// <ul className="navbar-nav ms-auto align-items-lg-center gap-2 flex-lg-row flex-column w-100">
-
-							// 	<li className="nav-item">
-
-							// 		<Link to="/login" className="btn btn-primary ms-lg-2 w-100 mb-lg-0 mb-2">
-							// 			Log in
-							// 		</Link>
-							// 	</li>
-
-
-							// 	<li className="nav-item">
-
-							// 		<Link to="/signup" className="btn btn-outline-primary w-100">
-							// 			Sign up
-							// 		</Link>
-
-							// 	</li>
-							// </ul>
-							
+	
 						) : (
+
 							<>
+								{/* New Recipe */}
 								<Link to="/new-recipe" className="btn btn-link text-success text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="New Recipe">
 									<FilePlus size={22} />
 								</Link>
 
+
+								{/* My Collections */}
 								<Link to="/my-collections" className="btn btn-link text-secondary text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="My Collections">
 									<Bookmark size={22} />
 								</Link>
 
+
+								{/* Messages with Unread Count Badge */}
 								<Link to="/messages" className="btn btn-link text-info text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto position-relative" title="Messages">
+									
 									<MessageCircle size={22} />
+									
 									{ unreadCount > 0 && (
 										<span 
-											className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-											style={{ fontSize: "0.65rem", padding: "0.25em 0.5em" }}
+											key={unreadCount} // Force re-render with animation when count changes
+											className="position-absolute top-0 start-100 badge rounded-pill bg-danger"
+											style={{ fontSize: "0.65rem",  transform: 'translate(-100%, 5%)' }}
 										>
 											{ unreadCount > 99 ? "99+" : unreadCount }
 										</span>
 									)}
+
 								</Link>
 								
+
+								{/* Liked Recipes */}
 								<Link to="/liked-recipes" className="btn btn-link text-danger text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Liked Recipes">
 									<Heart size={22} />
 								</Link>
 
+
+								{/* Settings */}
 								<Link to="/settings" className="btn btn-link text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Settings">
 									<Cog size={22} />
 								</Link>
+
 
 								{/* User Avatar */}
 								<UserAvatar
@@ -261,7 +395,10 @@ export const Navbar = () => {
 									className="me-2"
 								/>
 
+
+								{/* Logout */}
 								<button onClick={handleLogout} className="btn btn-light border-0 text-danger"><DoorOpen size={22} /></button>
+							
 							</>
 						)}
 					</div>			

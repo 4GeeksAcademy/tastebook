@@ -14,6 +14,7 @@ import MessageBubble from "../MessageBubble";
  * @param {function}     onCancelEdit       - Function to cancel editing
  * @param {function}     onMarkAsRead       - Function to mark messages as read
  * @param {function}     onNewMessageChange - Function to set a new message (for conversation starters)
+ * @param {function}     onRegisterMessage  - Function to register message for read tracking
  */
 const MessageListWindow = ({ 
     messages, 
@@ -25,7 +26,8 @@ const MessageListWindow = ({
     onStartEdit,
     onCancelEdit,
     onMarkAsRead,
-    onNewMessageChange
+    onNewMessageChange,
+    onRegisterMessage
 }) => {
     const messagesEndRef = useRef(null);
 
@@ -143,6 +145,7 @@ const MessageListWindow = ({
                                 onDelete={onDeleteMessage}
                                 onStartEdit={onStartEdit}
                                 onCancelEdit={onCancelEdit}
+                                onRegisterForReadTracking={onRegisterMessage}
                             />
                         </React.Fragment>
                     );
