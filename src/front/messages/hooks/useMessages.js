@@ -585,7 +585,7 @@ export const useMessages = (chatId) => {
         
         // Use module-level cache to track recent messages
         const lastProcessed = messageThrottleCache.get(messageKey);
-        if (lastProcessed && (now - lastProcessed) < 1000) { // Increased to 1 second to catch duplicates
+        if (lastProcessed && (now - lastProcessed) < 300) { // Reduced to 300ms to balance deduplication and rapid updates
             debugLog('[WEBSOCKET] ⚡ BLOCKING DUPLICATE MESSAGE:', messageKey, 'Handler Call ID:', handlerCallId);
             debugLog('[WEBSOCKET] Last processed:', new Date(lastProcessed), 'Current:', new Date(now));
             return; // Early exit to prevent any processing
