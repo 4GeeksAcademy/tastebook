@@ -2,6 +2,99 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 10, 2025) -- Build Enhancement: Pip Upgrade and Conditional Database Migrations
+
+**Enhancement implemented:**
+Added automatic pip upgrade to the latest version (25.2) during build process to ensure optimal package management, security updates, and eliminate upgrade notices in build logs.
+
+**Changes made:**
+- ✅ **Added pip upgrade step** - `pip install --upgrade pip` runs before Python dependency installation
+- ✅ **Maintained conditional database migrations** - WebSocket service skips Flask-Migrate commands it doesn't need
+- ✅ **Locked configuration** - Upgrade is now permanent part of build process
+
+**Benefits:**
+- 🚀 **Latest pip features** - Access to newest package management improvements
+- 🛡️ **Security updates** - Latest pip version includes security patches
+- 🧹 **Clean build logs** - Eliminates pip upgrade notices during deployment
+- ⚡ **Better dependency resolution** - Improved package installation performance
+
+**Files modified:**
+- `render_build.sh` - Added pip upgrade step before Python dependencies
+
+**Result:**
+- 🎉 **Consistent pip version** - All deployments use latest pip (25.2)
+- 📝 **Cleaner build output** - No more upgrade notices cluttering logs
+- 🔧 **Enhanced reliability** - Better package management across all services
+
+---
+
+## (October 10, 2025) -- Render Deployment Fixes: WSGI Configuration and Pipenv Installation
+
+**Problem encountered:**
+After fixing the Python version specification, Render deployment was still failing with multiple issues:
+
+1. **Pipenv installation error:**
+```
+pipenv not found, installing pipenv locally
+ERROR: Can not perform a '--user' install. User site-packages are not visible in this virtualenv.
+```
+
+2. **API service WSGI error:**
+```
+ImportError: cannot import name 'socketio' from 'app'
+```
+
+3. **WebSocket service application error:**
+```
+gunicorn.errors.AppImportError: Application object must be callable.
+```
+
+**Root causes:**
+1. **Pipenv installation**: Render's environment doesn't support `--user` installations in their virtualenv setup
+2. **WSGI import mismatch**: After separating WebSocket functionality into standalone service, `wsgi.py` was still trying to import `socketio` from the main API
+3. **EventLet configuration**: WebSocket service needed proper eventlet monkey patching for production deployment
+
+**Solution implemented:**
+
+**Part 1: Fixed Pipenv Installation (`render_build.sh`)**
+```bash
+# Before: User installation (not supported by Render)
+pip install --user pipenv
+
+# After: Global installation 
+pip install pipenv
+```
+
+**Part 2: Fixed API Service WSGI (`src/wsgi.py`)**
+```python
+# Before: Trying to import socketio (separated architecture)
+from app import app, socketio
+
+# After: Clean Flask app only
+from app import app
+```
+
+**Part 3: Fixed WebSocket Service Configuration (`src/socket_wsgi.py` & `src/socket_app.py`)**
+```python
+# Added proper eventlet monkey patching at the top:
+import eventlet
+eventlet.monkey_patch()
+```
+
+**Files modified:**
+- `render_build.sh` - Removed `--user` flag from pipenv installation
+- `src/wsgi.py` - Removed socketio import, kept only Flask app
+- `src/socket_wsgi.py` - Added eventlet monkey patching for production
+- `src/socket_app.py` - Added eventlet monkey patching for proper SocketIO integration
+
+**Result:**
+- 🎉 **Successful Render deployment** - Both API and WebSocket services deploy correctly
+- 🗃️ **Proper microservices architecture** - API and WebSocket services run independently
+- 🧹 **Clean WSGI configuration** - Each service exports the correct application object
+- 🎯 **Production-ready EventLet setup** - WebSocket service properly configured for gunicorn + eventlet worker
+
+---
+
 ## (October 10, 2025) -- Python Version Specification Fix: Updated to Complete Semantic Version
 
 **Problem encountered:**
