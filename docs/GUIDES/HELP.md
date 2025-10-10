@@ -113,5 +113,5 @@ zip -r tastebook.zip . -x ".git/*" "node_modules/*" "*.log" "*.sqlite*" "*.db" "
 
 ---
 
-
+Run `pipenv lock` to update pipfile.lock Python dependencies
 
