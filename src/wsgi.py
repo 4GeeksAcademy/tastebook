@@ -5,12 +5,11 @@
 # This file is required for Render.com deployment using gunicorn.
 # Read more about it here: https://devcenter.heroku.com/articles/python-gunicorn
 
-# Import the SocketIO app for WebSocket support
-from app import app, socketio
+# Import the main Flask app (WebSocket functionality is now in a separate service)
+from app import app
 
-# For regular WSGI servers (if needed)
+# For WSGI servers
 application = app
 
-# For SocketIO deployment with eventlet
 if __name__ == "__main__":
-    socketio.run(app)
+    app.run()

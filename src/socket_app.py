@@ -2,6 +2,9 @@
 Standalone WebSocket server for TasteBook real-time messaging.
 This server runs separately from the main Flask API.
 """
+import eventlet
+eventlet.monkey_patch()
+
 import os
 import logging
 import signal
@@ -9,7 +12,6 @@ import sys
 from flask import Flask, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_cors import CORS
-import eventlet
 
 # Basic logging
 logging.basicConfig(level=logging.DEBUG if os.getenv("FLASK_DEBUG") == "1" else logging.INFO)
