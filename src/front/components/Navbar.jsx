@@ -8,6 +8,13 @@ import ThemeToggle from "./ThemeToggle"; //Imported for final CSS styling implem
 
 const UNREAD_COUNT_CACHE_MS = 5000;
 
+// Helper function to only log in development environment
+const debugLog = (...args) => {
+	if (import.meta.env.MODE === 'development') {
+		console.log(...args);
+	}
+};
+
 // Module-level throttle cache to avoid using window globals
 const navbarThrottleCache = new Map();
 
@@ -31,7 +38,7 @@ export const Navbar = () => {
 	useEffect(() => {
 		const handleConnectionChange = (data) => {
 			setIsSocketConnected(data.connected);
-			console.log('[NAVBAR] Socket connection status:', data.connected);
+			debugLog('[NAVBAR] Socket connection status:', data.connected);
 		};
 
 		// Set initial connection status
@@ -43,10 +50,10 @@ export const Navbar = () => {
 		// Auto-connect if not already connected and user is logged in
 		const initializeConnection = async () => {
 			if (!socketService.getConnectionStatus() && token) {
-				console.log('[NAVBAR] Auto-connecting to WebSocket for real-time updates...');
+				debugLog('[NAVBAR] Auto-connecting to WebSocket for real-time updates...');
 				try {
 					await socketService.connect();
-					console.log('[NAVBAR] ✅ WebSocket connected successfully');
+					debugLog('[NAVBAR] ✅ WebSocket connected successfully');
 				} catch (error) {
 					console.warn('[NAVBAR] ⚠️ Failed to connect to WebSocket:', error.message || error);
 					// Non-critical error - app can work without real-time features
@@ -102,7 +109,7 @@ export const Navbar = () => {
 
 	// Real-time WebSocket handlers for instant updates (using useCallback for stability)
 	const handleNewMessage = useCallback((data) => {
-		console.log('[NAVBAR] 📨 GLOBAL MESSAGE HANDLER TRIGGERED:', data);
+		debugLog('[NAVBAR] 📨 GLOBAL MESSAGE HANDLER TRIGGERED:', data);
 		const { chat_id, message } = data;
 		
 		// PERFORMANCE: Throttle rapid successive global messages
@@ -111,7 +118,7 @@ export const Navbar = () => {
 		
 		const lastProcessed = navbarThrottleCache.get(messageKey);
 		if (lastProcessed && (now - lastProcessed) < 100) { // 100ms throttle
-			console.log('[NAVBAR] ⚡ Throttling duplicate global message:', messageKey);
+			debugLog('[NAVBAR] ⚡ Throttling duplicate global message:', messageKey);
 			return;
 		}
 		navbarThrottleCache.set(messageKey, now);
@@ -124,19 +131,19 @@ export const Navbar = () => {
 		
 		const isCurrentUserMessage = message.sender_id === currentUserRef.current?.user_id;
 		
-		console.log('[NAVBAR] Current user ID:', currentUserRef.current?.user_id);
-		console.log('[NAVBAR] Message sender ID:', message.sender_id);
-		console.log('[NAVBAR] Is current user message:', isCurrentUserMessage);
+		debugLog('[NAVBAR] Current user ID:', currentUserRef.current?.user_id);
+		debugLog('[NAVBAR] Message sender ID:', message.sender_id);
+		debugLog('[NAVBAR] Is current user message:', isCurrentUserMessage);
 		
 		// Only increment if message is NOT from current user
 		if (!isCurrentUserMessage) {
 			setUnreadCount(prev => {
 				const newCount = prev + 1;
-				console.log('[NAVBAR] 📨 Incrementing unread count from', prev, 'to', newCount);
+				debugLog('[NAVBAR] 📨 Incrementing unread count from', prev, 'to', newCount);
 				return newCount;
 			});
 		} else {
-			console.log('[NAVBAR] 📨 Skipping count increment - message is from current user');
+			debugLog('[NAVBAR] 📨 Skipping count increment - message is from current user');
 		}
 	}, []);
 
@@ -147,7 +154,7 @@ export const Navbar = () => {
 		if (user_id === currentUserRef.current?.user_id) {
 			// Refresh count from server to get accurate number
 			fetchUnreadCount(true);
-			console.log('[NAVBAR] 👀 Messages marked read - refreshing count');
+			debugLog('[NAVBAR] 👀 Messages marked read - refreshing count');
 		}
 	}, [fetchUnreadCount]);
 
@@ -180,7 +187,7 @@ export const Navbar = () => {
 		};
 		
 		fetchCount();
-		console.log('[NAVBAR] 🗑️ Chat deleted - refreshing count');
+		debugLog('[NAVBAR] 🗑️ Chat deleted - refreshing count');
 	}, [token]); // Only depend on token
 
 	useEffect(() => {
@@ -210,7 +217,7 @@ export const Navbar = () => {
 					
 					// Fetch unread count immediately after user data is loaded
 					await fetchUnreadCount(true);
-					console.log('[NAVBAR] ✅ User data and unread count loaded');
+					debugLog('[NAVBAR] ✅ User data and unread count loaded');
 				} else {
 					console.error("Failed to fetch user data");
 					updateUserData(null);
@@ -254,7 +261,7 @@ export const Navbar = () => {
 		if (!isSocketConnected || !userData?.user_id) {
 			// Clean up if disconnected or no user
 			if (navbarHandlersRegisteredRef.current) {
-				console.log('[NAVBAR] Cleaning up handlers due to disconnect/logout');
+				debugLog('[NAVBAR] Cleaning up handlers due to disconnect/logout');
 				socketService.off('global_message_received', handleNewMessage);
 				socketService.off('global_messages_read', handleMessagesRead);
 				socketService.off('global_chat_deleted', handleChatDeleted);
@@ -265,8 +272,8 @@ export const Navbar = () => {
 
 		// Only register if not already registered
 		if (!navbarHandlersRegisteredRef.current) {
-			console.log('[NAVBAR] Setting up WebSocket event handlers for user:', userData.user_id);
-			console.log('[NAVBAR] Current listeners before adding:', socketService.listeners.get('global_message_received')?.length || 0);
+			debugLog('[NAVBAR] Setting up WebSocket event handlers for user:', userData.user_id);
+			debugLog('[NAVBAR] Current listeners before adding:', socketService.listeners.get('global_message_received')?.length || 0);
 
 			// Set up WebSocket listeners for real-time updates (using GLOBAL events for Navbar)
 			socketService.on('global_message_received', handleNewMessage);
@@ -274,14 +281,14 @@ export const Navbar = () => {
 			socketService.on('global_chat_deleted', handleChatDeleted);
 			navbarHandlersRegisteredRef.current = true;
 
-			console.log('[NAVBAR] Current listeners after adding:', socketService.listeners.get('global_message_received')?.length || 0);
+			debugLog('[NAVBAR] Current listeners after adding:', socketService.listeners.get('global_message_received')?.length || 0);
 		} else {
-			console.log('[NAVBAR] Navbar handlers already registered, skipping setup');
+			debugLog('[NAVBAR] Navbar handlers already registered, skipping setup');
 		}
 
 		return () => {
 			// Only clean up on component unmount
-			console.log('[NAVBAR] Effect cleanup - keeping navbar handlers registered for now');
+			debugLog('[NAVBAR] Effect cleanup - keeping navbar handlers registered for now');
 		};
 	}, [isSocketConnected, userData?.user_id]);
 	
@@ -289,7 +296,7 @@ export const Navbar = () => {
 	useEffect(() => {
 		return () => {
 			if (navbarHandlersRegisteredRef.current) {
-				console.log('[NAVBAR] Component unmounting - cleaning up all navbar handlers');
+				debugLog('[NAVBAR] Component unmounting - cleaning up all navbar handlers');
 				socketService.off('global_message_received', handleNewMessage);
 				socketService.off('global_messages_read', handleMessagesRead);
 				socketService.off('global_chat_deleted', handleChatDeleted);

@@ -4,6 +4,13 @@ import socketService from "../../utils/socketService";
 import { normalizeMessage, normalizeChat } from "../utils/normalize";
 import { useMessageReadStatus } from "./useMessageReadStatus";
 
+// Helper function to only log in development environment
+const debugLog = (...args) => {
+    if (import.meta.env.MODE === 'development') {
+        console.log(...args);
+    }
+};
+
 // Module-level cache for throttling message handling (prevents global/window pollution)
 const messageThrottleCache = new Map();
 
@@ -349,7 +356,7 @@ export const useMessages = (chatId) => {
                     socketService.emitMessagesRead(chatIdToMark, currentUserRef.current.user_id);
                 }
                 
-                console.log('[READ_STATUS] Messages marked as read:', {
+                debugLog('[READ_STATUS] Messages marked as read:', {
                     chatId: chatIdToMark,
                     messageIds: specificMessageIds,
                     markedCount: data.marked_count
@@ -415,7 +422,7 @@ export const useMessages = (chatId) => {
                 
                 // Replace temp message with final message and remove any duplicates
                 setMessages(prev => {
-                    console.log('[SEND_MESSAGE] Replacing temp message with final message');
+                    debugLog('[SEND_MESSAGE] Replacing temp message with final message');
                     
                     // Remove the specific temp message
                     const withoutTemp = prev.filter(m => m._tempId !== tempId && m.id !== tempId);
@@ -426,11 +433,11 @@ export const useMessages = (chatId) => {
                     );
                     
                     if (finalExists) {
-                        console.log('[SEND_MESSAGE] Final message already exists from WebSocket, keeping existing');
+                        debugLog('[SEND_MESSAGE] Final message already exists from WebSocket, keeping existing');
                         return withoutTemp;
                     }
                     
-                    console.log('[SEND_MESSAGE] Adding final message from API response');
+                    debugLog('[SEND_MESSAGE] Adding final message from API response');
                     // Mark message as coming from API to help WebSocket deduplication
                     const markedMessage = { ...finalMessage, _fromAPI: true };
                     return [...withoutTemp, markedMessage];
@@ -567,7 +574,7 @@ export const useMessages = (chatId) => {
     // WebSocket event handlers - Use refs to avoid dependency issues
     const handleNewMessage = useCallback((data) => {
         const handlerCallId = `${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-        console.log('[WEBSOCKET] 📨 RAW MESSAGE RECEIVED:', data, 'Handler Call ID:', handlerCallId);
+        debugLog('[WEBSOCKET] 📨 RAW MESSAGE RECEIVED:', data, 'Handler Call ID:', handlerCallId);
         
         const { chat_id, message } = data;
         const normalizedMessage = normalizeMessage(message);
@@ -579,15 +586,15 @@ export const useMessages = (chatId) => {
         // Use module-level cache to track recent messages
         const lastProcessed = messageThrottleCache.get(messageKey);
         if (lastProcessed && (now - lastProcessed) < 1000) { // Increased to 1 second to catch duplicates
-            console.log('[WEBSOCKET] ⚡ BLOCKING DUPLICATE MESSAGE:', messageKey, 'Handler Call ID:', handlerCallId);
-            console.log('[WEBSOCKET] Last processed:', new Date(lastProcessed), 'Current:', new Date(now));
+            debugLog('[WEBSOCKET] ⚡ BLOCKING DUPLICATE MESSAGE:', messageKey, 'Handler Call ID:', handlerCallId);
+            debugLog('[WEBSOCKET] Last processed:', new Date(lastProcessed), 'Current:', new Date(now));
             return; // Early exit to prevent any processing
         }
         messageThrottleCache.set(messageKey, now);
         
-        console.log('[WEBSOCKET] ✅ PROCESSING NEW MESSAGE:', normalizedMessage, 'Handler Call ID:', handlerCallId);
-        console.log('[WEBSOCKET] Current chat ID:', currentChatRef.current?.chat_id);
-        console.log('[WEBSOCKET] Current user ID:', currentUserRef.current?.user_id);
+        debugLog('[WEBSOCKET] ✅ PROCESSING NEW MESSAGE:', normalizedMessage, 'Handler Call ID:', handlerCallId);
+        debugLog('[WEBSOCKET] Current chat ID:', currentChatRef.current?.chat_id);
+        debugLog('[WEBSOCKET] Current user ID:', currentUserRef.current?.user_id);
         
         // Clean up old entries to prevent memory leaks
         if (messageThrottleCache.size > 50) {
@@ -602,17 +609,17 @@ export const useMessages = (chatId) => {
         // Always add the message to the current chat if we're viewing it,
         // regardless of sender (this ensures real-time updates for all users)
         if (isCurrentChat) {
-            console.log('[WEBSOCKET] ✅ Adding to current chat - chat IDs match');
+            debugLog('[WEBSOCKET] ✅ Adding to current chat - chat IDs match');
             
             setMessages(prevMessages => {
-                console.log('[WEBSOCKET] Previous messages count:', prevMessages.length);
+                debugLog('[WEBSOCKET] Previous messages count:', prevMessages.length);
                 
                 // OPTIMIZED: Fast deduplication using direct ID lookup (O(1) instead of O(n))
                 if (normalizedMessage.message_id) {
                     // Create a Set of existing message IDs for fast lookup
                     const existingIds = new Set(prevMessages.map(msg => msg.message_id));
                     if (existingIds.has(normalizedMessage.message_id)) {
-                        console.log('[WEBSOCKET] ⚠️ Message exists by ID:', normalizedMessage.message_id);
+                        debugLog('[WEBSOCKET] ⚠️ Message exists by ID:', normalizedMessage.message_id);
                         return prevMessages; // Early return - no changes needed
                     }
                 }
@@ -625,7 +632,7 @@ export const useMessages = (chatId) => {
                     const recentMessages = prevMessages.slice(-3);
                     messageExists = recentMessages.some(msg => {
                         if (msg._fromAPI && Math.abs(new Date(msg.created_at).getTime() - newMessageTime) < 2000) {
-                            console.log('[WEBSOCKET] ⚠️ Skipping WebSocket message - already have from API');
+                            debugLog('[WEBSOCKET] ⚠️ Skipping WebSocket message - already have from API');
                             return true;
                         }
                         return false;
@@ -633,7 +640,7 @@ export const useMessages = (chatId) => {
                 }
                 
                 if (!messageExists) {
-                    console.log('[WEBSOCKET] ✅ Adding NEW message to current chat:', normalizedMessage);
+                    debugLog('[WEBSOCKET] ✅ Adding NEW message to current chat:', normalizedMessage);
                     
                     // OPTIMIZED: For own messages, find and replace temp messages more efficiently
                     if (isCurrentUserMessage) {
@@ -664,21 +671,21 @@ export const useMessages = (chatId) => {
                     }
                 }
                 
-                console.log('[WEBSOCKET] ⚠️ Message already exists, skipping duplicate');
+                debugLog('[WEBSOCKET] ⚠️ Message already exists, skipping duplicate');
                 return prevMessages;
             });
         } else {
-            console.log('[WEBSOCKET] ❌ NOT adding to current chat - chat IDs don\'t match or no current chat');
-            console.log('[WEBSOCKET] Current chat:', currentChatRef.current?.chat_id, 'Message chat:', chat_id);
+            debugLog('[WEBSOCKET] ❌ NOT adding to current chat - chat IDs don\'t match or no current chat');
+            debugLog('[WEBSOCKET] Current chat:', currentChatRef.current?.chat_id, 'Message chat:', chat_id);
         }
         
         // OPTIMIZED: Single chat list update with minimal processing
         setChats(prevChats => {
-            console.log('[WEBSOCKET] Updating chats list for message - Handler Call ID:', handlerCallId);
+            debugLog('[WEBSOCKET] Updating chats list for message - Handler Call ID:', handlerCallId);
             
             const updatedChats = prevChats.map(chat => {
                 if (chat.chat_id === chat_id) {
-                    console.log('[WEBSOCKET] Updating chat in list:', {
+                    debugLog('[WEBSOCKET] Updating chat in list:', {
                         chat_id,
                         isCurrentUserMessage,
                         isCurrentChat,
@@ -717,7 +724,7 @@ export const useMessages = (chatId) => {
             }));
         }
         
-        console.log('[WEBSOCKET] 📨 Message handling completed - Handler Call ID:', handlerCallId);
+        debugLog('[WEBSOCKET] 📨 Message handling completed - Handler Call ID:', handlerCallId);
     }, []); // ✅ No dependencies - use refs instead
 
     const handleMessagesRead = useCallback((data) => {
@@ -783,13 +790,13 @@ export const useMessages = (chatId) => {
         // Check if already connected (from global initialization)
         if (!socketService.getConnectionStatus()) {
             // If not connected globally, try to connect here
-            console.log('[WEBSOCKET] Connecting WebSocket for real-time messaging...');
+            debugLog('[WEBSOCKET] Connecting WebSocket for real-time messaging...');
             socketService.connect().catch(error => {
                 console.error('[WEBSOCKET] Auto-connect failed:', error);
                 showToast('Failed to connect to real-time messaging ⚠️', 4000);
             });
         } else {
-            console.log('[WEBSOCKET] WebSocket already connected globally ✅');
+            debugLog('[WEBSOCKET] WebSocket already connected globally ✅');
         }
         
         // Initial status check
@@ -805,7 +812,7 @@ export const useMessages = (chatId) => {
         if (!isSocketConnected || !currentUser?.user_id) {
             // Clean up if disconnected or no user
             if (handlersRegisteredRef.current) {
-                console.log('[WEBSOCKET] Cleaning up handlers due to disconnect/logout');
+                debugLog('[WEBSOCKET] Cleaning up handlers due to disconnect/logout');
                 socketService.off('message_received', handleNewMessage);
                 socketService.off('messages_marked_read', handleMessagesRead);
                 socketService.off('chat_was_deleted', handleChatDeleted);
@@ -816,15 +823,15 @@ export const useMessages = (chatId) => {
         
         // Only register if not already registered
         if (!handlersRegisteredRef.current) {
-            console.log('[WEBSOCKET] Setting up event handlers for user:', currentUser.user_id);
-            console.log('[WEBSOCKET] Current message_received listeners before setup:', socketService.listeners.get('message_received')?.length || 0);
+            debugLog('[WEBSOCKET] Setting up event handlers for user:', currentUser.user_id);
+            debugLog('[WEBSOCKET] Current message_received listeners before setup:', socketService.listeners.get('message_received')?.length || 0);
             
             // SAFETY: Clean up any existing handlers first to prevent duplicates
             socketService.off('message_received', handleNewMessage);
             socketService.off('messages_marked_read', handleMessagesRead);
             socketService.off('chat_was_deleted', handleChatDeleted);
             
-            console.log('[WEBSOCKET] After cleanup - message_received listeners:', socketService.listeners.get('message_received')?.length || 0);
+            debugLog('[WEBSOCKET] After cleanup - message_received listeners:', socketService.listeners.get('message_received')?.length || 0);
             
             // Now register fresh handlers
             socketService.on('message_received', handleNewMessage);
@@ -832,15 +839,15 @@ export const useMessages = (chatId) => {
             socketService.on('chat_was_deleted', handleChatDeleted);
             handlersRegisteredRef.current = true;
             
-            console.log('[WEBSOCKET] Current message_received listeners after setup:', socketService.listeners.get('message_received')?.length || 0);
+            debugLog('[WEBSOCKET] Current message_received listeners after setup:', socketService.listeners.get('message_received')?.length || 0);
         } else {
-            console.log('[WEBSOCKET] Handlers already registered, skipping setup');
-            console.log('[WEBSOCKET] Current message_received listeners count:', socketService.listeners.get('message_received')?.length || 0);
+            debugLog('[WEBSOCKET] Handlers already registered, skipping setup');
+            debugLog('[WEBSOCKET] Current message_received listeners count:', socketService.listeners.get('message_received')?.length || 0);
         }
         
         return () => {
             // Only clean up on component unmount, not on dependency changes
-            console.log('[WEBSOCKET] Effect cleanup - keeping handlers registered for now');
+            debugLog('[WEBSOCKET] Effect cleanup - keeping handlers registered for now');
         };
     }, [isSocketConnected, currentUser?.user_id]); // Minimal dependencies
     
@@ -848,7 +855,7 @@ export const useMessages = (chatId) => {
     useEffect(() => {
         return () => {
             if (handlersRegisteredRef.current) {
-                console.log('[WEBSOCKET] Component unmounting - cleaning up all handlers');
+                debugLog('[WEBSOCKET] Component unmounting - cleaning up all handlers');
                 socketService.off('message_received', handleNewMessage);
                 socketService.off('messages_marked_read', handleMessagesRead);
                 socketService.off('chat_was_deleted', handleChatDeleted);
@@ -865,7 +872,7 @@ export const useMessages = (chatId) => {
 
         // Add a small delay to ensure WebSocket is fully connected before joining
         const joinTimer = setTimeout(() => {
-            console.log('[WEBSOCKET] Joining chat room:', currentChat.chat_id);
+            debugLog('[WEBSOCKET] Joining chat room:', currentChat.chat_id);
             socketService.joinChat(currentChat.chat_id, currentUser.user_id);
         }, 100);
 
@@ -873,7 +880,7 @@ export const useMessages = (chatId) => {
         return () => {
             clearTimeout(joinTimer);
             if (currentChat && isSocketConnected) {
-                console.log('[WEBSOCKET] Leaving chat room:', currentChat.chat_id);
+                debugLog('[WEBSOCKET] Leaving chat room:', currentChat.chat_id);
                 socketService.leaveChat(currentChat.chat_id, currentUser.user_id);
             }
         };
