@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, memo } from "react";
 import { MoreVertical, Edit3, Trash2 } from "lucide-react";
 import { formatTime } from "../utils/formatTime";
 
@@ -13,7 +13,7 @@ import { formatTime } from "../utils/formatTime";
  * @param {function} onCancelEdit  - Function to cancel editing
  * @param {function} onRegisterForReadTracking - Function to register message for read status tracking
  */
-const MessageBubble = ({ 
+const MessageBubble = memo(({ 
     message, 
     isCurrentUser, 
     isEditing, 
@@ -129,6 +129,21 @@ const MessageBubble = ({
             </div>
         </div>
     );
-};
+});
 
-export default MessageBubble;
+// Add display name for debugging
+MessageBubble.displayName = 'MessageBubble';
+
+// Only re-render if relevant props change
+function areEqual(prevProps, nextProps) {
+    return (
+        prevProps.message.message_id === nextProps.message.message_id &&
+        prevProps.message.content === nextProps.message.content &&
+        prevProps.message.is_edited === nextProps.message.is_edited &&
+        prevProps.message.created_at === nextProps.message.created_at &&
+        prevProps.isCurrentUser === nextProps.isCurrentUser &&
+        prevProps.isEditing === nextProps.isEditing
+    );
+}
+
+export default React.memo(MessageBubble, areEqual);

@@ -8,6 +8,9 @@ import ThemeToggle from "./ThemeToggle"; //Imported for final CSS styling implem
 
 const UNREAD_COUNT_CACHE_MS = 5000;
 
+// Module-level throttle cache to avoid using window globals
+const navbarThrottleCache = new Map();
+
 export const Navbar = () => {
 	const navigate = useNavigate();
 	const token = localStorage.getItem("token");
@@ -16,6 +19,7 @@ export const Navbar = () => {
 	const [isSocketConnected, setIsSocketConnected] = useState(false);
 	const currentUserRef = useRef(null);
 	const lastFetchTime = useRef(0);
+	const navbarHandlersRegisteredRef = useRef(false); // Track navbar handler registration
 
 	// Helper function to update user data consistently
 	const updateUserData = useCallback((newUserData) => {
@@ -100,6 +104,24 @@ export const Navbar = () => {
 	const handleNewMessage = useCallback((data) => {
 		console.log('[NAVBAR] 📨 GLOBAL MESSAGE HANDLER TRIGGERED:', data);
 		const { chat_id, message } = data;
+		
+		// PERFORMANCE: Throttle rapid successive global messages
+		const messageKey = `global_${message.id || message.message_id}_${chat_id}`;
+		const now = Date.now();
+		
+		const lastProcessed = navbarThrottleCache.get(messageKey);
+		if (lastProcessed && (now - lastProcessed) < 100) { // 100ms throttle
+			console.log('[NAVBAR] ⚡ Throttling duplicate global message:', messageKey);
+			return;
+		}
+		navbarThrottleCache.set(messageKey, now);
+		
+		// Clean up old entries
+		if (navbarThrottleCache.size > 30) {
+			const entries = Array.from(navbarThrottleCache.entries());
+			entries.slice(0, 15).forEach(([key]) => navbarThrottleCache.delete(key));
+		}
+		
 		const isCurrentUserMessage = message.sender_id === currentUserRef.current?.user_id;
 		
 		console.log('[NAVBAR] Current user ID:', currentUserRef.current?.user_id);
@@ -227,33 +249,54 @@ export const Navbar = () => {
 		};
 	}, [token, fetchUnreadCount, updateUserData]);
 
-	// Setup WebSocket event handlers when connected and user is available
+	// Setup WebSocket event handlers when connected and user is available - PREVENT DUPLICATES
 	useEffect(() => {
 		if (!isSocketConnected || !userData?.user_id) {
-			console.log('[NAVBAR] Not setting up WebSocket handlers - Socket connected:', isSocketConnected, 'User ID:', userData?.user_id);
+			// Clean up if disconnected or no user
+			if (navbarHandlersRegisteredRef.current) {
+				console.log('[NAVBAR] Cleaning up handlers due to disconnect/logout');
+				socketService.off('global_message_received', handleNewMessage);
+				socketService.off('global_messages_read', handleMessagesRead);
+				socketService.off('global_chat_deleted', handleChatDeleted);
+				navbarHandlersRegisteredRef.current = false;
+			}
 			return;
 		}
 
-		console.log('[NAVBAR] Setting up WebSocket event handlers for user:', userData.user_id);
-		console.log('[NAVBAR] Current listeners before adding:', socketService.listeners.get('global_message_received')?.length || 0);
+		// Only register if not already registered
+		if (!navbarHandlersRegisteredRef.current) {
+			console.log('[NAVBAR] Setting up WebSocket event handlers for user:', userData.user_id);
+			console.log('[NAVBAR] Current listeners before adding:', socketService.listeners.get('global_message_received')?.length || 0);
 
-		// Set up WebSocket listeners for real-time updates (using GLOBAL events for Navbar)
-		socketService.on('global_message_received', handleNewMessage);
-		socketService.on('global_messages_read', handleMessagesRead);
-		socketService.on('global_chat_deleted', handleChatDeleted);
+			// Set up WebSocket listeners for real-time updates (using GLOBAL events for Navbar)
+			socketService.on('global_message_received', handleNewMessage);
+			socketService.on('global_messages_read', handleMessagesRead);
+			socketService.on('global_chat_deleted', handleChatDeleted);
+			navbarHandlersRegisteredRef.current = true;
 
-		console.log('[NAVBAR] Current listeners after adding:', socketService.listeners.get('global_message_received')?.length || 0);
+			console.log('[NAVBAR] Current listeners after adding:', socketService.listeners.get('global_message_received')?.length || 0);
+		} else {
+			console.log('[NAVBAR] Navbar handlers already registered, skipping setup');
+		}
 
 		return () => {
-			console.log('[NAVBAR] Cleaning up WebSocket event handlers');
-			console.log('[NAVBAR] Listeners before cleanup:', socketService.listeners.get('global_message_received')?.length || 0);
-			// Clean up WebSocket listeners
-			socketService.off('global_message_received', handleNewMessage);
-			socketService.off('global_messages_read', handleMessagesRead);
-			socketService.off('global_chat_deleted', handleChatDeleted);
-			console.log('[NAVBAR] Listeners after cleanup:', socketService.listeners.get('global_message_received')?.length || 0);
+			// Only clean up on component unmount
+			console.log('[NAVBAR] Effect cleanup - keeping navbar handlers registered for now');
 		};
-	}, [isSocketConnected, userData?.user_id, handleNewMessage, handleMessagesRead, handleChatDeleted]);
+	}, [isSocketConnected, userData?.user_id]);
+	
+	// Clean up handlers only on component unmount
+	useEffect(() => {
+		return () => {
+			if (navbarHandlersRegisteredRef.current) {
+				console.log('[NAVBAR] Component unmounting - cleaning up all navbar handlers');
+				socketService.off('global_message_received', handleNewMessage);
+				socketService.off('global_messages_read', handleMessagesRead);
+				socketService.off('global_chat_deleted', handleChatDeleted);
+				navbarHandlersRegisteredRef.current = false;
+			}
+		};
+	}, []); // Empty dependency array = only on unmount
 
 	const handleLogout = () => {
 		if (localStorage.getItem("token")) {

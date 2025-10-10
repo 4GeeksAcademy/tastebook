@@ -269,12 +269,25 @@ class User(db.Model):
         return None
     
     def get_total_unread_messages(self) -> int:
-        """Get total count of unread messages across all chats"""
-        total_unread = 0
-        all_chats = self.get_all_chats()
+        """Get total count of unread messages across all chats - OPTIMIZED VERSION"""
+        from sqlalchemy import and_, or_, func
         
-        for chat in all_chats:
-            total_unread += chat.get_unread_count_for_user(self.id)
+        # Single query to get total unread count across all user's chats
+        total_unread = (
+            db.session.query(func.count(Message.id))
+            .join(Chat, Message.chat_id == Chat.id)
+            .filter(
+                and_(
+                    # User is a participant in the chat
+                    or_(Chat.user1_id == self.id, Chat.user2_id == self.id),
+                    # Message is not from the current user
+                    Message.sender_id != self.id,
+                    # Message is not read
+                    Message.is_read == False
+                )
+            )
+            .scalar() or 0
+        )
         
         return total_unread
 
@@ -1123,41 +1136,26 @@ class Chat(db.Model):
     
     @property
     def last_message(self):
-        """Get the most recent message in this chat."""
+        """Get the most recent message in this chat.
+        
+        PERFORMANCE NOTE: This property loads ALL messages for each chat.
+        For better performance, use a database query to get only the latest message.
+        """
         if self.messages:
             return max(self.messages, key=lambda m: m.created_at)
         return None
     
     def get_other_participant(self, current_user_id: int) -> Optional["User"]:
         """Get the other participant in the chat (not the current user)."""
-        print(f"[DEBUG PARTICIPANT] get_other_participant called")
-        print(f"[DEBUG PARTICIPANT] current_user_id: {current_user_id}")
-        print(f"[DEBUG PARTICIPANT] self.user1_id: {self.user1_id}")
-        print(f"[DEBUG PARTICIPANT] self.user2_id: {self.user2_id}")
-        
         if self.user1_id == current_user_id:
-            print(f"[DEBUG PARTICIPANT] Current user is user1, returning user2: {self.user2}")
             return self.user2
         elif self.user2_id == current_user_id:
-            print(f"[DEBUG PARTICIPANT] Current user is user2, returning user1: {self.user1}")
             return self.user1
-        
-        print(f"[DEBUG PARTICIPANT] Current user is not a participant! Returning None")
         return None
     
     def is_participant(self, user_id: int) -> bool:
         """Check if a user is a participant in this chat."""
-        print(f"[DEBUG IS_PARTICIPANT] is_participant called")
-        print(f"[DEBUG IS_PARTICIPANT] user_id: {user_id} (type: {type(user_id)})")
-        print(f"[DEBUG IS_PARTICIPANT] self.user1_id: {self.user1_id} (type: {type(self.user1_id)})")
-        print(f"[DEBUG IS_PARTICIPANT] self.user2_id: {self.user2_id} (type: {type(self.user2_id)})")
-        
-        result = user_id == self.user1_id or user_id == self.user2_id
-        print(f"[DEBUG IS_PARTICIPANT] Result: {result}")
-        print(f"[DEBUG IS_PARTICIPANT] user_id == self.user1_id: {user_id == self.user1_id}")
-        print(f"[DEBUG IS_PARTICIPANT] user_id == self.user2_id: {user_id == self.user2_id}")
-        
-        return result
+        return user_id == self.user1_id or user_id == self.user2_id
     
     def get_unread_count_for_user(self, user_id: int) -> int:
         """Get count of unread messages for a specific user."""
@@ -1173,17 +1171,8 @@ class Chat(db.Model):
     # Serialization #
     #---------------#
     def serialize(self, current_user_id: Optional[int] = None, include_messages: bool = False) -> Dict[str, Any]:
-        print(f"[DEBUG SERIALIZE] Chat.serialize called")
-        print(f"[DEBUG SERIALIZE] Chat ID: {self.id}")
-        print(f"[DEBUG SERIALIZE] Current user ID: {current_user_id}")
-        print(f"[DEBUG SERIALIZE] Include messages: {include_messages}")
-        print(f"[DEBUG SERIALIZE] Chat user1_id: {self.user1_id}, user2_id: {self.user2_id}")
-        
+        """Serialize chat data with performance optimizations."""
         other_participant = self.get_other_participant(current_user_id) if current_user_id else None
-        print(f"[DEBUG SERIALIZE] Other participant: {other_participant}")
-        
-        if other_participant:
-            print(f"[DEBUG SERIALIZE] Other participant details: ID={other_participant.id}, username={other_participant.username}")
         
         data = {
             "chat_id":     self.id,
@@ -1200,11 +1189,429 @@ class Chat(db.Model):
         }
 
         if include_messages:
-            print(f"[DEBUG SERIALIZE] Including {len(self.messages)} messages")
             data["messages"] = [message.serialize() for message in self.messages]
 
-        print(f"[DEBUG SERIALIZE] Final serialized data: {data}")
         return data
+
+    #------------------------#
+    # Optimized Class Methods #
+    #------------------------#
+    
+    @classmethod
+    def get_optimized_chat_list(cls, user_id: int):
+        """Get chat list with optimized queries to avoid N+1 problems.
+        
+        This method fetches all chats for a user with:
+        - Preloaded participants (user1, user2)
+        - Last message data via subquery  
+        - Unread counts via subquery
+        
+        Returns raw data suitable for efficient serialization.
+        """
+        from sqlalchemy import and_, or_, desc, case, func
+        
+        # Subquery for unread counts per chat for this user
+        unread_count_subquery = (
+            db.session.query(
+                Message.chat_id,
+                func.count(Message.id).label('unread_count')
+            )
+            .filter(
+                and_(
+                    Message.sender_id != user_id,  # Not sent by current user
+                    Message.is_read == False       # Not read yet
+                )
+            )
+            .group_by(Message.chat_id)
+            .subquery()
+        )
+        
+        # Subquery for last message per chat
+        last_message_subquery = (
+            db.session.query(
+                Message.chat_id,
+                Message.content.label('last_msg_content'),
+                Message.created_at.label('last_msg_timestamp')
+            )
+            .join(
+                # Subquery to get the latest message ID per chat
+                db.session.query(
+                    Message.chat_id,
+                    func.max(Message.created_at).label('max_created_at')
+                ).group_by(Message.chat_id).subquery('max_msg'),
+                and_(
+                    Message.chat_id == text('max_msg.chat_id'),
+                    Message.created_at == text('max_msg.max_created_at')
+                )
+            )
+            .subquery()
+        )
+        
+        # Main query with all optimizations
+        query = (
+            db.session.query(
+                cls.id.label('chat_id'),
+                cls.created_at,
+                cls.updated_at,
+                cls.user1_id,
+                cls.user2_id,
+                
+                # Other participant data (conditional based on which user is current)
+                case(
+                    (cls.user1_id == user_id, cls.user2_id),
+                    else_=cls.user1_id
+                ).label('other_participant_id'),
+                
+                # Last message data
+                last_message_subquery.c.last_msg_content,
+                last_message_subquery.c.last_msg_timestamp,
+                
+                # Unread count
+                func.coalesce(unread_count_subquery.c.unread_count, 0).label('unread_count')
+            )
+            .outerjoin(last_message_subquery, cls.id == last_message_subquery.c.chat_id)
+            .outerjoin(unread_count_subquery, cls.id == unread_count_subquery.c.chat_id)
+            .filter(
+                or_(cls.user1_id == user_id, cls.user2_id == user_id)
+            )
+            .order_by(desc(func.coalesce(last_message_subquery.c.last_msg_timestamp, cls.created_at)))
+        )
+        
+        return query.all()
+    
+    @classmethod
+    def get_optimized_chat_list_paginated(cls, user_id: int, page: int = 1, per_page: int = 20):
+        """Get paginated chat list with optimized queries.
+        
+        Args:
+            user_id: The user ID to get chats for
+            page: Page number (1-based)
+            per_page: Chats per page (max 50)
+            
+        Returns:
+            Dict with chats, pagination info, and total unread count
+        """
+        from sqlalchemy import and_, or_, desc, case, func, text
+        
+        # First get total chat count and total unread count
+        total_chats = (
+            db.session.query(func.count(cls.id))
+            .filter(or_(cls.user1_id == user_id, cls.user2_id == user_id))
+            .scalar() or 0
+        )
+        
+        # Get total unread count across all chats (efficient single query)
+        total_unread = (
+            db.session.query(func.count(Message.id))
+            .join(cls, Message.chat_id == cls.id)
+            .filter(
+                and_(
+                    or_(cls.user1_id == user_id, cls.user2_id == user_id),
+                    Message.sender_id != user_id,
+                    Message.is_read == False
+                )
+            )
+            .scalar() or 0
+        )
+        
+        # Calculate pagination
+        total_pages = (total_chats + per_page - 1) // per_page
+        offset = (page - 1) * per_page
+        
+        # Subquery for unread counts per chat for this user
+        unread_count_subquery = (
+            db.session.query(
+                Message.chat_id,
+                func.count(Message.id).label('unread_count')
+            )
+            .filter(
+                and_(
+                    Message.sender_id != user_id,  # Not sent by current user
+                    Message.is_read == False       # Not read yet
+                )
+            )
+            .group_by(Message.chat_id)
+            .subquery()
+        )
+        
+        # Subquery for last message per chat
+        last_message_subquery = (
+            db.session.query(
+                Message.chat_id,
+                Message.content.label('last_msg_content'),
+                Message.created_at.label('last_msg_timestamp')
+            )
+            .join(
+                # Subquery to get the latest message ID per chat
+                db.session.query(
+                    Message.chat_id,
+                    func.max(Message.created_at).label('max_created_at')
+                ).group_by(Message.chat_id).subquery('max_msg'),
+                and_(
+                    Message.chat_id == text('max_msg.chat_id'),
+                    Message.created_at == text('max_msg.max_created_at')
+                )
+            )
+            .subquery()
+        )
+        
+        # Main paginated query
+        query = (
+            db.session.query(
+                cls.id.label('chat_id'),
+                cls.created_at,
+                cls.updated_at,
+                cls.user1_id,
+                cls.user2_id,
+                
+                # Other participant data
+                case(
+                    (cls.user1_id == user_id, cls.user2_id),
+                    else_=cls.user1_id
+                ).label('other_participant_id'),
+                
+                # Last message data
+                last_message_subquery.c.last_msg_content,
+                last_message_subquery.c.last_msg_timestamp,
+                
+                # Unread count
+                func.coalesce(unread_count_subquery.c.unread_count, 0).label('unread_count')
+            )
+            .outerjoin(last_message_subquery, cls.id == last_message_subquery.c.chat_id)
+            .outerjoin(unread_count_subquery, cls.id == unread_count_subquery.c.chat_id)
+            .filter(
+                or_(cls.user1_id == user_id, cls.user2_id == user_id)
+            )
+            .order_by(desc(func.coalesce(last_message_subquery.c.last_msg_timestamp, cls.created_at)))
+            .offset(offset)
+            .limit(per_page)
+        )
+        
+        chats = query.all()
+        
+        return {
+            'chats': chats,
+            'total_unread': total_unread,
+            'pagination': {
+                'current_page': page,
+                'per_page': per_page,
+                'total_pages': total_pages,
+                'total_chats': total_chats,
+                'has_next': page < total_pages,
+                'has_prev': page > 1
+            }
+        }
+    
+    @classmethod  
+    def get_optimized_chat_data(cls, chat_id: int, current_user_id: int, include_messages: bool = False):
+        """Get a single chat with optimized loading.
+        
+        Args:
+            chat_id: The chat ID to fetch
+            current_user_id: Current user ID for permission checking
+            include_messages: Whether to include message list
+            
+        Returns:
+            Dict with chat data ready for JSON serialization, or None if not found
+        """
+        from sqlalchemy import and_, or_, desc, func
+        
+        # First, get the basic chat with participants preloaded
+        chat = (
+            db.session.query(cls)
+            .options(
+                db.joinedload(cls.user1),
+                db.joinedload(cls.user2)
+            )
+            .filter(
+                and_(
+                    cls.id == chat_id,
+                    or_(cls.user1_id == current_user_id, cls.user2_id == current_user_id)
+                )
+            )
+            .first()
+        )
+        
+        if not chat:
+            return None
+        
+        # Get other participant
+        other_participant = chat.get_other_participant(current_user_id)
+        
+        # Build basic response
+        result = {
+            "chat_id": chat.id,
+            "created_at": chat.created_at.isoformat() if chat.created_at else None,
+            "updated_at": chat.updated_at.isoformat() if chat.updated_at else None,
+            "participant": {
+                "user_id": other_participant.id if other_participant else None,
+                "username": other_participant.username if other_participant else None,
+                "full_name": other_participant.full_name if other_participant else None,
+                "cloudinary_url": other_participant.cloudinary_url if other_participant else None
+            } if other_participant else None,
+            "unread_count": 0  # Will be calculated below
+        }
+        
+        if include_messages:
+            # Efficiently load messages with sender info
+            messages = (
+                db.session.query(Message)
+                .options(db.joinedload(Message.sender))
+                .filter(Message.chat_id == chat_id)
+                .order_by(Message.created_at)
+                .all()
+            )
+            
+            result["messages"] = [msg.serialize() for msg in messages]
+            
+            # Calculate unread count from loaded messages
+            unread_count = sum(1 for msg in messages 
+                             if msg.sender_id != current_user_id and not msg.is_read)
+            result["unread_count"] = unread_count
+            
+            # Set last message from loaded data
+            if messages:
+                result["last_message"] = messages[-1].serialize()
+            else:
+                result["last_message"] = None
+        else:
+            # Get just the last message efficiently
+            last_message = (
+                db.session.query(Message)
+                .options(db.joinedload(Message.sender))
+                .filter(Message.chat_id == chat_id)
+                .order_by(desc(Message.created_at))
+                .first()
+            )
+            
+            result["last_message"] = last_message.serialize() if last_message else None
+            
+            # Get unread count efficiently
+            unread_count = (
+                db.session.query(func.count(Message.id))
+                .filter(
+                    and_(
+                        Message.chat_id == chat_id,
+                        Message.sender_id != current_user_id,
+                        Message.is_read == False
+                    )
+                )
+                .scalar() or 0
+            )
+            result["unread_count"] = unread_count
+        
+        return result
+    
+    @classmethod  
+    def get_optimized_chat_data_paginated(cls, chat_id: int, current_user_id: int, page: int = 1, per_page: int = 50):
+        """Get a single chat with paginated messages for efficient loading.
+        
+        Args:
+            chat_id: The chat ID to fetch
+            current_user_id: Current user ID for permission checking
+            page: Page number (1-based)
+            per_page: Messages per page (max 100)
+            
+        Returns:
+            Dict with chat data and paginated messages, or None if not found
+        """
+        from sqlalchemy import and_, or_, desc, func
+        
+        # First, get the basic chat with participants preloaded
+        chat = (
+            db.session.query(cls)
+            .options(
+                db.joinedload(cls.user1),
+                db.joinedload(cls.user2)
+            )
+            .filter(
+                and_(
+                    cls.id == chat_id,
+                    or_(cls.user1_id == current_user_id, cls.user2_id == current_user_id)
+                )
+            )
+            .first()
+        )
+        
+        if not chat:
+            return None
+        
+        # Get other participant
+        other_participant = chat.get_other_participant(current_user_id)
+        
+        # Get total message count
+        total_messages = (
+            db.session.query(func.count(Message.id))
+            .filter(Message.chat_id == chat_id)
+            .scalar() or 0
+        )
+        
+        # Calculate pagination info
+        total_pages = (total_messages + per_page - 1) // per_page  # Ceiling division
+        offset = (page - 1) * per_page
+        
+        # Get paginated messages (most recent first, then reverse for chronological order)
+        messages_query = (
+            db.session.query(Message)
+            .options(db.joinedload(Message.sender))
+            .filter(Message.chat_id == chat_id)
+            .order_by(desc(Message.created_at))
+            .offset(offset)
+            .limit(per_page)
+        )
+        
+        messages = list(reversed(messages_query.all()))  # Reverse to get chronological order
+        
+        # Calculate unread count from all messages (not just current page)
+        unread_count = (
+            db.session.query(func.count(Message.id))
+            .filter(
+                and_(
+                    Message.chat_id == chat_id,
+                    Message.sender_id != current_user_id,
+                    Message.is_read == False
+                )
+            )
+            .scalar() or 0
+        )
+        
+        # Build response
+        result = {
+            "chat_id": chat.id,
+            "created_at": chat.created_at.isoformat() if chat.created_at else None,
+            "updated_at": chat.updated_at.isoformat() if chat.updated_at else None,
+            "participant": {
+                "user_id": other_participant.id if other_participant else None,
+                "username": other_participant.username if other_participant else None,
+                "full_name": other_participant.full_name if other_participant else None,
+                "cloudinary_url": other_participant.cloudinary_url if other_participant else None
+            } if other_participant else None,
+            "unread_count": unread_count,
+            "messages": [msg.serialize() for msg in messages],
+            "pagination": {
+                "current_page": page,
+                "per_page": per_page,
+                "total_pages": total_pages,
+                "total_messages": total_messages,
+                "has_next": page < total_pages,
+                "has_prev": page > 1
+            }
+        }
+        
+        # Set last message from the most recent message (regardless of current page)
+        if total_messages > 0:
+            last_message = (
+                db.session.query(Message)
+                .options(db.joinedload(Message.sender))
+                .filter(Message.chat_id == chat_id)
+                .order_by(desc(Message.created_at))
+                .first()
+            )
+            result["last_message"] = last_message.serialize() if last_message else None
+        else:
+            result["last_message"] = None
+        
+        return result
 
 
     #-----------------#

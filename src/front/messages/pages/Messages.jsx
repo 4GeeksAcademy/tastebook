@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 import { useParams } from "react-router-dom";
 import { useMessages } from "../hooks/useMessages";
@@ -63,7 +63,7 @@ export const Messages = () => {
     } = useMessages(chatId);
 
     // Handle chat selection
-    const handleSelectChat = (chat) => {
+    const handleSelectChat = useCallback((chat) => {
         navigate(`/messages/${chat.chat_id}`);
         fetchChat(chat.chat_id);
         
@@ -71,32 +71,37 @@ export const Messages = () => {
         if (chat.unread_count > 0) {
             markMessagesAsRead(chat.chat_id);
         }
-    };
+    }, [navigate, fetchChat, markMessagesAsRead]);
 
     // Handle navigating back to chat list (mobile)
-    const handleNavigateBack = () => {
+    const handleNavigateBack = useCallback(() => {
         navigate("/messages");
-    };
+    }, [navigate]);
 
     // Handle starting message edit
-    const handleStartEdit = (messageId) => {
+    const handleStartEdit = useCallback((messageId) => {
         dispatchLoading({ type: 'SET_EDITING_MESSAGE', payload: messageId });
-    };
+    }, [dispatchLoading]);
 
     // Handle canceling message edit
-    const handleCancelEdit = () => {
+    const handleCancelEdit = useCallback(() => {
         dispatchLoading({ type: 'SET_EDITING_MESSAGE', payload: null });
-    };
+    }, [dispatchLoading]);
 
     // Handle retry WebSocket server check
-    const handleRetryServerCheck = async () => {
+    const handleRetryServerCheck = useCallback(async () => {
         setIsRetryingServer(true);
         try {
             await checkWebSocketServerAvailability();
         } finally {
             setIsRetryingServer(false);
         }
-    };
+    }, [checkWebSocketServerAvailability]);
+
+    // Optimized new message change handler - only for conversation starters
+    const handleNewMessageChange = useCallback((value) => {
+        setNewMessage(value);
+    }, [setNewMessage]);
 
     // Show loading spinner while main data is loading
     if (loadingState.main) {
@@ -205,7 +210,7 @@ export const Messages = () => {
                     currentUser={currentUser}
                     loading={loadingState.chat}
                     newMessage={newMessage}
-                    onNewMessageChange={setNewMessage}
+                    onNewMessageChange={handleNewMessageChange}
                     onSendMessage={sendMessage}
                     onEditMessage={updateMessage}
                     onDeleteMessage={deleteMessage}

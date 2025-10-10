@@ -1,17 +1,19 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useCallback, memo } from "react";
 
 import { Send } from "lucide-react";
 
 /**
- * Message input component with send button
- * @param {string}   value       - Current input value
- * @param {function} onChange    - Function to handle input change
- * @param {function} onSubmit    - Function to handle form submission
+ * Optimized message input component that prevents expensive re-renders
+ * Uses local state and only communicates with parent on form submission
+ * 
+ * @param {string}   value       - Current input value (for conversation starters only)
+ * @param {function} onChange    - Function to handle input change (DEPRECATED - not used)
+ * @param {function} onSubmit    - Function to handle form submission (receives currentInputValue in event)
  * @param {boolean}  loading     - Whether message is being sent
  * @param {string}   placeholder - Input placeholder text
  * @param {boolean}  autoFocus   - Whether to auto-focus the input
  */
-const ConversationInput = ({ 
+const ConversationInput = memo(({ 
     value, 
     onChange, 
     onSubmit, 
@@ -21,12 +23,29 @@ const ConversationInput = ({
 }) => {
     const inputRef = useRef(null);
     const shouldRefocusRef = useRef(false);
+    
+    // Local state to handle typing without triggering parent re-renders
+    const [localValue, setLocalValue] = useState(value || "");
+    
+    // Only sync parent value changes (like conversation starters)
+    useEffect(() => {
+        if (value !== localValue && value !== undefined) {
+            setLocalValue(value);
+        }
+    }, [value]);
 
     useEffect(() => {
         if (autoFocus && inputRef.current) {
             inputRef.current.focus();
         }
     }, [autoFocus]);
+
+    // Handle input changes locally only - NO parent updates during typing
+    const handleInputChange = useCallback((e) => {
+        const newValue = e.target.value;
+        setLocalValue(newValue);
+        // DO NOT call onChange here - only on submit or when user stops typing
+    }, []);
 
     // Refocus input after message is sent if it was focused during submission
     useEffect(() => {
@@ -41,15 +60,23 @@ const ConversationInput = ({
         }
     }, [loading]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = useCallback((e) => {
         e.preventDefault();
+        
+        if (!localValue.trim()) return;
         
         // Track if input was focused when submitting
         shouldRefocusRef.current = document.activeElement === inputRef.current;
         
-        // Call the original onSubmit
+        // Add the current input value to the event object without breaking it
+        e.currentInputValue = localValue.trim();
+        
+        // Call the original onSubmit with the enhanced event
         onSubmit(e);
-    };
+        
+        // Clear local value after submit
+        setLocalValue("");
+    }, [localValue, onSubmit]);
 
     return (
         <form onSubmit={handleSubmit} className="p-3 border-top bg-light flex-shrink-0 m-0">
@@ -59,8 +86,8 @@ const ConversationInput = ({
                     type="text"
                     className="form-control rounded-pill"
                     placeholder={placeholder}
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
+                    value={localValue}
+                    onChange={handleInputChange}
                     disabled={loading}
                     autoFocus={autoFocus}
                     style={{padding: "0.75rem 1.25rem"}}
@@ -68,7 +95,7 @@ const ConversationInput = ({
                 <button
                     type="submit"
                     className="btn btn-primary rounded-circle ms-2"
-                    disabled={!value.trim() || loading}
+                    disabled={!localValue.trim() || loading}
                     style={{width: "48px", height: "48px"}}
                 >
                     { loading ? (
@@ -82,6 +109,9 @@ const ConversationInput = ({
             </div>
         </form>
     );
-};
+});
+
+// Add display name for debugging
+ConversationInput.displayName = 'ConversationInput';
 
 export default ConversationInput;

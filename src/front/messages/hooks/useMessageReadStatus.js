@@ -30,11 +30,20 @@ export const useMessageReadStatus = ({
         };
     }, []);
 
+    // Pre-build a message map for O(1) lookups instead of O(n) find operations
+    const messagesMapRef = useRef(new Map());
+    
+    // Update messages map only when messages actually change
+    useEffect(() => {
+        messagesMapRef.current = new Map(messages.map(msg => [msg.message_id, msg]));
+    }, [messages]);
+
     // Register a message element for viewport tracking
     const registerMessage = useCallback((messageId, element) => {
         if (!element || !messageId || !currentUser) return;
 
-        const message = messages.find(m => m.message_id === messageId);
+        // OPTIMIZATION: Use pre-built map for O(1) lookup instead of O(n) find()
+        const message = messagesMapRef.current.get(messageId);
         if (!message) return;
 
         // Only track messages from OTHER users that haven't been read yet
@@ -48,7 +57,7 @@ export const useMessageReadStatus = ({
             messageRefs.current.set(messageId, element);
             observe(element, messageId);
         }
-    }, [messages, currentUser, observe]);
+    }, [currentUser, observe]); // Removed messages dependency - using ref instead
 
     // Unregister a message element
     const unregisterMessage = useCallback((messageId) => {
@@ -76,7 +85,8 @@ export const useMessageReadStatus = ({
                 return;
             }
 
-            const message = messages.find(m => m.message_id === messageId);
+            // OPTIMIZATION: Use pre-built map for O(1) lookup instead of O(n) find()
+            const message = messagesMapRef.current.get(messageId);
             if (!message || message.sender_id === currentUser.user_id || message.is_read) {
                 return;
             }
@@ -100,7 +110,7 @@ export const useMessageReadStatus = ({
 
             readTimeouts.current.set(messageId, timeout);
         });
-    }, [visibleIds, messages, currentUser, currentChatId, isSocketConnected, onMarkAsRead, unregisterMessage]);
+    }, [visibleIds, currentUser, currentChatId, isSocketConnected, onMarkAsRead, unregisterMessage]); // Removed messages dependency
 
     // Clean up when chat changes
     useEffect(() => {
@@ -121,13 +131,15 @@ export const useMessageReadStatus = ({
     const markAllVisibleAsRead = useCallback(() => {
         if (!currentUser || !currentChatId) return;
 
-        const unreadMessageIds = messages
-            .filter(m => 
-                m.sender_id !== currentUser.user_id && 
-                !m.is_read && 
-                !alreadyRead.current.has(m.message_id)
-            )
-            .map(m => m.message_id);
+        // OPTIMIZATION: Use map values instead of array filter for better performance
+        const unreadMessageIds = [];
+        for (const message of messagesMapRef.current.values()) {
+            if (message.sender_id !== currentUser.user_id && 
+                !message.is_read && 
+                !alreadyRead.current.has(message.message_id)) {
+                unreadMessageIds.push(message.message_id);
+            }
+        }
 
         if (unreadMessageIds.length > 0 && onMarkAsRead) {
             console.log('[READ_STATUS] Manually marking all messages as read:', unreadMessageIds);
@@ -138,7 +150,7 @@ export const useMessageReadStatus = ({
             // Call the read function
             onMarkAsRead(currentChatId, unreadMessageIds);
         }
-    }, [messages, currentUser, currentChatId, onMarkAsRead]);
+    }, [currentUser, currentChatId, onMarkAsRead]); // Removed messages dependency
 
     return {
         registerMessage,

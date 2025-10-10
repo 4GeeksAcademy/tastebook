@@ -13,6 +13,35 @@ class SocketService {
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
         this.isManuallyDisconnected = false;
+        this.lastEmittedEvents = new Map(); // Add throttling cache
+        this._throttleCleanupInterval = null; // Add cleanup interval tracker
+        
+        // Start periodic cleanup for throttling cache
+        this._startThrottleCleanup();
+    }
+
+    /**
+     * Start periodic cleanup for throttling cache to prevent memory leaks
+     */
+    _startThrottleCleanup() {
+        // Clear any existing interval
+        if (this._throttleCleanupInterval) {
+            clearInterval(this._throttleCleanupInterval);
+        }
+        
+        this._throttleCleanupInterval = setInterval(() => {
+            const now = Date.now();
+            // Remove entries older than 5 minutes (300000 ms)
+            for (const [key, timestamp] of this.lastEmittedEvents.entries()) {
+                if (now - timestamp > 300000) {
+                    this.lastEmittedEvents.delete(key);
+                }
+            }
+            
+            if (import.meta.env.DEV && this.lastEmittedEvents.size > 0) {
+                console.log(`[SOCKET] 🧹 Throttle cache cleanup: ${this.lastEmittedEvents.size} entries remaining`);
+            }
+        }, 60000); // Run cleanup every 60 seconds
     }
 
     /**
@@ -41,7 +70,10 @@ class SocketService {
                 reconnection: true,
                 reconnectionAttempts: this.maxReconnectAttempts,
                 reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000
+                reconnectionDelayMax: 5000,
+                // Optimize ping/pong to reduce message handler calls
+                pingTimeout: 60000,
+                pingInterval: 30000
             });
 
             this.socket.on('connect', () => {
@@ -199,6 +231,16 @@ class SocketService {
      */
     destroy() {
         console.log('[SOCKET] 🔥 Destroying socket service...');
+        
+        // Clean up throttle cleanup interval
+        if (this._throttleCleanupInterval) {
+            clearInterval(this._throttleCleanupInterval);
+            this._throttleCleanupInterval = null;
+        }
+        
+        // Clear throttling cache
+        this.lastEmittedEvents.clear();
+        
         this.disconnect();
         this.removeAllListeners();
         console.log('[SOCKET] ✅ Socket service destroyed');
@@ -322,20 +364,34 @@ class SocketService {
     }
 
     /**
-     * Emit event to all listeners
+     * Emit event to all listeners with basic deduplication
      * @param {string} event - Event name
      * @param {*} data - Event data
      */
     emit(event, data) {
-        if (this.listeners.has(event)) {
-            this.listeners.get(event).forEach(callback => {
-                try {
-                    callback(data);
-                } catch (error) {
-                    console.error('[SOCKET] Error in event listener:', error);
-                }
-            });
+        if (!this.listeners.has(event)) return;
+
+        // Basic throttling for message events to prevent rapid duplicates
+        if (event.includes('message') && data?.message?.message_id) {
+            const messageKey = `${event}_${data.message.message_id}_${data.chat_id}`;
+            const now = Date.now();
+            const lastEmitted = this.lastEmittedEvents.get(messageKey);
+            
+            if (lastEmitted && (now - lastEmitted) < 50) { // 50ms throttle
+                console.log('[SOCKET] ⚡ Throttling rapid duplicate event:', event, messageKey);
+                return;
+            }
+            
+            this.lastEmittedEvents.set(messageKey, now);
         }
+
+        this.listeners.get(event).forEach(callback => {
+            try {
+                callback(data);
+            } catch (error) {
+                console.error('[SOCKET] Error in event listener:', error);
+            }
+        });
     }
 
     /**
@@ -375,13 +431,36 @@ if (typeof window !== 'undefined' && import.meta.env && import.meta.env.DEV) {
         console.log('🧪 Testing socket event reception...');
         console.log('Connected:', socketService.getConnectionStatus());
         console.log('Listeners:', socketService.listeners);
+        console.log('Current message_received listeners:', socketService.listeners.get('message_received')?.length || 0);
+        console.log('Current global_message_received listeners:', socketService.listeners.get('global_message_received')?.length || 0);
+    };
+    
+    window.clearAllTestListeners = () => {
+        console.log('🧹 Clearing all test listeners...');
+        console.log('Before clearing - message_received listeners:', socketService.listeners.get('message_received')?.length || 0);
+        console.log('Before clearing - global_message_received listeners:', socketService.listeners.get('global_message_received')?.length || 0);
         
-        // Add a test listener
-        socketService.on('message_received', (data) => {
-            console.log('🧪 TEST LISTENER - Message received:', data);
-        });
+        // Clear specific event types that might have test listeners
+        if (socketService.listeners.has('message_received')) {
+            const listeners = socketService.listeners.get('message_received');
+            listeners.forEach((listener, index) => {
+                console.log(`Removing message_received listener ${index}:`, listener.toString().slice(0, 100) + '...');
+            });
+        }
         
-        console.log('Test listener added. Send a message to see if it triggers.');
+        socketService.removeAllListeners();
+        console.log('After clearing - all listeners removed');
+    };
+    
+    window.listAllSocketListeners = () => {
+        console.log('📋 Current socket listeners:');
+        console.log('message_received:', socketService.listeners.get('message_received')?.length || 0);
+        console.log('global_message_received:', socketService.listeners.get('global_message_received')?.length || 0);
+        console.log('messages_marked_read:', socketService.listeners.get('messages_marked_read')?.length || 0);
+        console.log('global_messages_read:', socketService.listeners.get('global_messages_read')?.length || 0);
+        console.log('chat_was_deleted:', socketService.listeners.get('chat_was_deleted')?.length || 0);
+        console.log('global_chat_deleted:', socketService.listeners.get('global_chat_deleted')?.length || 0);
+        console.log('All listeners map:', socketService.listeners);
     };
 }
 
