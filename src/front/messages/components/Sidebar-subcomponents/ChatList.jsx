@@ -38,7 +38,7 @@ const ChatList = ({
                         </div>
                     </div>
                     <h6 className="mb-2 text-danger"> Could not connect to server </h6>
-                    <p className="text-muted mb-3"> Unable to load your conversations. This might be a server problem. </p>
+                    <p className="text-muted mb-3"> Unable to load your conversations, which might be due to a server problem. </p>
                     <button 
                         className="btn btn-outline-danger btn-sm"
                         onClick={() => window.location.reload()}
