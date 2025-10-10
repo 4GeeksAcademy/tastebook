@@ -12,7 +12,7 @@ services:
       name: tastebook-webapp
       env: python
       buildCommand: "./render_build_api.sh"
-      startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/"
+      startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application"
       plan: free
       numInstances: 1
       envVars:
@@ -41,7 +41,9 @@ services:
       name: tastebook-websocket
       env: python
       buildCommand: "./render_build_websocket.sh"
-      startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --chdir ./src/ --timeout 60 --keep-alive 30"
+      startCommand: "cd src && gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --timeout 60 --keep-alive 30 --max-requests 1000 --preload"
+      # startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --timeout 60 --keep-alive 30"
+      # startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --chdir ./src/ --timeout 60 --keep-alive 30"
       # startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --chdir ./src/"
       plan: free
       numInstances: 1
