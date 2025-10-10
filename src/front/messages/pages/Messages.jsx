@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useCallback } from "react";
+
 import { useParams } from "react-router-dom";
 import { useMessages } from "../hooks/useMessages";
-import ChatSidebar from "../components/ChatSidebar";
-import ChatWindow from "../components/ChatWindow";
-import Toast from "../components/Toast";
-import ConfirmationModal from "../components/ConfirmationModal";
-import WebSocketStatus from "../components/WebSocketStatus";
+
+import ChatSidebar            from "../components/ChatSidebar";
+import ChatConversation       from "../components/ChatConversation";
+import Toast                  from "../components/Modals-and-Toasts/Toast";
+import ConfirmationModal      from "../components/Modals-and-Toasts/ConfirmationModal";
+import WebSocketConnectButton from "../components/Websocket-Status/WebSocketConnectButton";
+import NoWebSocketServer      from "../components/Websocket-Status/NoWebSocketServer";
 
 
 
@@ -16,6 +19,7 @@ import WebSocketStatus from "../components/WebSocketStatus";
  */
 export const Messages = () => {
     const { chatId } = useParams();
+    const [isRetryingServer, setIsRetryingServer] = React.useState(false);
     
     // Get all state and actions from the useMessages hook
     const {
@@ -31,6 +35,8 @@ export const Messages = () => {
         showSuccessToast,
         toastMessage,
         confirmState,
+        isSocketConnected,
+        isSocketServerAvailable,
         
         // Actions
         setNewMessage,
@@ -45,11 +51,19 @@ export const Messages = () => {
         hideConfirmation,
         showToast,
         dispatchLoading,
-        navigate
+        navigate,
+        connectWebSocket,
+        disconnectWebSocket,
+        checkWebSocketServerAvailability,
+        
+        // Read status management
+        registerMessage,
+        unregisterMessage,
+        markAllVisibleAsRead,
     } = useMessages(chatId);
 
     // Handle chat selection
-    const handleSelectChat = (chat) => {
+    const handleSelectChat = useCallback((chat) => {
         navigate(`/messages/${chat.chat_id}`);
         fetchChat(chat.chat_id);
         
@@ -57,22 +71,37 @@ export const Messages = () => {
         if (chat.unread_count > 0) {
             markMessagesAsRead(chat.chat_id);
         }
-    };
+    }, [navigate, fetchChat, markMessagesAsRead]);
 
     // Handle navigating back to chat list (mobile)
-    const handleNavigateBack = () => {
+    const handleNavigateBack = useCallback(() => {
         navigate("/messages");
-    };
+    }, [navigate]);
 
     // Handle starting message edit
-    const handleStartEdit = (messageId) => {
+    const handleStartEdit = useCallback((messageId) => {
         dispatchLoading({ type: 'SET_EDITING_MESSAGE', payload: messageId });
-    };
+    }, [dispatchLoading]);
 
     // Handle canceling message edit
-    const handleCancelEdit = () => {
+    const handleCancelEdit = useCallback(() => {
         dispatchLoading({ type: 'SET_EDITING_MESSAGE', payload: null });
-    };
+    }, [dispatchLoading]);
+
+    // Handle retry WebSocket server check
+    const handleRetryServerCheck = useCallback(async () => {
+        setIsRetryingServer(true);
+        try {
+            await checkWebSocketServerAvailability();
+        } finally {
+            setIsRetryingServer(false);
+        }
+    }, [checkWebSocketServerAvailability]);
+
+    // Optimized new message change handler - only for conversation starters
+    const handleNewMessageChange = useCallback((value) => {
+        setNewMessage(value);
+    }, [setNewMessage]);
 
     // Show loading spinner while main data is loading
     if (loadingState.main) {
@@ -87,16 +116,80 @@ export const Messages = () => {
         );
     }
 
+    // Show NoWebSocketServer component if WebSocket server is not available
+    if (isSocketServerAvailable === false) {
+        return (
+            <div 
+                className="d-flex flex-column" 
+                style={{
+                    minHeight: "calc(100vh - 120px)", // Account for navbar and footer
+                    overflow: "auto"
+                }}
+            >
+                <NoWebSocketServer 
+                    onRetry={handleRetryServerCheck}
+                    isRetrying={isRetryingServer}
+                />
+                
+                {/* Toast notifications still work */}
+                <Toast
+                    show={showSuccessToast}
+                    message={toastMessage}
+                    onClose={() => showToast('')}
+                    type="success"
+                />
+            </div>
+        );
+    }
+
+    // Show loading spinner while checking WebSocket server availability
+    if (isSocketServerAvailable === null) {
+        return (
+            <div className="container-fluid py-4">
+                <div className="d-flex justify-content-center">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Checking WebSocket server...</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
+
         <div 
             className="d-flex flex-column" 
             style={{
                 height: "calc(100vh - 120px)", // Account for navbar and footer
                 maxHeight: "calc(100vh - 120px)",
-                overflow: "hidden"
+                // allow the page to scroll so sticky elements can remain visible
+                overflow: "auto"
             }}
         >
+
+
+        {/* Different version for testing */}
+        
+        {/* <div 
+            className="d-flex flex-column" 
+            style={{
+                minHeight: "calc(100vh - 120px)", // Account for navbar and footer
+                overflow: "auto"
+            }}
+        > */}
             
+            {/* WebSocket Status Banner - TESTING - ONLY SHOWS IN DEVELOPMENT MODE */}
+            {import.meta.env.MODE === 'development' && (
+                <div className="container-fluid px-3 pt-3 border sticky-top bg-white" style={{ zIndex: 2000 }}>
+                    <WebSocketConnectButton 
+                        // isConnected={isSocketConnected} --- IGNORE ---
+                        onConnect={connectWebSocket}
+                        onDisconnect={disconnectWebSocket}
+                    />
+                </div>
+            )}
+            
+
             <div className="row g-0 flex-grow-1" style={{ height: "100%" }}>
 
                 {/* Chat Sidebar */}
@@ -111,13 +204,13 @@ export const Messages = () => {
                 />
 
                 {/* Chat Window */}
-                <ChatWindow
+                <ChatConversation
                     currentChat={currentChat}
                     messages={messages}
                     currentUser={currentUser}
                     loading={loadingState.chat}
                     newMessage={newMessage}
-                    onNewMessageChange={setNewMessage}
+                    onNewMessageChange={handleNewMessageChange}
                     onSendMessage={sendMessage}
                     onEditMessage={updateMessage}
                     onDeleteMessage={deleteMessage}
@@ -130,6 +223,7 @@ export const Messages = () => {
                     onNavigateBack={handleNavigateBack}
                     connectionError={connectionError}
                     isVisible={!!chatId}
+                    onRegisterMessage={registerMessage}
                 />
             </div>
 

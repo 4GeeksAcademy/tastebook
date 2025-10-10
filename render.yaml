@@ -2,35 +2,58 @@
 # https://www.npmjs.com/package/@renderinc/heroku-import
 # Schema documented at https://render.com/docs/yaml-spec
 
-# IF THERE ARE PROBLEMS, check the "startCommand" since it was changed to support WebSocket
+# Updated to support isolated WebSocket architecture
 
 services:
-    - type: web # valid values: https://render.com/docs/yaml-spec#type
+
+    # REST API Service (Flask)
+    - type: web
       region: frankfurt
-      name: tastebook # optional; if not provided, the service name will be generated from the repo name
-      env: python # valid values: https://render.com/docs/yaml-spec#environment
+      name: tastebook-api
+      env: python
       buildCommand: "./render_build.sh"
-      startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/"
-      plan: free # optional; defaults to starter
+      startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/"
+      plan: free
       numInstances: 1
       envVars:
-          - key: VITE_BASENAME # Imported from Heroku app
+          - key: VITE_BASENAME
             value: /
-          - key: FLASK_APP # Imported from Heroku app
+          - key: FLASK_APP
             value: src/app.py
-          - key: FLASK_DEBUG # Imported from Heroku app
+          - key: FLASK_DEBUG
             value: 0
-          - key: FLASK_APP_KEY # Imported from Heroku app
+          - key: FLASK_APP_KEY
             value: "any key works"
           - key: PYTHON_VERSION
             value: "3.13"
-          - key: DATABASE_URL # Render PostgreSQL database
+          - key: DATABASE_URL
             fromDatabase:
                 name: postgresql-db-tastebook
                 property: connectionString
+          - key: SOCKET_SERVER_URL
+            value: https://tastebook-websocket.onrender.com
+          - key: JWT_SECRET_KEY
+            generateValue: true
 
-databases: # Render PostgreSQL database
+    # WebSocket Service (Separate)
+    - type: web
+      region: frankfurt
+      name: tastebook-websocket
+      env: python
+      buildCommand: "./render_build.sh"
+      startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --chdir ./src/"
+      plan: free
+      numInstances: 1
+      envVars:
+          - key: SOCKET_PORT
+            value: 10000
+          - key: FLASK_DEBUG
+            value: 0
+          - key: PYTHON_VERSION
+            value: "3.13"
+
+databases:
     - name: postgresql-db-tastebook
       region: frankfurt
-      ipAllowList: [] # only allow internal connections
-      plan: free # optional; defaults to starter
+      ipAllowList: []
+      plan: free

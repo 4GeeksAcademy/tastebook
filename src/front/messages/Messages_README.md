@@ -9,13 +9,13 @@ src/front/messages/
 ├── components/
 │   ├── ChatSidebar.jsx      # Sidebar with search + chat list
 │   ├── ChatItem.jsx         # Single chat row
-│   ├── ChatWindow.jsx       # Chat area container
-│   ├── ChatHeader.jsx       # Top bar with avatar + actions
-│   ├── MessageList.jsx      # Scrollable list of messages
+│   ├── ChatConversation.jsx       # Chat area container
+│   ├── ConversationHeader.jsx       # Top bar with avatar + actions
+│   ├── MessageListWindow.jsx      # Scrollable list of messages
 │   ├── MessageBubble.jsx    # Single message bubble (with edit/delete)
-│   ├── MessageInput.jsx     # Input box + send button
+│   ├── ConversationInput.jsx     # Input box + send button
 │   ├── Toast.jsx            # Reusable toast component
-│   └── ConfirmationModal.jsx # Reusable confirmation dialog
+│   └── Modals-and-Toasts/ConfirmationModal.jsx # Reusable confirmation dialog
 ├── hooks/
 │   └── useMessages.js       # Custom hook with all business logic
 ├── utils/
@@ -49,17 +49,17 @@ src/front/messages/
 #### Chat Components
 - **ChatSidebar**: Receives `chats`, `currentChatId`, `searchTerm`, `onSearch`, `onSelectChat`
 - **ChatItem**: Receives single `chat`, `isActive`, `onClick`
-- **ChatWindow**: Receives `currentChat`, `messages`, handlers for actions
-- **ChatHeader**: Receives participant info + `onDeleteChat`
+- **ChatConversation**: Receives `currentChat`, `messages`, handlers for actions
+- **ConversationHeader**: Receives participant info + `onDeleteChat`
 
 #### Message Components  
-- **MessageList**: Receives `messages`, `currentUserId`, `onEdit`, `onDelete`
+- **MessageListWindow**: Receives `messages`, `currentUserId`, `onEdit`, `onDelete`
 - **MessageBubble**: Receives `message`, `isCurrentUser`, `onEdit`, `onDelete`
-- **MessageInput**: Receives `value`, `onChange`, `onSubmit`, `loading`
+- **ConversationInput**: Receives `value`, `onChange`, `onSubmit`, `loading`
 
 #### Reusable Components
 - **Toast**: Receives `show`, `message`, `onClose`, `type`
-- **ConfirmationModal**: Receives `show`, `message`, `onConfirm`, `onCancel`, `type`
+- **Modals-and-Toasts/ConfirmationModal**: Receives `show`, `message`, `onConfirm`, `onCancel`, `type`
 
 ### Utilities
 - **formatTime.js**: Pure function for timestamp formatting
