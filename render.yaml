@@ -11,7 +11,7 @@ services:
       region: frankfurt
       name: tastebook-api
       env: python
-      buildCommand: "./render_build.sh"
+      buildCommand: "./render_build_api.sh"
       startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/"
       plan: free
       numInstances: 1
@@ -40,7 +40,7 @@ services:
       region: frankfurt
       name: tastebook-websocket
       env: python
-      buildCommand: "./render_build.sh"
+      buildCommand: "./render_build_websocket.sh"
       startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --chdir ./src/"
       plan: free
       numInstances: 1
