@@ -19,9 +19,9 @@ export default function ThemeToggle() {
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
       {isDark ? (
-          <Sun size={20} className="text-warning" />
+          <Sun  size={22} strokeWidth={2.4} className="text-warning"/>
       ) : (
-          <Moon size={20} className="text-primary" />
+          <Moon size={22} strokeWidth={2.4} className="text-primary" />
       )}
     </button>
   );

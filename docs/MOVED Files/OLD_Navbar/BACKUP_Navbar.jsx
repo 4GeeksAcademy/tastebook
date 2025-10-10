@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle, Menu } from "lucide-react";
+import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import socketService from "../utils/socketService";
 
@@ -326,218 +326,150 @@ export const Navbar = () => {
 
 	
 	return (
-		<>
+		<nav className="navbar navbar-expand-lg shadow-sm">
+			<div className="container">
 
-			{/* Sidebar Offcanvas - ONLY visible on smaller screens */}
-			<div className="offcanvas offcanvas-start" tabIndex="-1" id="navigationSidebar" aria-labelledby="navigationSidebarLabel">
-				
-				<div className="offcanvas-header">
+				{/* Logo and Name */}
+				<Link to="/" className="navbar-brand mb-0 h1 d-flex align-items-center gap-2">
+					<ChefHat size={32} strokeWidth={2.7} className="text-primary" />
+					<span className="fw-bold">Tastebook</span>
+				</Link>
 
-					{/* <h5 className="offcanvas-title" id="navigationSidebarLabel">
-						<ChefHat size={24} className="text-primary me-2" />
-						Navigation
-					</h5> */}
-
-					{!token && (
-						<Link to="/signup" className="btn btn-primary btn-lg fs-4 fw-semibold my-2 ms-2" data-bs-dismiss="offcanvas">
-							Sign up
-						</Link>
-					)}
-
-					<button type="button" className="btn btn-lg btn-close me-2" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-				</div>
-
-				<div className="offcanvas-body">
-					<div className="d-flex flex-column gap-3">
-						<Link 
-							to="/all-recipes" 
-							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
-							data-bs-dismiss="offcanvas"
-						>
-							All Recipes
-						</Link>
-						<Link 
-							to="/collections" 
-							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
-							data-bs-dismiss="offcanvas"
-						>
-							Collections
-						</Link>
-						<Link 
-							to="/users" 
-							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
-							data-bs-dismiss="offcanvas"
-						>
-							Users
-						</Link>
-					</div>
-
-				</div>
-			</div>
-
-
-
-			{/* MAIN Navbar */}
-			<nav className="navbar navbar-expand-lg shadow-sm">
-				<div className="container">
-
-
-					{/* Hamburger Menu Button - Only visible on smaller screens */}
-					<button
-						className="btn btn-link text-secondary p-2 me-3 d-lg-none" 
-						type="button" 
-						data-bs-toggle="offcanvas" 
-						data-bs-target="#navigationSidebar" 
-						aria-controls="navigationSidebar"
-						title="Open Navigation Menu"
-					>
-						<Menu size={24} />
-					</button>
-
-
-					{/* Logo and Name */}
-					<Link to="/" className="navbar-brand mb-0 h1 d-flex align-items-center gap-2 me-auto">
-						<ChefHat size={26} strokeWidth={2.7} className="text-primary" />
-						<span className="fw-bold">Tastebook</span>
+				{/* Navigation Links */}
+				<div className="d-flex gap-3 ms-4">
+					<Link to="/all-recipes" className="nav-link text-decoration-none fw-semibold text-secondary">
+						All Recipes
 					</Link>
-
-					{/* Navigation Links - Only visible on larger screens */}
-					<div className="d-none d-lg-flex gap-3 ms-4">
-						<Link to="/all-recipes" className="nav-link text-decoration-none fw-semibold text-secondary">
-							All Recipes
-						</Link>
-						<Link to="/collections" className="nav-link text-decoration-none fw-semibold text-secondary">
-							Collections
-						</Link>
-						<Link to="/users" className="nav-link text-decoration-none fw-semibold text-secondary">
-							Users
-						</Link>
-					</div>
+					<Link to="/collections" className="nav-link text-decoration-none fw-semibold text-secondary">
+						Collections
+					</Link>
+					<Link to="/users" className="nav-link text-decoration-none fw-semibold text-secondary">
+						Users
+					</Link>
+				</div>
 
 
-					{/* Bootstrap Dark Mode Toggle */}
-					<div className="d-flex align-items-center ms-3">
+				{/* Toggler (mobile) */}
+				<button
+					className="navbar-toggler"
+					type="button"
+					data-bs-toggle="collapse"
+					data-bs-target="#navbarContent"
+					aria-controls="navbarContent"
+					aria-expanded="false"
+					aria-label="Toggle navigation"
+				>
+					<span className="navbar-toggler-icon"></span>
+				</button>
+
+
+
+
+				{/* Collapsible content */}
+				<div className="collapse navbar-collapse" id="navbarContent">
+					<div className="ms-auto d-flex gap-2 align-items-center flex-lg-row flex-column text-center">
+						
+
+						{/* Bootstrap Dark Mode Toggle */}
 						<ThemeToggle />
-					</div>
 
 
-					{/* Toggler (mobile) */}
-					<button
-						className="navbar-toggler"
-						type="button"
-						data-bs-toggle="collapse"
-						data-bs-target="#navbarContent"
-						aria-controls="navbarContent"
-						aria-expanded="false"
-						aria-label="Toggle navigation"
-					>
-						<span className="navbar-toggler-icon"></span>
-					</button>
+
+						{/* Conditional Rendering Based on Auth Status */}
+						{!token ? (
+
+							// User is not authenticated
+							<>
+								{/* Auth Links */}
+								<ul className="navbar-nav ms-auto align-items-lg-center gap-2">
+
+									{/* Log In */}
+									<li className="nav-item">
+										<Link to="/login" className="btn btn-primary ms-lg-2">
+											Log in
+										</Link>
+									</li>
+
+									{/* Sign Up */}
+									<li className="nav-item">
+										<Link to="/signup" className="btn btn-outline-primary">
+											Sign up
+										</Link>
+									</li>
+
+								</ul>
+							</>
+	
+
+						) : (
 
 
-					{/* Collapsible content */}
-					<div className="collapse navbar-collapse" id="navbarContent">
+							// User is authenticated
+							<>
+								{/* New Recipe */}
+								<Link to="/new-recipe" className="btn btn-link text-success text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="New Recipe">
+									<FilePlus size={22} />
+								</Link>
 
 
-						<div className="ms-auto d-flex gap-2 align-items-center flex-lg-row flex-column text-center">
-							
-
-							{/* Conditional Rendering Based on Auth Status */}
-							{!token ? (
-
-								// User is not authenticated
-								<>
-									{/* Auth Links */}
-									<ul className="navbar-nav ms-auto align-items-lg-center gap-2">
-
-										{/* Log In */}
-										<li className="nav-item">
-											<Link to="/login" className="btn btn-primary ms-lg-2">
-												Log in
-											</Link>
-										</li>
-
-										{/* Sign Up */}
-										<li className="nav-item">
-											<Link to="/signup" className="btn btn-outline-primary">
-												Sign up
-											</Link>
-										</li>
-
-									</ul>
-								</>
-		
-
-							) : (
+								{/* My Collections */}
+								<Link to="/my-collections" className="btn btn-link text-secondary text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="My Collections">
+									<Bookmark size={22} />
+								</Link>
 
 
-								// User is authenticated
-								<>
-									{/* New Recipe */}
-									<Link to="/new-recipe" className="btn btn-link text-success text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="New Recipe">
-										<FilePlus size={22} />
-									</Link>
-
-
-									{/* My Collections */}
-									<Link to="/my-collections" className="btn btn-link text-secondary text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="My Collections">
-										<Bookmark size={22} />
-									</Link>
-
-
-									{/* Messages with Unread Count Badge */}
-									<Link to="/messages" className="btn btn-link text-info text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto position-relative" title="Messages">
-										
-										<MessageCircle size={22} />
-										
-										{ unreadCount > 0 && (
-											<span 
-												key={unreadCount} // Force re-render with animation when count changes
-												className="position-absolute top-0 start-100 badge rounded-pill bg-danger"
-												style={{ fontSize: "0.65rem",  transform: 'translate(-100%, 5%)' }}
-											>
-												{ unreadCount > 99 ? "99+" : unreadCount }
-											</span>
-										)}
-									</Link>
+								{/* Messages with Unread Count Badge */}
+								<Link to="/messages" className="btn btn-link text-info text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto position-relative" title="Messages">
 									
-
-									{/* Liked Recipes */}
-									<Link to="/liked-recipes" className="btn btn-link text-danger text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Liked Recipes">
-										<Heart size={22} />
-									</Link>
-
-
-									{/* Settings */}
-									<Link to="/settings" className="btn btn-link text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Settings">
-										<Cog size={22} />
-									</Link>
-
-
-									{/* User Avatar */}
-									<UserAvatar
-										imageUrl={userData?.cloudinary_url}
-										username={userData?.username}
-										fullName={userData?.full_name}
-										size="medium"
-										onClick={handleAvatarClick}
-										className="me-2"
-									/>
-
-
-									{/* Logout */}
-									<button onClick={handleLogout} className="btn border-0 text-danger"><DoorOpen size={22} /></button>
+									<MessageCircle size={22} />
+									
+									{ unreadCount > 0 && (
+										<span 
+											key={unreadCount} // Force re-render with animation when count changes
+											className="position-absolute top-0 start-100 badge rounded-pill bg-danger"
+											style={{ fontSize: "0.65rem",  transform: 'translate(-100%, 5%)' }}
+										>
+											{ unreadCount > 99 ? "99+" : unreadCount }
+										</span>
+									)}
+								</Link>
 								
-								</>
-							)}
-						</div>			
 
-					</div>
+								{/* Liked Recipes */}
+								<Link to="/liked-recipes" className="btn btn-link text-danger text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Liked Recipes">
+									<Heart size={22} />
+								</Link>
+
+
+								{/* Settings */}
+								<Link to="/settings" className="btn btn-link text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Settings">
+									<Cog size={22} />
+								</Link>
+
+
+								{/* User Avatar */}
+								<UserAvatar
+									imageUrl={userData?.cloudinary_url}
+									username={userData?.username}
+									fullName={userData?.full_name}
+									size="medium"
+									onClick={handleAvatarClick}
+									className="me-2"
+								/>
+
+
+								{/* Logout */}
+								<button onClick={handleLogout} className="btn btn-light border-0 text-danger"><DoorOpen size={22} /></button>
+							
+							</>
+						)}
+					</div>			
 
 				</div>
 
-			</nav>
 
-		</>
+
+			</div>
+		</nav>
 	);
 };
