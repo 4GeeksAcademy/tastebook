@@ -404,7 +404,8 @@ class Recipe(db.Model):
     collection_recipes: Mapped[List["CollectionRecipe"]] = relationship(
         "CollectionRecipe",
         back_populates="recipe",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        overlaps="collections,collection_recipes"
     )
 
 
@@ -958,12 +959,14 @@ class CollectionRecipe(db.Model):
     # Relations back to parent objects
     collection: Mapped["Collection"] = relationship(
         "Collection",
-        back_populates="collection_recipes"
+        back_populates="collection_recipes",
+        overlaps="collections"
     )
 
     recipe: Mapped["Recipe"] = relationship(
         "Recipe",
-        back_populates="collection_recipes"
+        back_populates="collection_recipes",
+        overlaps="collections"
     )
 
     def serialize(self) -> Dict[str, Any]:
@@ -1019,7 +1022,8 @@ class Collection(db.Model):
         "Recipe",
         secondary="collection_recipe",
         back_populates="collections",
-        viewonly=False
+        viewonly=False,
+        overlaps="collection_recipes,collection,recipe"
     )
 
     # One-to-many to association objects for ordering/metadata
@@ -1027,7 +1031,8 @@ class Collection(db.Model):
         "CollectionRecipe",
         back_populates="collection",
         cascade="all, delete-orphan",
-        order_by="CollectionRecipe.display_order"
+        order_by="CollectionRecipe.display_order",
+        overlaps="collections,recipes"
     )
 
     # Serialization
