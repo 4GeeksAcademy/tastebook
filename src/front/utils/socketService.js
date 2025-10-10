@@ -72,7 +72,7 @@ class SocketService {
             this.socket = io(socketUrl, {
                 transports: ['websocket', 'polling'],
                 timeout: 20000,
-                forceNew: true,
+                forceNew: false,  // Changed from true to prevent connection issues
                 autoConnect: true,
                 reconnection: true,
                 reconnectionAttempts: this.maxReconnectAttempts,
@@ -80,7 +80,11 @@ class SocketService {
                 reconnectionDelayMax: 5000,
                 // Optimize ping/pong to reduce message handler calls
                 pingTimeout: 60000,
-                pingInterval: 30000
+                pingInterval: 30000,
+                // Add connection upgrade settings for better stability
+                upgrade: true,
+                rememberUpgrade: false,
+                maxReconnectionAttempts: this.maxReconnectAttempts
             });
 
             this.socket.on('connect', () => {

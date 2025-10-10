@@ -3,12 +3,15 @@ Standalone WebSocket server for TasteBook real-time messaging.
 This server runs separately from the main Flask API.
 """
 import eventlet
+# CRITICAL: Monkey patch MUST be first, before any other imports
 eventlet.monkey_patch()
 
 import os
 import logging
 import signal
 import sys
+import time
+import threading
 from flask import Flask, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_cors import CORS
@@ -21,18 +24,40 @@ logger = logging.getLogger(__name__)
 socket_app = Flask(__name__)
 CORS(socket_app, resources={r"/*": {"origins": "*"}})
 
-# Initialize SocketIO
+# Initialize SocketIO with better error handling
 socketio = SocketIO(
     socket_app, 
     cors_allowed_origins="*", 
     async_mode='eventlet',
     logger=True,
-    engineio_logger=True
+    engineio_logger=True,
+    ping_timeout=60,
+    ping_interval=25,
+    max_http_buffer_size=1000000,
+    allow_upgrades=True,
+    transports=['websocket', 'polling'],
+    # Better connection handling
+    always_connect=False,
+    engineio_logger_format='%(asctime)s [%(levelname)s] %(message)s'
 )
+
+# Track active connections to debug connection issues
+active_connections = set()
+connection_lock = threading.Lock()
 
 # Graceful shutdown handler
 def signal_handler(sig, frame):
     logger.info("🛑 Received shutdown signal (%s), shutting down gracefully...", sig)
+    
+    # Notify all connected clients before shutdown
+    if active_connections:
+        logger.info("📢 Notifying %d connected clients of shutdown...", len(active_connections))
+        socketio.emit('server_shutdown', {'message': 'Server is shutting down'})
+        
+        # Give clients time to handle the shutdown message
+        time.sleep(1)
+    
+    # Stop the socket server
     socketio.stop()
     sys.exit(0)
 
@@ -46,14 +71,32 @@ signal.signal(signal.SIGTERM, signal_handler)  # Kill/stop command
 @socketio.on('connect')
 def handle_connect():
     """Handle client connection to WebSocket"""
-    logger.info("[SOCKETIO] Client connected: %s", request.sid)
-    emit('connected', {'status': 'Connected to WebSocket server'})
+    with connection_lock:
+        active_connections.add(request.sid)
+    
+    logger.info("[SOCKETIO] Client connected: %s (Total: %d)", request.sid, len(active_connections))
+    emit('connected', {'status': 'Connected to WebSocket server', 'sid': request.sid})
+    return True
 
 
 @socketio.on('disconnect')
 def handle_disconnect():
     """Handle client disconnection from WebSocket"""
-    logger.info("[SOCKETIO] Client disconnected: %s", request.sid)
+    with connection_lock:
+        active_connections.discard(request.sid)  # Use discard to avoid KeyError
+    
+    logger.info("[SOCKETIO] Client disconnected: %s (Remaining: %d)", request.sid, len(active_connections))
+
+
+@socketio.on_error_default
+def default_error_handler(e):
+    """Handle WebSocket errors to prevent crashes"""
+    logger.error("[SOCKETIO] Socket error for %s: %s", request.sid, str(e))
+    # Try to emit error to client if possible
+    try:
+        emit('error', {'message': 'Socket error occurred'})
+    except Exception as emit_error:
+        logger.error("[SOCKETIO] Failed to emit error to client: %s", emit_error)
 
 
 @socketio.on('join_chat')
@@ -207,8 +250,17 @@ def emit_chat_deleted_endpoint():
 
 @socket_app.route('/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
-    return {'status': 'healthy', 'service': 'websocket'}, 200
+    """Health check endpoint with connection info"""
+    return {
+        'status': 'healthy', 
+        'service': 'websocket',
+        'active_connections': len(active_connections),
+        'timestamp': time.time(),
+        'server_info': {
+            'eventlet_version': eventlet.__version__,
+            'transport_types': ['websocket', 'polling']
+        }
+    }, 200
 
 ############################################################################
 
