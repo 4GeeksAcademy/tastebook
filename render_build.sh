@@ -15,15 +15,9 @@ fi
 
 npm run build
 
-
-
-# "pip install pipenv &&" was added because Render did NOT recognize the "pipenv" command,
-# I suppose it was due to some update in the Render environment.
-
-# pip install pipenv && pipenv install
-
-# pipenv run upgrade
-
+# Upgrade pip to latest version for better package management and security
+echo "Upgrading pip to latest version..."
+pip install --upgrade pip
 
 # For Python dependencies prefer deterministic installs. If Pipfile.lock exists
 # use pipenv in deploy mode to skip re-resolution. If pipenv is not available,
@@ -45,7 +39,14 @@ else
 	$PIPENV_CMD install
 fi
 
-# Run DB upgrade if provided by Pipfile scripts (keeps previous behavior)
+# Run DB upgrade if provided by Pipfile scripts and if Flask app with migrations exists
+# Only run this for services that have database functionality (main API, not WebSocket)
 if command -v $PIPENV_CMD >/dev/null 2>&1; then
-	$PIPENV_CMD run upgrade || true
+	# Check if this is the main API service by looking for Flask-Migrate
+	if $PIPENV_CMD run python -c "import flask_migrate" 2>/dev/null; then
+		echo "Flask-Migrate detected, running database upgrade..."
+		$PIPENV_CMD run upgrade || true
+	else
+		echo "No Flask-Migrate found, skipping database upgrade (likely WebSocket service)"
+	fi
 fi
