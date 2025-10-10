@@ -32,9 +32,8 @@ npm run build
 if command -v pipenv >/dev/null 2>&1; then
 	PIPENV_CMD="pipenv"
 else
-	echo "pipenv not found, installing pipenv locally"
-	pip install --user pipenv
-	export PATH="$HOME/.local/bin:$PATH"
+	echo "pipenv not found, installing pipenv globally"
+	pip install pipenv
 	PIPENV_CMD="pipenv"
 fi
 
