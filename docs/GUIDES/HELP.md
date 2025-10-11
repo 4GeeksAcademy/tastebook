@@ -110,6 +110,21 @@ zip -r tastebook.zip . -x ".git/*" "node_modules/*" "*.log" "*.sqlite*" "*.db" "
 ```
 
 ```
+---
+
+## Flash of unstyled content
+
+https://en.wikipedia.org/wiki/Flash_of_unstyled_content
+
+Bootstrap indicatons
+https://getbootstrap.com/docs/5.3/customize/color-modes/#javascript
+
+
+```
+Here’s a look at the JavaScript that powers it. Feel free to inspect our own documentation navbar to see how it’s implemented using HTML and CSS from our own components. It is suggested to include the JavaScript at the top of your page to reduce potential screen flickering during reloading of your site. Note that if you decide to use media queries for your color modes, your JavaScript may need to be modified or removed if you prefer an implicit control.
+```
+
+
 
 ---
 
