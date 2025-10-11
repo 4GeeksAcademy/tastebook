@@ -248,6 +248,16 @@ def emit_chat_deleted_endpoint():
     return {'status': 'error', 'message': 'Invalid data'}, 400
 
 
+@socket_app.route('/', methods=['GET', 'HEAD'])
+def root_health_check():
+    """Root health check for Render's service detection"""
+    return {
+        'service': 'tastebook-websocket',
+        'status': 'healthy',
+        'version': '1.0.0'
+    }, 200
+
+
 @socket_app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint with connection info"""

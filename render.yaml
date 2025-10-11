@@ -51,7 +51,7 @@ services:
       name: tastebook-websocket
       env: python
       buildCommand: "./render_build_websocket.sh"
-      startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT --chdir src socket_wsgi:application --timeout 60 --keep-alive 30"
+      startCommand: "cd src && gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --timeout 120 --keep-alive 2 --log-level info"
       plan: free
       numInstances: 1
       envVars:
@@ -59,6 +59,10 @@ services:
             value: 0
           - key: PYTHON_VERSION
             value: "3.13.4"
+          - key: EVENTLET_HUB
+            value: poll
+          - key: PYTHONUNBUFFERED
+            value: 1
 
 databases:
     - name: postgresql-db-tastebook
