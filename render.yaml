@@ -20,7 +20,7 @@ services:
       name: tastebook-webapp
       env: python
       buildCommand: "./render_build_api.sh"
-      startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application"
+      startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/"
       plan: free
       numInstances: 1
       envVars:
