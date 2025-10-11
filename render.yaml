@@ -29,7 +29,7 @@ services:
           - key: FLASK_APP
             value: src/app.py
           - key: FLASK_DEBUG
-            value: 0
+            value: 1
           - key: FLASK_APP_KEY
             value: "any key works"
           - key: VITE_BACKEND_URL
@@ -66,7 +66,7 @@ services:
       numInstances: 1
       envVars:
           - key: FLASK_DEBUG
-            value: 0
+            value: 1
           - key: PYTHON_VERSION
             value: "3.13.4"
           - key: EVENTLET_HUB
