@@ -7,6 +7,10 @@ import eventlet
 # keep gunicorn's wakeup pipe using the standard blocking implementation.
 eventlet.monkey_patch(os=False)
 
+from eventlet_patches import apply_eventlet_ebadf_patch
+
+apply_eventlet_ebadf_patch()
+
 import os
 import logging
 import signal
@@ -82,7 +86,10 @@ def handle_connect():
         active_connections.add(request.sid)
     
     logger.info("[SOCKETIO] Client connected: %s (Total: %d)", request.sid, len(active_connections))
-    emit('connected', {'status': 'Connected to WebSocket server', 'sid': request.sid})
+    try:
+        emit('connected', {'status': 'Connected to WebSocket server', 'sid': request.sid})
+    except Exception as e:
+        logger.error("[SOCKETIO] Failed to emit connected event: %s", e)
     return True
 
 
@@ -120,7 +127,10 @@ def handle_join_chat(data):
         room_name = f"chat_{chat_id}"
         join_room(room_name)
         logger.info("[SOCKETIO] ✅ User %s joined chat room %s (Session: %s)", user_id, room_name, request.sid)
-        emit('joined_chat', {'chat_id': chat_id, 'room': room_name, 'user_id': user_id})
+        try:
+            emit('joined_chat', {'chat_id': chat_id, 'room': room_name, 'user_id': user_id})
+        except Exception as e:
+            logger.error("[SOCKETIO] Failed to emit joined_chat: %s", e)
     else:
         logger.warning("[SOCKETIO] ❌ Invalid join_chat data: %s", data)
 
@@ -151,10 +161,13 @@ def handle_new_message(data):
         logger.info("[SOCKETIO] Broadcasting message to room %s: %s", room_name, message_data.get('id'))
         
         # Broadcast to all users in the chat room
-        emit('message_received', {
-            'chat_id': chat_id,
-            'message': message_data
-        }, room=room_name)
+        try:
+            emit('message_received', {
+                'chat_id': chat_id,
+                'message': message_data
+            }, room=room_name)
+        except Exception as e:
+            logger.error("[SOCKETIO] Failed to emit message_received: %s", e)
 
 
 @socketio.on('messages_read')
@@ -168,10 +181,13 @@ def handle_messages_read(data):
         logger.info("[SOCKETIO] Broadcasting messages read for chat %s by user %s", chat_id, user_id)
         
         # Broadcast to all users in the chat room
-        emit('messages_marked_read', {
-            'chat_id': chat_id,
-            'user_id': user_id
-        }, room=room_name)
+        try:
+            emit('messages_marked_read', {
+                'chat_id': chat_id,
+                'user_id': user_id
+            }, room=room_name)
+        except Exception as e:
+            logger.error("[SOCKETIO] Failed to emit messages_marked_read: %s", e)
 
 
 @socketio.on('chat_deleted')
@@ -185,10 +201,13 @@ def handle_chat_deleted(data):
         logger.info("[SOCKETIO] Broadcasting chat deletion for chat %s", chat_id)
         
         # Broadcast to all users in the chat room
-        emit('chat_was_deleted', {
-            'chat_id': chat_id,
-            'deleted_by': deleted_by
-        }, room=room_name)
+        try:
+            emit('chat_was_deleted', {
+                'chat_id': chat_id,
+                'deleted_by': deleted_by
+            }, room=room_name)
+        except Exception as e:
+            logger.error("[SOCKETIO] Failed to emit chat_was_deleted: %s", e)
 
 ############################################################################
 
@@ -204,12 +223,19 @@ def emit_message_received():
         room_name = f"chat_{chat_id}"
         
         # Broadcast to specific chat room
-        socketio.emit('message_received', {'chat_id': chat_id, 'message': message}, room=room_name)
-        logger.info("[HTTP->WS] Emitted message_received to room %s", room_name)
+        try:
+            socketio.emit('message_received', {'chat_id': chat_id, 'message': message}, room=room_name)
+            logger.info("[HTTP->WS] Emitted message_received to room %s", room_name)
+        except Exception as e:
+            logger.error("[HTTP->WS] Failed to emit message_received: %s", e)
+            return {'status': 'error', 'message': 'Emit failed'}, 500
         
         # ALSO broadcast globally for unread count updates (Navbar, etc.)
-        socketio.emit('global_message_received', {'chat_id': chat_id, 'message': message})
-        logger.info("[HTTP->WS] Emitted global_message_received for unread count updates")
+        try:
+            socketio.emit('global_message_received', {'chat_id': chat_id, 'message': message})
+            logger.info("[HTTP->WS] Emitted global_message_received for unread count updates")
+        except Exception as e:
+            logger.error("[HTTP->WS] Failed to emit global_message_received: %s", e)
         
         return {'status': 'success'}, 200
     return {'status': 'error', 'message': 'Invalid data'}, 400
@@ -226,12 +252,19 @@ def emit_messages_read_endpoint():
         room_name = f"chat_{chat_id}"
         
         # Broadcast to specific chat room
-        socketio.emit('messages_marked_read', {'chat_id': chat_id, 'user_id': user_id}, room=room_name)
-        logger.info("[HTTP->WS] Emitted messages_marked_read to room %s", room_name)
+        try:
+            socketio.emit('messages_marked_read', {'chat_id': chat_id, 'user_id': user_id}, room=room_name)
+            logger.info("[HTTP->WS] Emitted messages_marked_read to room %s", room_name)
+        except Exception as e:
+            logger.error("[HTTP->WS] Failed to emit messages_marked_read: %s", e)
+            return {'status': 'error', 'message': 'Emit failed'}, 500
         
         # ALSO broadcast globally for unread count updates (Navbar, etc.)
-        socketio.emit('global_messages_read', {'chat_id': chat_id, 'user_id': user_id})
-        logger.info("[HTTP->WS] Emitted global_messages_read for unread count updates")
+        try:
+            socketio.emit('global_messages_read', {'chat_id': chat_id, 'user_id': user_id})
+            logger.info("[HTTP->WS] Emitted global_messages_read for unread count updates")
+        except Exception as e:
+            logger.error("[HTTP->WS] Failed to emit global_messages_read: %s", e)
         
         return {'status': 'success'}, 200
     return {'status': 'error', 'message': 'Invalid data'}, 400
@@ -248,12 +281,19 @@ def emit_chat_deleted_endpoint():
         room_name = f"chat_{chat_id}"
         
         # Broadcast to specific chat room
-        socketio.emit('chat_was_deleted', {'chat_id': chat_id, 'deleted_by': deleted_by}, room=room_name)
-        logger.info("[HTTP->WS] Emitted chat_was_deleted to room %s", room_name)
+        try:
+            socketio.emit('chat_was_deleted', {'chat_id': chat_id, 'deleted_by': deleted_by}, room=room_name)
+            logger.info("[HTTP->WS] Emitted chat_was_deleted to room %s", room_name)
+        except Exception as e:
+            logger.error("[HTTP->WS] Failed to emit chat_was_deleted: %s", e)
+            return {'status': 'error', 'message': 'Emit failed'}, 500
         
         # ALSO broadcast globally for unread count updates (Navbar, etc.)
-        socketio.emit('global_chat_deleted', {'chat_id': chat_id, 'deleted_by': deleted_by})
-        logger.info("[HTTP->WS] Emitted global_chat_deleted for unread count updates")
+        try:
+            socketio.emit('global_chat_deleted', {'chat_id': chat_id, 'deleted_by': deleted_by})
+            logger.info("[HTTP->WS] Emitted global_chat_deleted for unread count updates")
+        except Exception as e:
+            logger.error("[HTTP->WS] Failed to emit global_chat_deleted: %s", e)
         
         return {'status': 'success'}, 200
     return {'status': 'error', 'message': 'Invalid data'}, 400

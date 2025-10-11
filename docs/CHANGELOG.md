@@ -2,6 +2,12 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 11, 2025) -- Eventlet EBADF Guard Centralized
+
+**Socket stability:**
+- ✅ Added `src/eventlet_patches.py` providing an idempotent Eventlet BaseSocket wrapper that swallows EBADF during shutdown while keeping other OSErrors visible for debugging.
+- ✅ Updated `src/socket_wsgi.py` and `src/socket_app.py` to import and apply the shared guard immediately after `eventlet.monkey_patch(os=False)` so both gunicorn workers and local runs benefit without duplicating defensive code.
+
 ## (October 11, 2025) -- WebSocket Shutdown Noise Suppression
 
 **Socket stability:**
