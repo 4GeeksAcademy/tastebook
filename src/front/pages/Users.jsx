@@ -348,7 +348,7 @@ export const Users = () => {
           {/* No Users Found */}
           {!loading && users.length === 0 && (
             <div className="text-center py-5">
-              <UsersIcon size={64} className="text-muted mb-3" />
+              <UsersIcon size={64} className="mb-3" />
               <h4 className="text-muted">No users found</h4>
               <p className="text-muted">
                 {searchTerm ? 

@@ -147,7 +147,7 @@ export const AllRecipes = () => {
                             />
                         ) : (
                             <div className="w-100 h-100 d-flex align-items-center justify-content-center border-bottom">
-                                <Utensils size={48} className="text-muted" />
+                                <Utensils size={48} className="" />
                             </div>
                         )}
                     </div>
@@ -193,7 +193,7 @@ export const AllRecipes = () => {
                             ) : (
                                 <div className="rounded-circle bg-light d-flex align-items-center justify-content-center me-2 border shadow-sm" 
                                      style={{ width: '32px', height: '32px' }}>
-                                    <User size={14} className="text-muted" />
+                                    <User size={16} className="" />
                                 </div>
                             )}
                             <small className="text-muted fw-medium">
@@ -265,7 +265,7 @@ export const AllRecipes = () => {
                         <form onSubmit={handleSearch} className="mx-auto" style={{ maxWidth: '600px' }}>
                             <div className="input-group input-group-lg shadow-sm">
                                 <span className="input-group-text border-end-0">
-                                    <Search size={20} className="text-muted" />
+                                    <Search size={20} className="" />
                                 </span>
                                 <input
                                     type="text"
@@ -444,7 +444,7 @@ export const AllRecipes = () => {
                     <div className="my-5">
                         <div className="text-center py-5">
                             <div className="mb-4">
-                                <Search size={64} className="text-muted opacity-50" />
+                                <Search size={64} className="opacity-50" />
                             </div>
                             <h3 className="text-secondary mb-3">No recipes found</h3>
                             <p className="text-muted mb-4 lead">

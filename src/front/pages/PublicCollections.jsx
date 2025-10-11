@@ -577,7 +577,7 @@ export const PublicCollections = () => {
         </>
       ) : (
         <div className="text-center py-5">
-          <Grid size={48} className="text-muted mb-3" />
+          <Grid size={48} className="mb-3" />
           <h5 className="text-muted">No public collections found</h5>
           <p className="text-muted mb-0">
             {searchTerm 

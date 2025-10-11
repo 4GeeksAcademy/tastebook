@@ -180,9 +180,9 @@ export const Messages = () => {
             
             {/* WebSocket Status Banner - TESTING - ONLY SHOWS IN DEVELOPMENT MODE */}
             {import.meta.env.MODE === 'development' && (
-                <div className="container-fluid px-3 pt-3 border sticky-top bg-white" style={{ zIndex: 2000 }}>
+                <div className=" background-paint container-fluid px-3 pt-3 border sticky-top" style={{ zIndex: 2000 }}>
                     <WebSocketConnectButton 
-                        // isConnected={isSocketConnected} --- IGNORE ---
+                        // isConnected={isSocketConnected} --- IGNORE - deprecated or not used ---
                         onConnect={connectWebSocket}
                         onDisconnect={disconnectWebSocket}
                     />
