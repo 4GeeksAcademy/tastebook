@@ -52,10 +52,17 @@ $pastel-peach:    #ffe4d6;
 $primary:   $beige-500;
 $secondary: $beige-400;
 
-$success: #a8d5ba; // Soft pastel green
-$info:    #a8c7d5; // Soft pastel blue
-$warning: #f5d5a8; // Soft pastel yellow/orange
-$danger:  #f5b5b5; // Soft pastel red
+// Soft Pastel Status Colors
+// $success: #a8d5ba; // Soft pastel green
+// $info:    #a8c7d5; // Soft pastel blue
+// $warning: #f5d5a8; // Soft pastel yellow/orange
+// $danger:  #f5b5b5; // Soft pastel red
+
+
+$success: #00c34e;
+$info:    #00aeff;
+$warning: #ffa930;
+$danger:  #fa6363;
 
 $light:     $beige-100;
 $dark:    #2d2d2d;
@@ -674,12 +681,20 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
 [data-bs-theme="light"] {
   background-color: $body-bg-light;
   color: $body-color-light;
+
+  .background-paint {
+    background-color: white;
+  }
 }
 
 // Dark mode --- Apply OLED black background for better dark mode
 [data-bs-theme="dark"] {
   background-color: $body-bg-dark;
   color: $body-color-dark;
+
+  .background-paint {
+    background-color: $body-bg-dark;
+  }
 }
 
 
