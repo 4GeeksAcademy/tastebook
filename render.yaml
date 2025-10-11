@@ -20,7 +20,7 @@ services:
       name: tastebook-webapp
       env: python
       buildCommand: "./render_build_api.sh"
-      startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/ --log-level debug --access-logfile - --error-logfile -"
+      startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/ --log-level info --access-logfile - --error-logfile -"
       plan: free
       numInstances: 1
       envVars:
@@ -28,8 +28,8 @@ services:
             value: /
           - key: FLASK_APP
             value: src/app.py
-          - key: FLASK_DEBUG
-            value: 1
+          - key: FLASK_DEBUG # if it is 1, it will run a dev environment and serve "generate_sitemap(app)" instead of the React frontend - check "app.py"
+            value: 0
           - key: FLASK_APP_KEY
             value: "any key works"
           - key: VITE_BACKEND_URL
@@ -61,12 +61,12 @@ services:
       name: tastebook-websocket
       env: python
       buildCommand: "./render_build_websocket.sh"
-      startCommand: "cd src && gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --timeout 120 --keep-alive 2 --log-level debug --access-logfile - --error-logfile -"
+      startCommand: "cd src && gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --timeout 120 --keep-alive 2 --log-level info --access-logfile - --error-logfile -"
       plan: free
       numInstances: 1
       envVars:
           - key: FLASK_DEBUG
-            value: 1
+            value: 0
           - key: PYTHON_VERSION
             value: "3.13.4"
           - key: EVENTLET_HUB

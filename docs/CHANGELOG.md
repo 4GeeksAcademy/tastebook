@@ -38,6 +38,9 @@ After successful initial deployments, a final review of the Render logs revealed
 - 🚀 **Clean logs** - No more 404s or deprecation warnings from our services.
 - 🔧 **Future-proofed dependencies** - Protected against upcoming breaking changes in `setuptools`.
 
+**Logging note:**
+- ℹ️ We run Gunicorn with `--log-level info` in production (and route access/error logs to stdout). This provides useful operational visibility (worker lifecycle, warnings, errors, and access logs) without the verbosity or potential sensitive output of `debug`. Use `--log-level debug` only temporarily for troubleshooting or enable debug for specific loggers in-app when you need finer trace output.
+
 ---
 
 ## (October 11, 2025) -- Configuration Review: Port Architecture and Environment Variables
