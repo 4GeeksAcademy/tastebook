@@ -80,21 +80,21 @@ const WebSocketConnectButton = ({ onConnect, onDisconnect }) => {
     if (isConnected) {
         return (
             <div
-                className="alert alert-success d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 mx-auto py-2"
+                className="alert alert-light border-3 border-success d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 mx-auto py-2"
                 style={wrapperStyle}
                 role="status"
             >
                 <div className="d-flex align-items-center text-center text-md-start">
-                    <Wifi size={18} className="me-2 text-success" />
+                    <Wifi size={30} className="me-3 text-success" />
                     <div>
-                        <span className="small fw-bold">WebSocket connected - Real-time messaging active</span>
+                        <span className="small fw-bold text-success">WebSocket connected - Real-time messaging active</span>
                         <br />
-                        <span className="small text-muted">Receiving live notifications and messages</span>
+                        <span className="small">Receiving live notifications and messages</span>
                     </div>
                 </div>
 
                 <button
-                    className="btn btn-sm btn-outline-danger mt-2 mt-md-0"
+                    className="btn btn-sm btn-outline-danger border-3 mt-2 mt-md-0"
                     onClick={handleDisconnect}
                     title="Disconnect WebSocket (disables real-time features)"
                 >
@@ -108,12 +108,12 @@ const WebSocketConnectButton = ({ onConnect, onDisconnect }) => {
     // Disconnected State - Warning Alert with Action
     return (
         <div
-            className="alert alert-danger d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 mx-auto py-2"
+            className="alert alert-danger border-3 d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 mx-auto py-2"
             style={wrapperStyle}
             role="status"
         >
             <div className="d-flex align-items-center text-center text-md-start">
-                <WifiOff size={20} className="me-2 text-danger" />
+                <WifiOff size={20} className="me-3 text-danger" />
                 <div>
                     <strong className="d-block small text-danger">WebSocket Disconnected - Real-time messaging deactivated</strong>
                     <p className="mb-0 small text-muted">
@@ -130,7 +130,7 @@ const WebSocketConnectButton = ({ onConnect, onDisconnect }) => {
             </div>
 
             <button
-                className={`btn btn-sm mt-2 mt-md-0 ${lastError ? 'btn-warning' : 'btn-outline-success'}`}
+                className={`btn btn-sm mt-2 mt-md-0 border-3 ${lastError ? 'btn-warning' : 'btn-outline-success'}`}
                 onClick={handleConnect}
                 disabled={isConnecting}
                 title={lastError ? "Retry connection" : "Connect to enable real-time messaging"}
