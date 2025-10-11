@@ -53,8 +53,6 @@ services:
       plan: free
       numInstances: 1
       envVars:
-          - key: SOCKET_PORT
-            value: 10000
           - key: FLASK_DEBUG
             value: 0
           - key: PYTHON_VERSION

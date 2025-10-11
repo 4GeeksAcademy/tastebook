@@ -2,6 +2,23 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 11, 2025) -- Render Port Configuration Fix: Removed Hardcoded SOCKET_PORT
+
+**Problem fixed:**
+The WebSocket service in `render.yaml` had a hardcoded `SOCKET_PORT=10000` environment variable that conflicted with Render's dynamic `$PORT` allocation, potentially causing connection issues.
+
+**Solution implemented:**
+- ✅ **Removed hardcoded SOCKET_PORT** from WebSocket service environment variables
+- ✅ **Updated socket_app.py** to prioritize Render's `$PORT`, then fall back to `SOCKET_PORT` for local dev
+- ✅ **Improved port handling** - Now uses standard Render practices with gunicorn handling port binding
+
+**Result:**
+- 🎉 **Proper Render deployment** - WebSocket service uses dynamic port allocation
+- 🔧 **Better local dev support** - Maintains backward compatibility with SOCKET_PORT
+- 🚀 **Production-ready configuration** - Follows Render's standard port handling
+
+---
+
 ## (October 10, 2025) -- Build Enhancement: Pip Upgrade and Conditional Database Migrations
 
 **Enhancement implemented:**

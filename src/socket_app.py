@@ -266,6 +266,6 @@ def health_check():
 
 
 if __name__ == '__main__':
-    PORT = int(os.environ.get('SOCKET_PORT', 3002))
+    PORT = int(os.environ.get('PORT', os.environ.get('SOCKET_PORT', 3002)))
     logger.info("🚀 Starting WebSocket server on port %s", PORT)
     socketio.run(socket_app, host='0.0.0.0', port=PORT, debug=os.getenv("FLASK_DEBUG") == "1")
