@@ -1,12 +1,21 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle, Menu } from "lucide-react";
+import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle, Menu, User } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import socketService from "../utils/socketService";
 
 import ThemeToggle from "./ThemeToggle"; //Imported for final CSS styling implementation
 
 const UNREAD_COUNT_CACHE_MS = 5000;
+
+
+// DROPDOWN styling Constants
+// -- Centralized icon size for Lucide icons in the user dropdown
+const DROPDOWN_ICON_SIZE = 22;
+// -- Centralized font sizes in the user dropdown
+const DROPDOWN_FONT_SIZE = 18;
+// -- Centralized font sizes in the user dropdown
+const DROPDOWN_STROKE_WIDTH = 2.2;
 
 // Helper function to only log in development environment
 const debugLog = (...args) => {
@@ -316,13 +325,7 @@ export const Navbar = () => {
 	};
 
 
-	const handleAvatarClick = () => {
-		if (userData?.username) {
-			navigate(`/user/${userData.username}`);
-		} else {
-			navigate("/users");
-		}
-	};
+	const profilePath = userData?.username ? `/user/${userData.username}` : "/users";
 
 	// Helper to navigate using react-router and reliably close the Bootstrap offcanvas
 	const handleOffcanvasLinkClick = useCallback((e, path) => {
@@ -339,53 +342,55 @@ export const Navbar = () => {
 			const inst = bs.Offcanvas.getInstance(el) || new bs.Offcanvas(el);
 			try { inst.hide(); } catch (err) { /* Non-critical */ }
 		} else {
-			// Fallback: remove show/backdrop classes
 			el.classList.remove('show');
 			document.body.classList.remove('offcanvas-open');
 			const backdrop = document.querySelector('.offcanvas-backdrop');
-			if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+			if (backdrop && backdrop.parentNode) {
+				backdrop.parentNode.removeChild(backdrop);
+			}
 		}
 	}, [navigate]);
 
-	
 	return (
 		<>
 
 			{/* Sidebar Offcanvas - ONLY visible on smaller screens */}
 			<div className="offcanvas offcanvas-start" tabIndex="-1" id="navigationSidebar" aria-labelledby="navigationSidebarLabel">
 				
-                {/* Offcanvas Header */}
+				{/* Offcanvas Header */}
 				<div className="offcanvas-header">
 
-					{/* <h5 className="offcanvas-title" id="navigationSidebarLabel">
+                    {/* This has the id "navigationSidebarLabel" but idk what it does, so it is d-none */}
+					<h5 className="offcanvas-title d-none" id="navigationSidebarLabel">
 						<ChefHat size={24} className="text-primary me-2" />
 						Navigation
-					</h5> */}
+					</h5>
 
-						{!token && (
-							<Link 
-								to="/signup" 
-								className="btn btn-primary btn-lg fs-4 fw-semibold my-2 ms-2"
-                                // *Use onClick with handleOffcanvasLinkClick to ensure both navigation (SPA) and offcanvas closing work reliably.
-						        // data-bs-dismiss does not work as expected with React Router's <Link> because it does not trigger a native page reload.
-                                onClick={e => handleOffcanvasLinkClick(e, '/signup')}
-							>
-								Sign up
-							</Link>
-						)}
+					{!token && (
+						<Link 
+							to="/signup" 
+							className="btn btn-primary btn-lg fs-4 fw-semibold my-2 ms-2"
+							// *Use onClick with handleOffcanvasLinkClick to ensure both navigation (SPA) and offcanvas closing work reliably.
+			                // data-bs-dismiss does not work as expected with React Router's <Link> because it does not trigger a native page reload.
+							onClick={e => handleOffcanvasLinkClick(e, '/signup')}
+						>
+							Join the Comunity
+						</Link>
+					)}
 
 					<button type="button" className="btn btn-lg btn-close me-2" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-				</div>
+		
+		        </div>
 
 
-                {/* Offcanvas Body */}
+		        {/* Offcanvas Body */}
 				<div className="offcanvas-body">
 					<div className="d-flex flex-column gap-3">
 
 						<Link 
 							to="/all-recipes" 
 							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
-                            // data-bs-dismiss="offcanvas"
+		                    // data-bs-dismiss="offcanvas"
 							onClick={(e) => handleOffcanvasLinkClick(e, '/all-recipes')}
 						>
 							All Recipes
@@ -394,7 +399,7 @@ export const Navbar = () => {
 						<Link 
 							to="/collections" 
 							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
-                            // data-bs-dismiss="offcanvas"
+		                    // data-bs-dismiss="offcanvas"
 							onClick={(e) => handleOffcanvasLinkClick(e, '/collections')}
 						>
 							Collections
@@ -403,7 +408,7 @@ export const Navbar = () => {
 						<Link 
 							to="/users" 
 							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
-                            // data-bs-dismiss="offcanvas"
+		                    // data-bs-dismiss="offcanvas"
 							onClick={(e) => handleOffcanvasLinkClick(e, '/users')}
 						>
 							Users
@@ -424,19 +429,19 @@ export const Navbar = () => {
 
 					{/* Hamburger Menu Button - Only visible on smaller screens */}
 					<button
-						className="btn btn-link text-secondary p-2 me-3 d-lg-none" 
+						className="btn btn-link text-secondary p-1 me-1 d-lg-none" 
 						type="button" 
 						data-bs-toggle="offcanvas" 
 						data-bs-target="#navigationSidebar" 
 						aria-controls="navigationSidebar"
 						title="Open Navigation Menu"
 					>
-						<Menu size={24} />
+						<Menu size={26} />
 					</button>
 
 
 					{/* Logo and Name */}
-					<Link to="/" className="navbar-brand mb-0 h1 d-flex align-items-center gap-2 me-auto">
+					<Link to="/" className="navbar-brand mb-0 h1 d-flex align-items-start gap-1">
 						<ChefHat size={26} strokeWidth={2.7} className="text-primary" />
 						<span className="fw-bold">Tastebook</span>
 					</Link>
@@ -460,128 +465,158 @@ export const Navbar = () => {
 					</div>
 
 
+                    <div className="d-flex ms-auto align-items-end me-2">
 
-					{/* Bootstrap Dark Mode Toggle */}
-					<div className="d-flex align-items-center ms-3">
-						<ThemeToggle />
+                            {/* Theme Toggle Button */}
+							<ThemeToggle />
+
+                            {/* Messages with Unread Count Badge */}
+                            {token && (
+                                <Link to="/messages" className="btn btn-link text-info text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto position-relative" title="Messages">
+                                    
+                                    <MessageCircle size={26} strokeWidth={2.7}/>
+                                    
+                                    { unreadCount > 0 && (
+                                        <span 
+                                            key={unreadCount} // Force re-render with animation when count changes
+                                            className="position-absolute top-0 start-100 badge rounded-pill bg-danger"
+                                            style={{ fontSize: "0.65rem",  transform: 'translate(-100%, 5%)' }}
+                                        >
+                                            { unreadCount > 99 ? "99+" : unreadCount }
+                                        </span>
+                                    )}
+                                </Link>
+                            )}
 					</div>
 
 
 
+					<div className="d-flex align-items-center gap-2">
+						
 
-					{/* Toggler (mobile) */}
-					<button
-						className="navbar-toggler"
-						type="button"
-						data-bs-toggle="collapse"
-						data-bs-target="#navbarContent"
-						aria-controls="navbarContent"
-						aria-expanded="false"
-						aria-label="Toggle navigation"
-					>
-						<span className="navbar-toggler-icon"></span>
-					</button>
+						{!token ? (
 
+                            // AUTH LINKS - Different styles for small vs large screens
+							<>
+                                {/* Large screens - Log in */}
+								<Link to="/login"  className="btn btn-primary        d-none d-lg-inline-flex align-items-center">
+									Log in
+								</Link>
 
+                                {/* Large screens - Sign up */}
+								<Link to="/signup" className="btn btn-outline-primary d-none d-lg-inline-flex align-items-center">
+									Sign up
+								</Link>
 
+                                {/* Small screens  - Log in */}
+								<Link to="/login"  className="btn btn-primary d-inline-flex d-lg-none align-items-center">
+									Log in
+								</Link>
+							</>
 
-					{/* Collapsible content */}
-					<div className="collapse navbar-collapse" id="navbarContent">
-
-
-						<div className="ms-auto d-flex gap-2 align-items-center flex-lg-row flex-column text-center">
-							
-
-							{/* Conditional Rendering Based on Auth Status */}
-							{!token ? (
-
-								// User is not authenticated
-								<>
-									{/* Auth Links */}
-									<ul className="navbar-nav ms-auto align-items-lg-center gap-2">
-
-										{/* Log In */}
-										<li className="nav-item">
-											<Link to="/login" className="btn btn-primary ms-lg-2">
-												Log in
-											</Link>
-										</li>
-
-										{/* Sign Up */}
-										<li className="nav-item">
-											<Link to="/signup" className="btn btn-outline-primary">
-												Sign up
-											</Link>
-										</li>
-
-									</ul>
-								</>
-		
-
-							) : (
+						) : (
 
 
-								// User is authenticated
-								<>
-									{/* New Recipe */}
-									<Link to="/new-recipe" className="btn btn-link text-success text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="New Recipe">
-										<FilePlus size={22} />
-									</Link>
+                            // USER AVATAR DROPDOWN
+							<div className="dropdown">
 
-
-									{/* My Collections */}
-									<Link to="/my-collections" className="btn btn-link text-secondary text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="My Collections">
-										<Bookmark size={22} />
-									</Link>
-
-
-									{/* Messages with Unread Count Badge */}
-									<Link to="/messages" className="btn btn-link text-info text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto position-relative" title="Messages">
-										
-										<MessageCircle size={22} />
-										
-										{ unreadCount > 0 && (
-											<span 
-												key={unreadCount} // Force re-render with animation when count changes
-												className="position-absolute top-0 start-100 badge rounded-pill bg-danger"
-												style={{ fontSize: "0.65rem",  transform: 'translate(-100%, 5%)' }}
-											>
-												{ unreadCount > 99 ? "99+" : unreadCount }
-											</span>
-										)}
-									</Link>
-									
-
-									{/* Liked Recipes */}
-									<Link to="/liked-recipes" className="btn btn-link text-danger text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Liked Recipes">
-										<Heart size={22} />
-									</Link>
-
-
-									{/* Settings */}
-									<Link to="/settings" className="btn btn-link text-decoration-none p-2 d-flex align-items-center justify-content-center mx-lg-0 mx-auto" title="Settings">
-										<Cog size={22} />
-									</Link>
-
-
-									{/* User Avatar */}
+								<button
+									type="button"
+									className="btn p-0 border-0 d-flex align-items-center"
+									data-bs-toggle="dropdown"
+									aria-expanded="false"
+								>
 									<UserAvatar
 										imageUrl={userData?.cloudinary_url}
 										username={userData?.username}
 										fullName={userData?.full_name}
 										size="medium"
-										onClick={handleAvatarClick}
-										className="me-2"
+										className="me-1"
 									/>
+								</button>
+
+                                {/* Dropdown Menu */}
+								<ul className="dropdown-menu dropdown-menu-end shadow">
 
 
-									{/* Logout */}
-									<button onClick={handleLogout} className="btn border-0 text-danger"><DoorOpen size={22} /></button>
+                                    {/* Profile */}
+									<li>
+										<Link to={profilePath} className="dropdown-item d-flex align-items-center gap-2">
+											<User size={DROPDOWN_ICON_SIZE} strokeWidth={2.5} />
+											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>Profile</span>
+										</Link>
+									</li>
+
+
+								<li><hr className="dropdown-divider" /></li>
+
+
+                                    {/* New Recipe */}
+									<li>
+										<Link to="/new-recipe" className="dropdown-item d-flex align-items-center gap-2">
+											<FilePlus size={DROPDOWN_ICON_SIZE} className="text-success" strokeWidth={DROPDOWN_STROKE_WIDTH} />
+											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>New Recipe</span>
+										</Link>
+									</li>
+
+                                    {/* My Collections */}
+									<li>
+										<Link to="/my-collections" className="dropdown-item d-flex align-items-center gap-2">
+											<Bookmark size={DROPDOWN_ICON_SIZE} className="text-secondary" strokeWidth={DROPDOWN_STROKE_WIDTH}  />
+											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>My Collections</span>
+										</Link>
+									</li>
+
+                                    {/* Messages with unread count */}
+									<li>
+										<Link to="/messages" className="dropdown-item d-flex align-items-center gap-2">
+											<MessageCircle size={DROPDOWN_ICON_SIZE} className="text-info" strokeWidth={DROPDOWN_STROKE_WIDTH} />
+											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>Messages</span>
+											{unreadCount > 0 && (
+												<span className="badge bg-danger ms-auto">
+													{ unreadCount > 99 ? "99+" : unreadCount }
+												</span>
+											)}
+										</Link>
+									</li>
+
+
+                                    {/* Liked Recipes */}
+									<li>
+										<Link to="/liked-recipes" className="dropdown-item d-flex align-items-center gap-2">
+											<Heart size={DROPDOWN_ICON_SIZE} className="text-danger" strokeWidth={DROPDOWN_STROKE_WIDTH}  />
+											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>Liked Recipes</span>
+										</Link>
+									</li>
+
+
+                                <li><hr className="dropdown-divider" /></li>
+
+
+                                    {/* Settings */}
+									<li>
+										<Link to="/settings" className="dropdown-item d-flex align-items-center gap-2">
+											<Cog size={DROPDOWN_ICON_SIZE} strokeWidth={DROPDOWN_STROKE_WIDTH} />
+											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>Settings</span>
+										</Link>
+									</li>
+
+
+                                <li><hr className="dropdown-divider" /></li>
+
+
+                                    {/* Log out */}
+                                    <li>
+										<button type="button" className="dropdown-item d-flex align-items-center gap-2 text-danger" onClick={handleLogout}>
+											<DoorOpen size={DROPDOWN_ICON_SIZE} strokeWidth={DROPDOWN_STROKE_WIDTH} />
+											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>Log out</span>
+										</button>
+                                    </li>
 								
-								</>
-							)}
-						</div>			
+                                </ul>
 
+							</div>
+						)}
 					</div>
 
 				</div>
