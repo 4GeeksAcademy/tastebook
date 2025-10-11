@@ -2,6 +2,11 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 11, 2025) -- WebSocket Shutdown Noise Suppression
+
+**Socket stability:**
+- ✅ Updated `src/socket_wsgi.py` to wrap Eventlet's socket shutdown and quietly ignore the known `[Errno 9]` case so Render's proxy disconnects stop spamming the logs while other errors still bubble up.
+
 ## (October 11, 2025) -- Production Deployment Fixes: Health Checks, Gunicorn, and Dependencies
 
 **Deployment analysis and fixes:**
