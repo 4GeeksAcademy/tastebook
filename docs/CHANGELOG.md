@@ -14,15 +14,17 @@ After successful initial deployments, a final review of the Render logs revealed
     *   **Solution:** Added a root route (`@socket_app.route('/')`) to `socket_app.py` that returns a `200 OK` status, satisfying the health checks.
 
 2.  **Gunicorn/Eventlet `mainloop` Crash:**
-    *   **Problem:** The WebSocket service was crashing with a `RuntimeError: do not call blocking functions from the mainloop`. This is a known issue with `gunicorn` and `eventlet` where signal handling can conflict.
+    *   **Problem:** The WebSocket service was crashing with a `RuntimeError: do not call blocking functions from the mainloop`. This is a known issue where custom signal handling in an application can conflict with the process management of a WSGI server like Gunicorn.
     *   **Solution:**
-        *   Removed the custom `signal_handler` from `socket_app.py` to let gunicorn manage its own worker processes.
-        *   Set `EVENTLET_HUB=poll` in `render.yaml` to use a more stable event loop.
-        *   Adjusted gunicorn timeouts and keep-alive settings for better stability.
+        *   Removed the custom `signal_handler` from `socket_app.py` to let Gunicorn manage its own worker processes without conflict.
+        *   Set `EVENTLET_HUB=poll` in `render.yaml` to use a more stable event loop for `eventlet`.
+        *   Adjusted Gunicorn timeouts and keep-alive settings for better stability in a production environment.
 
 3.  **`pkg_resources` Deprecation Warning:**
-    *   **Problem:** A `UserWarning` indicated that `flask-admin` relies on `pkg_resources`, which will be removed from `setuptools` in the future, posing a risk of breaking the application.
-    *   **Solution:** Pinned `setuptools = "<81"` in the `Pipfile`. This ensures a compatible version of `setuptools` is used, silencing the warning and preventing future breakage without needing to modify the unmaintained `flask-admin` library.
+    *   **Problem:** A `UserWarning` indicated that `flask-admin`, a dependency for the admin interface, relies on `pkg_resources`. This is a legacy component of the `setuptools` library that is being deprecated and is scheduled for removal as early as November 2025. If left unaddressed, this would cause future deployments to fail.
+    *   **Root Cause:** The `flask-admin` library is no longer actively maintained (last release in 2021), so it is not expected to be updated to remove this legacy dependency.
+    *   **Solution (Workaround):** Pinned `setuptools = "<81"` in the `Pipfile`. This is the community-accepted workaround, which instructs the build process to use a version of `setuptools` that still includes `pkg_resources`. This is a safe, non-invasive fix that silences the warning and prevents future breakage without modifying the application's logic or the `flask-admin` library itself.
+    *   **Long-Term Strategy:** For future projects, migrating to an actively maintained alternative like `Flask-AppBuilder` is recommended. For this project, the current workaround is the most stable and appropriate solution.
 
 **Summary of changes:**
 - ✅ **Added root health check endpoint** to `socket_app.py` to resolve 404 errors.
