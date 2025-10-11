@@ -55,9 +55,6 @@ export const Footer = () => {
 							<Settings size={16} strokeWidth={2} />
 						</Link>
 
-						{/* Theme Toggle */}
-						<ThemeToggle />
-
 
 						<a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-muted ms-4 me-2">
 							<Twitter size={16} strokeWidth={2} />
@@ -76,18 +73,25 @@ export const Footer = () => {
 					</div>
 				</div>
 
-				<hr style={{margin: "0.5rem 0"}} />
 
-				{/* Legal */}
-				<div className="d-flex justify-content-between flex-column flex-sm-row" style={{gap: "0.5rem"}}>
-					<small className="text-muted" style={{fontSize: "0.85rem"}}>© {year} Tastebook. All rights reserved.</small>
-					<div>
+				{/* <hr style={{margin: "0.5rem 0"}} /> */}
+
+				{/* Legal - REMOVED TO MAKE FOOTER SMALLER*/}
+				{/* <div className="d-flex justify-content-between flex-column flex-sm-row" style={{gap: "0.5rem"}}>
+					
+                    <small className="text-muted" style={{fontSize: "0.85rem"}}>© {year} Tastebook. All rights reserved.</small>
+					
+                    <div>
+
 						<Link to="/terms" className="text-muted me-2" style={{fontSize: "0.85rem"}}>Terms</Link>
-						<Link to="/privacy" className="text-muted" style={{fontSize: "0.85rem"}}>Privacy</Link>
-					</div>
-				</div>
+                        <Link to="/privacy" className="text-muted" style={{fontSize: "0.85rem"}}>Privacy</Link>
+					
+                    </div>
+				</div> */}
+
 
 			</div>
+
 		</footer>
 	);
 }
