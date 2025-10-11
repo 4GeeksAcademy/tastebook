@@ -324,6 +324,29 @@ export const Navbar = () => {
 		}
 	};
 
+	// Helper to navigate using react-router and reliably close the Bootstrap offcanvas
+	const handleOffcanvasLinkClick = useCallback((e, path) => {
+		if (e && e.preventDefault) e.preventDefault();
+		// Programmatic navigation ensures SPA routing works even if Bootstrap intercepts click
+		navigate(path);
+
+		// Try to close the offcanvas via Bootstrap's JS API if available
+		const el = document.getElementById('navigationSidebar');
+		if (!el) return;
+
+		const bs = window.bootstrap;
+		if (bs && bs.Offcanvas) {
+			const inst = bs.Offcanvas.getInstance(el) || new bs.Offcanvas(el);
+			try { inst.hide(); } catch (err) { /* Non-critical */ }
+		} else {
+			// Fallback: remove show/backdrop classes
+			el.classList.remove('show');
+			document.body.classList.remove('offcanvas-open');
+			const backdrop = document.querySelector('.offcanvas-backdrop');
+			if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+		}
+	}, [navigate]);
+
 	
 	return (
 		<>
@@ -331,6 +354,7 @@ export const Navbar = () => {
 			{/* Sidebar Offcanvas - ONLY visible on smaller screens */}
 			<div className="offcanvas offcanvas-start" tabIndex="-1" id="navigationSidebar" aria-labelledby="navigationSidebarLabel">
 				
+                {/* Offcanvas Header */}
 				<div className="offcanvas-header">
 
 					{/* <h5 className="offcanvas-title" id="navigationSidebarLabel">
@@ -338,42 +362,58 @@ export const Navbar = () => {
 						Navigation
 					</h5> */}
 
-					{!token && (
-						<Link to="/signup" className="btn btn-primary btn-lg fs-4 fw-semibold my-2 ms-2" data-bs-dismiss="offcanvas">
-							Sign up
-						</Link>
-					)}
+						{!token && (
+							<Link 
+								to="/signup" 
+								className="btn btn-primary btn-lg fs-4 fw-semibold my-2 ms-2"
+                                // *Use onClick with handleOffcanvasLinkClick to ensure both navigation (SPA) and offcanvas closing work reliably.
+						        // data-bs-dismiss does not work as expected with React Router's <Link> because it does not trigger a native page reload.
+                                onClick={e => handleOffcanvasLinkClick(e, '/signup')}
+							>
+								Sign up
+							</Link>
+						)}
 
 					<button type="button" className="btn btn-lg btn-close me-2" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 				</div>
 
+
+                {/* Offcanvas Body */}
 				<div className="offcanvas-body">
 					<div className="d-flex flex-column gap-3">
+
 						<Link 
 							to="/all-recipes" 
 							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
-							data-bs-dismiss="offcanvas"
+                            // data-bs-dismiss="offcanvas"
+							onClick={(e) => handleOffcanvasLinkClick(e, '/all-recipes')}
 						>
 							All Recipes
 						</Link>
+
 						<Link 
 							to="/collections" 
 							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
-							data-bs-dismiss="offcanvas"
+                            // data-bs-dismiss="offcanvas"
+							onClick={(e) => handleOffcanvasLinkClick(e, '/collections')}
 						>
 							Collections
 						</Link>
+
 						<Link 
 							to="/users" 
 							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
-							data-bs-dismiss="offcanvas"
+                            // data-bs-dismiss="offcanvas"
+							onClick={(e) => handleOffcanvasLinkClick(e, '/users')}
 						>
 							Users
 						</Link>
+
 					</div>
 
 				</div>
 			</div>
+
 
 
 
@@ -401,24 +441,32 @@ export const Navbar = () => {
 						<span className="fw-bold">Tastebook</span>
 					</Link>
 
+
 					{/* Navigation Links - Only visible on larger screens */}
 					<div className="d-none d-lg-flex gap-3 ms-4">
+
 						<Link to="/all-recipes" className="nav-link text-decoration-none fw-semibold text-secondary">
 							All Recipes
 						</Link>
+
 						<Link to="/collections" className="nav-link text-decoration-none fw-semibold text-secondary">
 							Collections
 						</Link>
+
 						<Link to="/users" className="nav-link text-decoration-none fw-semibold text-secondary">
 							Users
 						</Link>
+
 					</div>
+
 
 
 					{/* Bootstrap Dark Mode Toggle */}
 					<div className="d-flex align-items-center ms-3">
 						<ThemeToggle />
 					</div>
+
+
 
 
 					{/* Toggler (mobile) */}
@@ -433,6 +481,8 @@ export const Navbar = () => {
 					>
 						<span className="navbar-toggler-icon"></span>
 					</button>
+
+
 
 
 					{/* Collapsible content */}

@@ -48,7 +48,7 @@ export const Home = () => {
 								</h1>
 
 								<p className="lead mb-4">
-									Your place to discover and share delicious recipes.
+									Your place to discover and share delicious recipes
 								</p>
 
 								<div className="d-flex gap-3 justify-content-center">
