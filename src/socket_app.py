@@ -45,25 +45,31 @@ socketio = SocketIO(
 active_connections = set()
 connection_lock = threading.Lock()
 
-# Graceful shutdown handler
-def signal_handler(sig, frame):
-    logger.info("🛑 Received shutdown signal (%s), shutting down gracefully...", sig)
-    
-    # Notify all connected clients before shutdown
-    if active_connections:
-        logger.info("📢 Notifying %d connected clients of shutdown...", len(active_connections))
-        socketio.emit('server_shutdown', {'message': 'Server is shutting down'})
-        
-        # Give clients time to handle the shutdown message
-        time.sleep(1)
-    
-    # Stop the socket server
-    socketio.stop()
-    sys.exit(0)
 
-# Register signal handlers for graceful shutdown
-signal.signal(signal.SIGINT, signal_handler)   # Ctrl+C
-signal.signal(signal.SIGTERM, signal_handler)  # Kill/stop command
+# GRACEFUL SHUTDOWN HANDLER
+
+# Gunicorn will handle signals and graceful shutdown.
+# Custom signal handlers can conflict with gunicorn's process management.
+# Removing the custom signal handler logic.
+
+# def signal_handler(sig, frame):
+#     logger.info("🛑 Received shutdown signal (%s), shutting down gracefully...", sig)
+    
+#     # Notify all connected clients before shutdown
+#     if active_connections:
+#         logger.info("📢 Notifying %d connected clients of shutdown...", len(active_connections))
+#         socketio.emit('server_shutdown', {'message': 'Server is shutting down'})
+        
+#         # Give clients time to handle the shutdown message
+#         time.sleep(1)
+    
+#     # Stop the socket server
+#     socketio.stop()
+#     sys.exit(0)
+
+# # Register signal handlers for graceful shutdown
+# signal.signal(signal.SIGINT, signal_handler)   # Ctrl+C
+# signal.signal(signal.SIGTERM, signal_handler)  # Kill/stop command
 
 ############################################################################
 ### WEBSOCKET EVENT HANDLERS ###
