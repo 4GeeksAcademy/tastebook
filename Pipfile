@@ -27,6 +27,8 @@ sqlalchemy = "*"
 flask-socketio = "*"
 eventlet = "*"
 requests = "*"
+# Pin setuptools to avoid breaking changes from dependencies like flask-admin
+setuptools = "<81"
 
 
 

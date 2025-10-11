@@ -2,6 +2,42 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 11, 2025) -- Production Deployment Fixes: Health Checks, Gunicorn, and Dependencies
+
+**Deployment analysis and fixes:**
+After successful initial deployments, a final review of the Render logs revealed several issues affecting production stability. This update addresses them to ensure robust, long-term operation.
+
+**Key issues fixed:**
+
+1.  **Render Health Check Failures (404 Errors):**
+    *   **Problem:** Render's health checker was sending `HEAD` and `GET` requests to the root (`/`) of the WebSocket service, which had no handler, causing 404 errors in the logs.
+    *   **Solution:** Added a root route (`@socket_app.route('/')`) to `socket_app.py` that returns a `200 OK` status, satisfying the health checks.
+
+2.  **Gunicorn/Eventlet `mainloop` Crash:**
+    *   **Problem:** The WebSocket service was crashing with a `RuntimeError: do not call blocking functions from the mainloop`. This is a known issue with `gunicorn` and `eventlet` where signal handling can conflict.
+    *   **Solution:**
+        *   Removed the custom `signal_handler` from `socket_app.py` to let gunicorn manage its own worker processes.
+        *   Set `EVENTLET_HUB=poll` in `render.yaml` to use a more stable event loop.
+        *   Adjusted gunicorn timeouts and keep-alive settings for better stability.
+
+3.  **`pkg_resources` Deprecation Warning:**
+    *   **Problem:** A `UserWarning` indicated that `flask-admin` relies on `pkg_resources`, which will be removed from `setuptools` in the future, posing a risk of breaking the application.
+    *   **Solution:** Pinned `setuptools = "<81"` in the `Pipfile`. This ensures a compatible version of `setuptools` is used, silencing the warning and preventing future breakage without needing to modify the unmaintained `flask-admin` library.
+
+**Summary of changes:**
+- ✅ **Added root health check endpoint** to `socket_app.py` to resolve 404 errors.
+- ✅ **Removed custom signal handler** in `socket_app.py` to prevent conflicts with gunicorn.
+- ✅ **Optimized `render.yaml`** with `EVENTLET_HUB=poll` and better gunicorn settings.
+- ✅ **Pinned `setuptools<81`** in `Pipfile` to resolve the `pkg_resources` deprecation warning.
+- ✅ **Added explanatory comment** in `Pipfile` for the `setuptools` pin.
+
+**Result:**
+- 🎉 **Stable production deployment** - Both services run without crashes or warnings.
+- 🚀 **Clean logs** - No more 404s or deprecation warnings from our services.
+- 🔧 **Future-proofed dependencies** - Protected against upcoming breaking changes in `setuptools`.
+
+---
+
 ## (October 11, 2025) -- Configuration Review: Port Architecture and Environment Variables
 
 **Configuration analysis completed:**
