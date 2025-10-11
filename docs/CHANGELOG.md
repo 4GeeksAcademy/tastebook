@@ -2,6 +2,32 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 11, 2025) -- Configuration Review: Port Architecture and Environment Variables
+
+**Configuration analysis completed:**
+Reviewed the entire configuration for potential production issues and clarified the microservices port architecture.
+
+**Key findings:**
+- ✅ **Port separation is intentional** - Frontend (3000), API (3001), WebSocket (3002) run as separate services
+- ✅ **Codespaces compatibility** - Port forwarding handles multiple services correctly via environment variables
+- ✅ **Fixed missing environment variables** - Added `VITE_SOCKET_URL` to production Render configuration
+- ✅ **Improved developer experience** - Changed hardcoded Codespaces URLs to localhost defaults
+
+**Architecture explanation:**
+The project uses a **microservices approach** where each service runs on its own port:
+- **Frontend (Vite)**: Port 3000 - Serves React application
+- **Backend (Flask API)**: Port 3001 - Handles REST API requests  
+- **WebSocket Service**: Port 3002 - Manages real-time messaging
+
+This separation allows independent scaling, better resource management, and cleaner service boundaries.
+
+**Result:**
+- 🎉 **Robust configuration** - All services properly configured for development and production
+- 🔧 **Clear architecture** - Microservices design with proper port allocation
+- 🚀 **Developer-friendly** - New developers get working localhost defaults instead of errors
+
+---
+
 ## (October 11, 2025) -- Render Port Configuration Fix: Removed Hardcoded SOCKET_PORT
 
 **Problem fixed:**

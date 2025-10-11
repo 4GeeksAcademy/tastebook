@@ -40,6 +40,8 @@ services:
                 property: connectionString
           - key: SOCKET_SERVER_URL
             value: https://tastebook-websocket.onrender.com
+          - key: VITE_SOCKET_URL
+            value: https://tastebook-websocket.onrender.com
           - key: JWT_SECRET_KEY
             generateValue: true
 
