@@ -10,5 +10,6 @@ eventlet.monkey_patch()
 from socket_app import socket_app, socketio
 
 # For gunicorn with Flask-SocketIO and eventlet worker
-# The socketio instance should be used as the WSGI application
-application = socketio
+# When using eventlet worker, gunicorn needs the Flask app, and Flask-SocketIO
+# will automatically handle WebSocket connections through the app
+application = socket_app

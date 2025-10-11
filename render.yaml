@@ -8,6 +8,7 @@
 # Extra startCommands for WebSocket service:
       # startCommand: "cd src && gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --timeout 60 --keep-alive 30 --max-requests 1000 --preload"
       # startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --chdir ./src/ --timeout 60 --keep-alive 30"
+      # startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --chdir ./src/ --timeout 60 --keep-alive 30"
       # startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --chdir ./src/"
       # startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application"
 
@@ -48,7 +49,7 @@ services:
       name: tastebook-websocket
       env: python
       buildCommand: "./render_build_websocket.sh"
-      startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --timeout 60 --keep-alive 30"
+      startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT --chdir src socket_wsgi:application --timeout 60 --keep-alive 30"
       plan: free
       numInstances: 1
       envVars:
