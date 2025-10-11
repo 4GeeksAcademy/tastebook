@@ -87,12 +87,16 @@ def handle_connect():
 
 
 @socketio.on('disconnect')
-def handle_disconnect():
+def handle_disconnect(reason=None):
     """Handle client disconnection from WebSocket"""
     with connection_lock:
         active_connections.discard(request.sid)  # Use discard to avoid KeyError
     
-    logger.info("[SOCKETIO] Client disconnected: %s (Remaining: %d)", request.sid, len(active_connections))
+    # Include reason when present; keep original log structure otherwise
+    if reason:
+        logger.info("[SOCKETIO] Client disconnected (%s): %s (Remaining: %d)", reason, request.sid, len(active_connections))
+    else:
+        logger.info("[SOCKETIO] Client disconnected: %s (Remaining: %d)", request.sid, len(active_connections))
 
 
 @socketio.on_error_default
