@@ -3,8 +3,9 @@ Standalone WebSocket server for TasteBook real-time messaging.
 This server runs separately from the main Flask API.
 """
 import eventlet
-# CRITICAL: Monkey patch MUST be first, before any other imports
-eventlet.monkey_patch()
+# CRITICAL: Monkey patch MUST be first, before any other imports. Skip os to
+# keep gunicorn's wakeup pipe using the standard blocking implementation.
+eventlet.monkey_patch(os=False)
 
 import os
 import logging

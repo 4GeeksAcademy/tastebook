@@ -20,7 +20,7 @@ services:
       name: tastebook-webapp
       env: python
       buildCommand: "./render_build_api.sh"
-      startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/"
+      startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:application --chdir ./src/ --log-level debug --access-logfile - --error-logfile -"
       plan: free
       numInstances: 1
       envVars:
@@ -32,6 +32,8 @@ services:
             value: 0
           - key: FLASK_APP_KEY
             value: "any key works"
+          - key: VITE_BACKEND_URL
+            value: https://tastebook-webapp.onrender.com
           - key: PYTHON_VERSION
             value: "3.13.4"
           - key: DATABASE_URL
@@ -44,6 +46,14 @@ services:
             value: https://tastebook-websocket.onrender.com
           - key: JWT_SECRET_KEY
             generateValue: true
+          - key: CLOUDINARY_CLOUD_NAME
+            value: ""
+          - key: CLOUDINARY_API_KEY
+            value: ""
+          - key: CLOUDINARY_API_SECRET
+            value: ""
+          - key: PYTHONUNBUFFERED
+            value: 1
 
     # WebSocket Service (Separate)
     - type: web
@@ -51,7 +61,7 @@ services:
       name: tastebook-websocket
       env: python
       buildCommand: "./render_build_websocket.sh"
-      startCommand: "cd src && gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --timeout 120 --keep-alive 2 --log-level info"
+      startCommand: "cd src && gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT socket_wsgi:application --timeout 120 --keep-alive 2 --log-level debug --access-logfile - --error-logfile -"
       plan: free
       numInstances: 1
       envVars:
