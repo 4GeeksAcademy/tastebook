@@ -9,17 +9,21 @@ export const Footer = () => {
 	const year = new Date().getFullYear();
 
 	return (
-		<footer className="border-top mt-auto" style={{paddingTop: "0.5rem", paddingBottom: "0.5rem"}}>
+		<footer className="border-top my-auto">
+
 			<div className="container py-2">
-				{/* Brand */}
-				<div className="row gy-1 align-items-center">
-					<div className="col-md-6 text-center text-md-start">
+
+				
+				<div className="d-flex justify-content-between align-items-center">
+
+                    {/* Brand */}
+					<div className="text-center text-md-start">
 						<Link to="/" className="navbar-brand mb-0 h1 fw-bold" style={{fontSize: "1.1rem"}}>Tastebook</Link>
 						<small className="text-muted d-block" style={{fontSize: "0.85rem"}}>Share the taste</small>
 					</div>
 
 					{/* Social */}
-					<div className="col-md-6 text-center text-md-end">
+					<div className="text-center text-md-end">
 
 						{/* Theme Dropdown */}
 						<div className="dropdown d-inline-block me-2">
