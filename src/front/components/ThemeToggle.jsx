@@ -5,6 +5,10 @@ import { Sun, Moon } from "lucide-react";
 /**
  * Bootstrap 5.3 Dark Mode Toggle Component
  */
+
+const TOGGLER_ICON_SIZE = 26;
+const TOGGLER_STROKE_WIDTH = 2.4;
+
 export default function ThemeToggle() {
   const { theme, toggleTheme, currentTheme } = useTheme();
 
@@ -19,11 +23,11 @@ export default function ThemeToggle() {
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
       {isDark ? (
-        // <Sun  size={22} strokeWidth={2.4} className="text-warning"/>
-        <Moon size={22} strokeWidth={2.4} className="text-primary" />
+        // <Sun  size={TOGGLER_ICON_SIZE} strokeWidth={TOGGLER_STROKE_WIDTH} className="text-warning"/>
+        <Moon size={TOGGLER_ICON_SIZE} strokeWidth={TOGGLER_STROKE_WIDTH} className="text-primary" />
         ) : (
-        // <Moon size={22} strokeWidth={2.4} className="text-primary" />
-        <Sun  size={22} strokeWidth={2.4} className="text-warning"/>
+        // <Moon size={TOGGLER_ICON_SIZE} strokeWidth={TOGGLER_STROKE_WIDTH} className="text-primary" />
+        <Sun  size={TOGGLER_ICON_SIZE} strokeWidth={TOGGLER_STROKE_WIDTH} className="text-warning"/>
       )}
     </button>
   );
