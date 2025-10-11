@@ -115,3 +115,12 @@ zip -r tastebook.zip . -x ".git/*" "node_modules/*" "*.log" "*.sqlite*" "*.db" "
 
 Run `pipenv lock` to update pipfile.lock Python dependencies
 
+---
+
+Consider this for future projects with Flask backend:
+
+3.  **`pkg_resources` Deprecation Warning:**
+    *   **Problem:** A `UserWarning` indicated that `flask-admin`, a dependency for the admin interface, relies on `pkg_resources`. This is a legacy component of the `setuptools` library that is being deprecated and is scheduled for removal as early as November 2025. If left unaddressed, this would cause future deployments to fail.
+    *   **Root Cause:** The `flask-admin` library is no longer actively maintained (last release in 2021), so it is not expected to be updated to remove this legacy dependency.
+    *   **Solution (Workaround):** Pinned `setuptools = "<81"` in the `Pipfile`. This is the community-accepted workaround, which instructs the build process to use a version of `setuptools` that still includes `pkg_resources`. This is a safe, non-invasive fix that silences the warning and prevents future breakage without modifying the application's logic or the `flask-admin` library itself.
+    *   **Long-Term Strategy:** For future projects, migrating to an actively maintained alternative like `Flask-AppBuilder` is recommended. For this project, the current workaround is the most stable and appropriate solution.
