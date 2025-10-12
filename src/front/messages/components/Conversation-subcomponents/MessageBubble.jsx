@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, memo } from "react";
 import { MoreVertical, Edit3, Trash2 } from "lucide-react";
-import { formatTime } from "../utils/formatTime";
+import { formatTime } from "../../utils/formatTime";
 
 /**
  * Single message bubble component
@@ -46,8 +46,8 @@ const MessageBubble = memo(({
             <div
                 className={`message-bubble py-2 px-3 rounded-3 position-relative shadow-sm ${
                     isCurrentUser 
-                        ? 'bg-primary text-white' 
-                        : 'bg-light border'
+                        ? 'border' 
+                        : 'bg-primary text-white'
                 }`}
                 style={{ maxWidth: "75%", minWidth: "80px" }}
             >

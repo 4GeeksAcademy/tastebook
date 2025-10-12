@@ -79,7 +79,7 @@ const ConversationInput = memo(({
     }, [localValue, onSubmit]);
 
     return (
-        <form onSubmit={handleSubmit} className="p-3 border-top bg-light flex-shrink-0 m-0">
+        <form onSubmit={handleSubmit} className="p-3 border-top flex-shrink-0 m-0">
             <div className="input-group">
                 <input
                     ref={inputRef}

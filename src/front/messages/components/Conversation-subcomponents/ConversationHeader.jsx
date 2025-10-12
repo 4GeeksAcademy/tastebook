@@ -10,7 +10,7 @@ import UserAvatar from "../../../components/UserAvatar";
  */
 const ConversationHeader = ({ participant, onDeleteChat, onNavigateBack }) => {
     return (
-        <div className="p-3 border-bottom bg-white d-flex align-items-center justify-content-between flex-shrink-0">
+        <div className="p-3 border-bottom d-flex align-items-center justify-content-between flex-shrink-0">
             <div className="d-flex align-items-center">
                 <button
                     className="btn btn-link d-md-none p-0 me-3"
