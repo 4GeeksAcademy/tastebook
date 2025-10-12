@@ -67,6 +67,7 @@
 		"@azure/identity-vscode": "^2.0.0",
 		"@azure/msal-node-runtime": "^0.19.5",
 		"bootstrap": "^5.3.8",
+		"emoji-picker-react": "^4.14.0",
 		"lucide-react": "^0.544.0",
 		"prop-types": "^15.8.1",
 		"punycode": "^2.3.1",

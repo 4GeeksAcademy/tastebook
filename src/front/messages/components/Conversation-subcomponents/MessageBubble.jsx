@@ -43,6 +43,7 @@ const MessageBubble = memo(({
             ref={messageRef}
             className={`d-flex mb-2 ${isCurrentUser ? 'justify-content-end' : 'justify-content-start'}`}
         >
+            {/* Message bubble */}
             <div
                 className={`message-bubble py-2 px-3 rounded-3 position-relative shadow-sm ${
                     isCurrentUser 
@@ -51,6 +52,7 @@ const MessageBubble = memo(({
                 }`}
                 style={{ maxWidth: "75%", minWidth: "80px" }}
             >
+                {/* Message content */}
                 { isEditing ? (
                     <form onSubmit={handleEditSubmit}>
                         <input
@@ -74,27 +76,26 @@ const MessageBubble = memo(({
                         </div>
                     </form>
                 ) : (
+
+                    // Display message content and metadata
                     <>
                         <p className="mb-0" style={{whiteSpace: "pre-wrap", wordBreak: "break-word"}}> { message.content } </p>
                         <div className="d-flex justify-content-end align-items-center mt-1">
                             <small className={`opacity-75 me-2 ${isCurrentUser ? 'text-white-50' : 'text-muted'}`}>
                                 { message.is_edited && "edited" }
                             </small>
-                            <small className={`opacity-75 ${isCurrentUser ? 'text-white-50' : 'text-muted'}`}>
+                            <small className={`opacity-100 ${isCurrentUser ? 'text-muted' : 'text-muted'}`}>
                                 { formatTime(message.created_at) }
                             </small>
-                            
+
+                            {/* Message actions */}
                             { isCurrentUser && (
                                 <div className="dropdown ms-1">
                                     <button
-                                        className="btn btn-link p-0"
+                                        className="btn btn-link p-0 text-pimary"
                                         type="button"
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false"
-                                        style={{ 
-                                            lineHeight: 1,
-                                            color: 'rgba(255, 255, 255, 0.7)'
-                                        }}
                                     >
                                         <MoreVertical size={16} />
                                     </button>
