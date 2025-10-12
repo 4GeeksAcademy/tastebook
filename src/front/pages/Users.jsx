@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Users as UsersIcon, ChefHat, Calendar, Filter, ArrowUpDown, ArrowUp, ArrowDown, Globe } from "lucide-react";
+import { Search, Users as UsersIcon, CircleUserRound, ChefHat, Calendar, Filter, ArrowUpDown, ArrowUp, ArrowDown, Globe } from "lucide-react";
 import { REGIONS, COUNTRIES, CountryFlag } from "../assets/data/countriesData.jsx";
 
 export const Users = () => {
@@ -82,14 +82,12 @@ export const Users = () => {
   };
 
   const handleSortChange = (newSortBy) => {
-    if (newSortBy === sortBy) {
-      // Toggle sort order if same field
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      // Set new sort field with default descending order
-      setSortBy(newSortBy);
-      setSortOrder("desc");
-    }
+    setSortBy(newSortBy);
+    setPagination(prev => ({ ...prev, offset: 0 }));
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder(prev => (prev === "asc" ? "desc" : "asc"));
     setPagination(prev => ({ ...prev, offset: 0 }));
   };
 
@@ -99,11 +97,25 @@ export const Users = () => {
     setPagination(prev => ({ ...prev, offset: newOffset }));
   };
 
-  const getSortIcon = (field) => {
-    if (sortBy !== field) return <ArrowUpDown size={16} className="ms-1 text-muted" />;
-    return sortOrder === "asc" ? 
-      <ArrowUp size={16} className="ms-1 text-primary" /> : 
-      <ArrowDown size={16} className="ms-1 text-primary" />;
+  const getSortOrderIcon = () => (
+    sortOrder === "asc" ?
+      <ArrowUp   size={18} strokeWidth={3} className="" /> :
+      <ArrowDown size={18} strokeWidth={3} className="" />
+  );
+
+  const getSortIcon = (key) => {
+    switch (key) {
+      case "created_at":
+        return <Calendar size={16} />;
+      case "recipes_count":
+        return <ChefHat size={16} />;
+      case "username":
+        return <CircleUserRound size={16} />;
+      case "followers_count":
+        return <UsersIcon size={16} />;
+      default:
+        return <ArrowUpDown size={16} />;
+    }
   };
 
   const formatDate = (dateString) => {
@@ -113,8 +125,12 @@ export const Users = () => {
 
   return (
     <div className="container py-5">
+
+
       <div className="row">
+
         <div className="col-12">
+
           {/* Header */}
           <div className="d-flex align-items-center mb-4">
             <UsersIcon size={32} className="text-primary me-3" />
@@ -166,43 +182,40 @@ export const Users = () => {
                   </select>
                 </div>
                 
+
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Sort by</label>
-                  <div className="btn-group d-flex" role="group">
+
+                    <label className="form-label fw-semibold">
+                        <ArrowUpDown size={16} className="me-1" />
+                        Sort by
+                    </label>
+
+                  <div className="input-group">
+
+                    <span className="input-group-text border-end-0 d-flex align-items-center justify-content-center">
+                      {getSortIcon(sortBy)}
+                    </span>
+
+                    <select
+                      className="form-select"
+                      value={sortBy}
+                      onChange={(e) => handleSortChange(e.target.value)}
+                      style={{borderLeft: '0'}}
+                    >
+                      <option value="created_at"      >Date</option>
+                      <option value="recipes_count"   >Recipes</option>
+                      <option value="username"        >Username</option>
+                      <option value="followers_count" >Followers</option>
+                    </select>
+
                     <button
                       type="button"
-                      className={`btn ${sortBy === "created_at" ? "btn-primary" : "btn-outline-primary"}`}
-                      onClick={() => handleSortChange("created_at")}
+                      className="btn border d-flex align-items-center"
+                      onClick={toggleSortOrder}
+                      aria-label={sortOrder === "asc" ? "Sort descending" : "Sort ascending"}
+                      title={sortOrder === "asc" ? "Sort descending" : "Sort ascending"}
                     >
-                      <Calendar size={16} className="me-1" />
-                      Newest
-                      {getSortIcon("created_at")}
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn ${sortBy === "recipes_count" ? "btn-primary" : "btn-outline-primary"}`}
-                      onClick={() => handleSortChange("recipes_count")}
-                    >
-                      <ChefHat size={16} className="me-1" />
-                      Most Recipes
-                      {getSortIcon("recipes_count")}
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn ${sortBy === "username" ? "btn-primary" : "btn-outline-primary"}`}
-                      onClick={() => handleSortChange("username")}
-                    >
-                      Username
-                      {getSortIcon("username")}
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn ${sortBy === "followers_count" ? "btn-primary" : "btn-outline-primary"}`}
-                      onClick={() => handleSortChange("followers_count")}
-                    >
-                      <UsersIcon size={16} className="me-1" />
-                      Most Followers
-                      {getSortIcon("followers_count")}
+                      {getSortOrderIcon()}
                     </button>
                   </div>
                 </div>
