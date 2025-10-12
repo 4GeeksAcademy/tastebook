@@ -13,6 +13,7 @@ import os
 import logging
 from pathlib import Path
 
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 # from flask_swagger import swagger # (not used) Normally used to provide a /swagger.json (or /openapi.json) endpoint so Swagger UI or Redoc can render interactive API docs.
@@ -26,7 +27,8 @@ from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
 
-
+# Load environment variables from .env file
+load_dotenv()
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
 

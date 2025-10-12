@@ -18,6 +18,7 @@ import { ResetPassword }    from "./pages/ResetPassword";
 import { PasswordRecovery } from "./pages/PasswordRecovery";
 
 import { Settings } from "./pages/Settings";
+import { AdminAccess } from "./pages/AdminAccess";
 
 import { UserProfile } from "./pages/UserProfile";
 import { Users }       from "./pages/Users";
@@ -70,6 +71,9 @@ export const router = createBrowserRouter(
 
         {/* User Private Settings */}
         <Route path= "/settings" element={<Settings />} />
+
+        {/* Admin Access */}
+        <Route path= "/admin-access" element={<AdminAccess />} />
 
         {/* Users and User Public Profile */}
         <Route path= "/users"           element={<Users />} />

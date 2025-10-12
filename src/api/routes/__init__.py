@@ -17,6 +17,7 @@ from .comments import comments_bp
 from .collections import collections_bp
 from .messaging import messaging_bp
 from .likes_recipes import likes_bp
+from .admin_access import admin_access_bp
 
 # Create the main API blueprint
 api = Blueprint('api', __name__)
@@ -33,6 +34,7 @@ api.register_blueprint(comments_bp)
 api.register_blueprint(collections_bp)
 api.register_blueprint(messaging_bp)
 api.register_blueprint(likes_bp)
+api.register_blueprint(admin_access_bp)
 
 # Example and testing endpoints
 @api.route('/hello', methods=['POST', 'GET'])

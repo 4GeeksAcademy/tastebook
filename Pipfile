@@ -29,8 +29,8 @@ eventlet = "*"
 requests = "*"
 # Pin setuptools to avoid breaking changes from dependencies like flask-admin
 setuptools = "<81"
-
-
+flask-login = "*"
+faker = "*"
 
 [requires]
 python_version = "3.13.4"
@@ -41,6 +41,9 @@ python_version = "3.13.4"
 # Main commands - Use these!
 api="flask run -p 3001 -h 0.0.0.0"
 dev="bash -c 'trap \"kill 0\" EXIT; flask run -p 3001 -h 0.0.0.0 & python src/socket_app.py & wait'"
+
+# TESTING COMMANDS
+admin-list="bash -c 'python src/scripts.py list' "
 
 # Service management commands
 start="bash ./dev_server.sh start"

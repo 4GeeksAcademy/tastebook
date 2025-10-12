@@ -46,6 +46,8 @@ class User(db.Model):
     description:     Mapped[str]      = mapped_column( Text,                              nullable=True)
     country:         Mapped[str]      = mapped_column( String(100),                       nullable=True)
     is_active:       Mapped[bool]     = mapped_column( Boolean,      default=True,        nullable=False)
+    
+    is_admin:        Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
 
     created_at:      Mapped[datetime] = mapped_column( DateTime(timezone=True),           nullable=False,  default=func.now(), server_default=func.now())
 
@@ -194,6 +196,7 @@ class User(db.Model):
     #---------------#
     def serialize(self) -> Dict[str, Any]:
         return {
+            "is_admin":    self.is_admin,
             "user_id":     self.id,
             "email":       self.email,
             "username":    self.username,
@@ -291,12 +294,28 @@ class User(db.Model):
         
         return total_unread
 
+    @property
+    def can_access_admin(self) -> bool:
+        return bool(self.is_admin and self.is_active)
+
 
     #-----------------#
     # __repr__ Method #
     #-----------------#
     def __repr__(self):
         return f"<User ID {self.id} | Username: {self.username} | Email: {self.email} | Name: {self.full_name}>"
+
+    # Flask-Login integration helpers
+    def get_id(self) -> str:
+        return str(self.id)
+
+    @property
+    def is_authenticated(self) -> bool:
+        return True
+
+    @property
+    def is_anonymous(self) -> bool:
+        return False
 
 
 
