@@ -401,14 +401,14 @@ export const Recipe = () => {
                       />
                     ) : null}
                     {/* Error fallback for main image */}
-                    <div className="d-none align-items-center justify-content-center bg-light" style={{ height: '400px' }}>
+                    <div className="d-none align-items-center justify-content-center" style={{ height: '400px' }}>
                       <div className="text-center">
                         <Camera size={48} className="text-muted mb-2" />
                         <p className="text-muted">Image failed to load</p>
                       </div>
                     </div>
                     {(!displayImage || !displayImage.url) && (
-                      <div className="d-flex align-items-center justify-content-center bg-light" style={{ height: '400px' }}>
+                      <div className="d-flex align-items-center justify-content-center" style={{ height: '400px' }}>
                         <div className="text-center">
                           <Camera size={48} className="text-muted mb-2" />
                           <p className="text-muted">Image not available</p>
@@ -467,7 +467,7 @@ export const Recipe = () => {
           ) : (
             /* Placeholder for recipes without images */
             <div className="mb-4">
-              <div className="card bg-light text-center py-5">
+              <div className="card text-center py-5">
                 <div className="card-body">
                   <Camera size={48} className="text-muted mb-3" />
                   <h5 className="text-muted">No images available</h5>

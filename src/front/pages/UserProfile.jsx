@@ -611,7 +611,7 @@ export const UserProfile = () => {
           ) : (
             /* No Collections State */
             <div className="text-center py-4">
-              <Bookmark size={48} className="text-muted mb-3" />
+              <Bookmark size={48} className="mb-3" />
               <h5 className="text-muted">No Public Collections</h5>
               <p className="text-muted">
                 {userProfile.full_name} hasn't created any public collections yet.
@@ -656,10 +656,10 @@ export const UserProfile = () => {
                           />
                         ) : (
                           <div 
-                            className="card-img-top d-flex align-items-center justify-content-center bg-light"
+                            className="card-img-top d-flex align-items-center justify-content-center bg-primary bg-opacity-10"
                             style={{ height: '200px' }}
                           >
-                            <ChefHat size={48} className="text-muted" />
+                            <ChefHat size={48} className="" />
                           </div>
                         )}
                         
