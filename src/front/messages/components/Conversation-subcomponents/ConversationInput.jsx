@@ -159,7 +159,12 @@ const ConversationInput = memo(({
                         >
                             <EmojiPicker
                                 onEmojiClick={handleEmojiPick}
+                                // skinTonePickerLocation="PREVIEW" // "SEARCH" or "PREVIEW"
+                                style={{width: "260px"}}
+                                // width={270}
+                                skinTonesDisabled={true}
                                 autoFocusSearch={false}
+                                // emojiStyle="native"
                                 lazyLoadEmojis
                                 theme={emojiTheme}
                             />
