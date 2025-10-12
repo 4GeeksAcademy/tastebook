@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
 
+const THEME_CHANGE_EVENT = 'bootstrap-theme-change';
+
+const isBrowser = () => typeof window !== 'undefined';
+
+const dispatchThemeChange = (preference, actual) => {
+  if (!isBrowser()) return;
+  const detail = { preference, actual };
+  window.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT, { detail }));
+};
+
 /**
  * Custom hook for managing Bootstrap 5.3 dark mode theme
  * Handles theme persistence, system preference detection, and live updates
@@ -7,7 +17,13 @@ import { useState, useEffect } from "react";
 export const useTheme = () => {
   // Get initial theme preference
   const getPreferredTheme = () => {
-    const storedTheme = localStorage.getItem('theme');
+    if (!isBrowser()) return 'auto';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem('theme');
+    } catch (e) {
+      storedTheme = null;
+    }
     if (storedTheme && ['light', 'dark', 'auto'].includes(storedTheme)) {
       return storedTheme;
     }
@@ -16,6 +32,7 @@ export const useTheme = () => {
 
   // Get actual theme to apply (resolves 'auto' to 'light' or 'dark')
   const getActualTheme = (theme) => {
+    if (!isBrowser()) return 'light';
     if (theme === 'auto') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
@@ -23,6 +40,36 @@ export const useTheme = () => {
   };
 
   const [theme, setThemeState] = useState(getPreferredTheme);
+  const [actualTheme, setActualTheme] = useState(() => getActualTheme(getPreferredTheme()));
+
+  // Sync with external theme change events
+  useEffect(() => {
+    if (!isBrowser()) return undefined;
+
+    const handleExternalThemeChange = (event) => {
+      const { preference, actual } = event.detail || {};
+      if (!preference) return;
+
+      setThemeState((prev) => (prev === preference ? prev : preference));
+      if (actual) {
+        setActualTheme((prev) => (prev === actual ? prev : actual));
+      }
+    };
+
+    const handleStorage = (event) => {
+      if (event.key !== 'theme' || !event.newValue) return;
+      if (!['light', 'dark', 'auto'].includes(event.newValue)) return;
+      setThemeState(event.newValue);
+    };
+
+    window.addEventListener(THEME_CHANGE_EVENT, handleExternalThemeChange);
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleExternalThemeChange);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
 
   // Function to set theme and update DOM + localStorage
   const setTheme = (newTheme) => {
@@ -35,10 +82,14 @@ export const useTheme = () => {
     setThemeState(newTheme);
     
     // Get actual theme to apply
-    const actualTheme = getActualTheme(newTheme);
+  const resolvedTheme = getActualTheme(newTheme);
+    setActualTheme(resolvedTheme);
     
     // Update HTML data attribute
-    document.documentElement.setAttribute('data-bs-theme', actualTheme);
+    if (isBrowser()) {
+      document.documentElement.setAttribute('data-bs-theme', resolvedTheme);
+    }
+  dispatchThemeChange(newTheme, resolvedTheme);
     
     // Store in localStorage
     try {
@@ -50,18 +101,27 @@ export const useTheme = () => {
 
   // Toggle between light and dark (skips auto)
   const toggleTheme = () => {
-    const actualTheme = getActualTheme(theme);
-    setTheme(actualTheme === 'light' ? 'dark' : 'light');
+    const nextTheme = actualTheme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
   };
 
   // Listen for system theme changes when theme is set to 'auto'
   useEffect(() => {
+    if (!isBrowser()) return undefined;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
+    const applyTheme = (resolvedTheme) => {
+      setActualTheme(resolvedTheme);
+      if (isBrowser()) {
+        document.documentElement.setAttribute('data-bs-theme', resolvedTheme);
+      }
+      dispatchThemeChange(theme, resolvedTheme);
+    };
+
     const handleSystemThemeChange = (e) => {
       if (theme === 'auto') {
-        const actualTheme = e.matches ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-bs-theme', actualTheme);
+        const resolvedTheme = e.matches ? 'dark' : 'light';
+        applyTheme(resolvedTheme);
       }
     };
 
@@ -69,8 +129,8 @@ export const useTheme = () => {
     mediaQuery.addEventListener('change', handleSystemThemeChange);
 
     // Initial theme application
-    const actualTheme = getActualTheme(theme);
-    document.documentElement.setAttribute('data-bs-theme', actualTheme);
+    const resolvedTheme = getActualTheme(theme);
+    applyTheme(resolvedTheme);
 
     // Cleanup listener
     return () => {
@@ -79,7 +139,7 @@ export const useTheme = () => {
   }, [theme]);
 
   // Get current actual theme being displayed
-  const getCurrentTheme = () => getActualTheme(theme);
+  const getCurrentTheme = () => actualTheme;
 
   return {
     theme,           // Current theme preference ('light', 'dark', 'auto')

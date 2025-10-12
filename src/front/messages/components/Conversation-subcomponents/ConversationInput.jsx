@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState, useCallback, memo } from "react";
 
 import { Send, Smile } from "lucide-react";
-import EmojiPicker from "emoji-picker-react";
+import EmojiPicker, { Theme as EmojiTheme } from "emoji-picker-react";
+import { useTheme } from "../../../hooks/useTheme";
 // import "emoji-picker-react/css/theme.css"; ## --> Wrong import
 
 /**
@@ -27,6 +28,8 @@ const ConversationInput = memo(({
     const shouldRefocusRef = useRef(false);
     const emojiPickerRef = useRef(null);
     const toggleButtonRef = useRef(null);
+    const { currentTheme } = useTheme();
+    const emojiTheme = currentTheme === "dark" ? EmojiTheme.DARK : EmojiTheme.LIGHT;
     
     // Local state to handle typing without triggering parent re-renders
     const [localValue, setLocalValue] = useState(value || "");
@@ -151,14 +154,14 @@ const ConversationInput = memo(({
                     {showEmojiPicker && (
                         <div
                             ref={emojiPickerRef}
-                            className="position-absolute bottom-100 end-0 mb-2 shadow-sm border bg-body rounded"
+                            className="position-absolute bottom-100 end-0 mb-2 shadow-sm border rounded-circle"
                             style={{zIndex: 1050}}
                         >
                             <EmojiPicker
                                 onEmojiClick={handleEmojiPick}
                                 autoFocusSearch={false}
                                 lazyLoadEmojis
-                                theme="auto"  // Follows system light/dark mode
+                                theme={emojiTheme}
                             />
                         </div>
                     )}

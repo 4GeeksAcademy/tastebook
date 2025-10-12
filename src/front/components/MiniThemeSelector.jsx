@@ -10,12 +10,18 @@ const MiniThemeSelector = ({ onThemeChange }) => {
     };
 
     return (
+
         <div className="mini-theme-selector">
+
             <div className="mb-2">
                 <small className="text-muted fw-bold">Quick Theme Switch</small>
             </div>
+
+
             <div className="d-flex flex-wrap gap-1">
+
                 {getThemeKeys().map((themeKey) => (
+
                     <button
                         key={themeKey}
                         type="button"
@@ -24,9 +30,14 @@ const MiniThemeSelector = ({ onThemeChange }) => {
                         style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}
                     >
                         {getThemeName(themeKey)}
+                        
                     </button>
+
                 ))}
+
             </div>
+
+
         </div>
     );
 };
