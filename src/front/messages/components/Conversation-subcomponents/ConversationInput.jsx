@@ -158,7 +158,7 @@ const ConversationInput = memo(({
                                 onEmojiClick={handleEmojiPick}
                                 autoFocusSearch={false}
                                 lazyLoadEmojis
-                                theme="light"
+                                theme="auto"  // Follows system light/dark mode
                             />
                         </div>
                     )}
