@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useCallback, memo } from "react";
 
 import { Send, Smile } from "lucide-react";
 import EmojiPicker, { Theme as EmojiTheme } from "emoji-picker-react";
-import { useTheme } from "../../../../shared/hooks/useTheme";
+import { useTheme } from "../../../theme-settings/hooks/useTheme";
 // import "emoji-picker-react/css/theme.css"; ## --> Wrong import
 
 /**

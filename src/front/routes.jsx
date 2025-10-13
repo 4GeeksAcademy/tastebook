@@ -41,14 +41,14 @@ import { MyCollections }     from "./pages/MyCollections";
 import { PublicCollections } from "./pages/PublicCollections";
 
 // Messages
-import { Messages }  from "./modules/messages/pages/Messages.jsx";
+import { Messages }     from "./modules/messages/pages/Messages.jsx";
 
 // Theme settings
-import { Theme }     from "./pages/Theme";
+import { ThemeTesting } from "./modules/theme-settings/ThemeTesting.jsx";
 
 // Miscellaneous
-import { Single }    from "./pages/Single";
-import { Demo }      from "./pages/Demo";
+import { Single } from "./pages/Single";
+import { Demo }   from "./pages/Demo";
 
 
 
@@ -107,7 +107,7 @@ export const router = createBrowserRouter(
         <Route path= "/messages/:chatId"  element={<Messages />} />
 
         {/* Theme */}
-        <Route path= "/theme" element={<Theme />} />
+        <Route path= "/theme" element={<ThemeTesting />} />
 
 
         {/* Miscellaneous, Testing and Extras*/}

@@ -6,7 +6,7 @@ import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle, Menu,
 import UserAvatar from "../../../components/UserAvatar";
 import socketService from "../../../shared/utils/socketService";
 
-import ThemeToggle from "../../../components/ThemeToggle"; //Imported for final CSS styling implementation
+import ThemeToggle from "../../theme-settings/components/ThemeToggle"; //Imported for final CSS styling implementation
 
 const UNREAD_COUNT_CACHE_MS = 5000;
 

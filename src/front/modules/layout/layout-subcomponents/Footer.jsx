@@ -4,7 +4,7 @@ import { Twitter, Github, Mail, Palette, Settings, ShieldCheck } from "lucide-re
 // import MiniThemeSelector from "./MiniThemeSelector"; // DEPRECATED
 // import MiniThemeSelector from "./MiniThemeSelector"; // DEPRECATED
 // import MiniThemeSelector from "./MiniThemeSelector"; // DEPRECATED
-import ThemeToggle from "../../../components/ThemeToggle";
+import ThemeToggle from "../../theme-settings/components/ThemeToggle";
 
 export const Footer = () => {
 

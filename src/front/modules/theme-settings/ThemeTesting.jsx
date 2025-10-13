@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 // import ThemeSelector from "../components/ThemeSelector"; // DERPRECATED
-import ThemeToggle from "../components/ThemeToggle";
-import { useTheme } from "../shared/hooks/useTheme";
+import ThemeToggle from "./components/ThemeToggle";
+import { useTheme } from "./hooks/useTheme";
 import { 
     ChefHat, User, Mail, Settings, Search, Plus, Heart, 
     Star, Clock, Camera, Edit, Trash2, Eye, Download,
     CheckCircle, AlertTriangle, Info, X
 } from "lucide-react";
 
-export const Theme = () => {
+export const ThemeTesting = () => {
     const [activeTab, setActiveTab] = useState("buttons");
     const [showAlert, setShowAlert] = useState(true);
     const [progress] = useState(75);
@@ -667,4 +667,4 @@ export const Theme = () => {
     );
 }
 
-export default Theme;
+export default ThemeTesting;
