@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useReducer, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import socketService from "../../utils/socketService";
+import socketService from "../../shared/utils/socketService";
 import { normalizeMessage, normalizeChat } from "../utils/normalize";
 import { useMessageReadStatus } from "./useMessageReadStatus";
 
