@@ -64,7 +64,7 @@ export const router = createBrowserRouter(
       <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
 
-        {/* NESTES ROUTES: Defines sub-routes within the Layout component. */}
+        {/* NESTED ROUTES: Defines sub-routes within the Layout component. */}
 
 
         {/* Home */}
