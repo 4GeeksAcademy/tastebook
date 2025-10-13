@@ -7,45 +7,49 @@ import {
 } from "react-router-dom";
 
 
+// Layout
 import { Layout } from "./modules/layout/Layout.jsx";
 import { Home }   from "./modules/layout/Home.jsx";
 
-
+// Authentucation
 import { Login }  from "./pages/Login";
 import { Signup } from "./pages/Signup";
 
 import { ResetPassword }    from "./pages/ResetPassword";
 import { PasswordRecovery } from "./pages/PasswordRecovery";
 
-
+// Admin Access
 import { AdminAccess }  from "./pages/AdminAccess";
 
+// Settings module
 import { Settings }     from "./pages/Settings";
 
-
+// User profile
+import { AllUsers }     from "./pages/AllUsers.jsx";
 import { UserProfile }  from "./pages/UserProfile";
-import { Users }        from "./pages/Users";
 
-
+// Recipes
 import { AllRecipes }   from "./pages/AllRecipes.jsx";
 import { Recipe }       from "./pages/Recipe";
 import { CreateRecipe } from "./pages/CreateRecipe";
 import { ModifyRecipe } from "./pages/ModifyRecipe";
+import { LikedRecipes } from "./pages/LikedRecipes.jsx";
 
-
+// Collections
 import { CollectionView }    from "./pages/CollectionView";
 import { MyCollections }     from "./pages/MyCollections";
 import { PublicCollections } from "./pages/PublicCollections";
 
-import { LikedRecipes }  from "./pages/LikedRecipes.jsx";
+// Messages
+import { Messages }  from "./modules/messages/pages/Messages.jsx";
 
-import { Messages }      from "./modules/messages/pages/Messages.jsx";
+// Theme settings
+import { Theme }     from "./pages/Theme";
 
-import { Theme } from "./pages/Theme";
+// Miscellaneous
+import { Single }    from "./pages/Single";
+import { Demo }      from "./pages/Demo";
 
-
-import { Single } from "./pages/Single";
-import { Demo }   from "./pages/Demo";
 
 
 export const router = createBrowserRouter(
@@ -60,7 +64,7 @@ export const router = createBrowserRouter(
       <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
 
-        {/* Nested Routes: Defines sub-routes within the Layout component. */}
+        {/* NESTES ROUTES: Defines sub-routes within the Layout component. */}
 
 
         {/* Home */}
@@ -81,7 +85,7 @@ export const router = createBrowserRouter(
         <Route path= "/admin-access" element={<AdminAccess />} />
 
         {/* Users and User Public Profile */}
-        <Route path= "/users"           element={<Users />} />
+        <Route path= "/users"           element={<AllUsers />} />
         <Route path= "/user/:username"  element={<UserProfile />} />
 
         {/* User Specific Pages  */}

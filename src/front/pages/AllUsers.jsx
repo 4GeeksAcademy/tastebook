@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Search, Users as UsersIcon, CircleUserRound, ChefHat, Calendar, Filter, ArrowUpDown, ArrowUp, ArrowDown, Globe } from "lucide-react";
 import { REGIONS, COUNTRIES, CountryFlag } from "../shared/assets/data/countriesData.jsx";
 
-export const Users = () => {
+export const AllUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
