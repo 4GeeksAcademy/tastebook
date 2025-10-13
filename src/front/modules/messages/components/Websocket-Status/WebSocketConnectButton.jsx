@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { WifiOff, Wifi, RefreshCw, AlertCircle } from 'lucide-react';
-import socketService from '../../../shared/utils/socketService';
+import socketService from '../../../../shared/utils/socketService';
 
 /**
  * WebSocket Connection Management Component

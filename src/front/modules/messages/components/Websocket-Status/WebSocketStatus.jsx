@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import socketService from '../../../shared/utils/socketService';
+import socketService from '../../../../shared/utils/socketService';
 
 /**
  * WebSocket Status Component
