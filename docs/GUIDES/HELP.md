@@ -180,7 +180,7 @@ To find all ES6 import statements (single-line):
 
 ### 2. Find Imports of a Specific File
 
-Replace `FILENAME` with your file name (e.g., `countriesDat.jsx`):
+Replace `FILENAME` with your file name (e.g., `countriesData.jsx`):
 
 ```
 import\s.*['"][^'"]*FILENAME['"]
