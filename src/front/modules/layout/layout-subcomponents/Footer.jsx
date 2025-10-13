@@ -2,7 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Twitter, Github, Mail, Palette, Settings, ShieldCheck } from "lucide-react";
 // import MiniThemeSelector from "./MiniThemeSelector"; // DEPRECATED
-import ThemeToggle from "./ThemeToggle";
+// import MiniThemeSelector from "./MiniThemeSelector"; // DEPRECATED
+// import MiniThemeSelector from "./MiniThemeSelector"; // DEPRECATED
+import ThemeToggle from "../../../components/ThemeToggle";
 
 export const Footer = () => {
 

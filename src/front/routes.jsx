@@ -1,6 +1,5 @@
 // Import necessary components and functions from react-router-dom.
 
-
 import {
     createBrowserRouter,
     createRoutesFromElements,
@@ -8,8 +7,9 @@ import {
 } from "react-router-dom";
 
 
-import { Layout } from "./pages/Layout";
-import { Home }   from "./pages/Home";
+import { Layout } from "./modules/layout/Layout.jsx";
+import { Home }   from "./modules/layout/Home.jsx";
+
 
 import { Login }  from "./pages/Login";
 import { Signup } from "./pages/Signup";
@@ -17,22 +17,27 @@ import { Signup } from "./pages/Signup";
 import { ResetPassword }    from "./pages/ResetPassword";
 import { PasswordRecovery } from "./pages/PasswordRecovery";
 
-import { Settings } from "./pages/Settings";
-import { AdminAccess } from "./pages/AdminAccess";
 
-import { UserProfile } from "./pages/UserProfile";
-import { Users }       from "./pages/Users";
+import { AdminAccess }  from "./pages/AdminAccess";
+
+import { Settings }     from "./pages/Settings";
+
+
+import { UserProfile }  from "./pages/UserProfile";
+import { Users }        from "./pages/Users";
+
 
 import { AllRecipes }   from "./pages/AllRecipes.jsx";
 import { Recipe }       from "./pages/Recipe";
 import { CreateRecipe } from "./pages/CreateRecipe";
 import { ModifyRecipe } from "./pages/ModifyRecipe";
 
+
 import { CollectionView }    from "./pages/CollectionView";
+import { MyCollections }     from "./pages/MyCollections";
 import { PublicCollections } from "./pages/PublicCollections";
 
 import { LikedRecipes }  from "./pages/LikedRecipes.jsx";
-import { MyCollections } from "./pages/MyCollections";
 
 import { Messages }      from "./modules/messages/pages/Messages.jsx";
 

@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle, Menu, User } from "lucide-react";
-import UserAvatar from "./UserAvatar";
-import socketService from "../shared/utils/socketService";
 
-import ThemeToggle from "./ThemeToggle"; //Imported for final CSS styling implementation
+import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle, Menu, User } from "lucide-react";
+
+import UserAvatar from "../../../components/UserAvatar";
+import socketService from "../../../shared/utils/socketService";
+
+import ThemeToggle from "../../../components/ThemeToggle"; //Imported for final CSS styling implementation
 
 const UNREAD_COUNT_CACHE_MS = 5000;
 
