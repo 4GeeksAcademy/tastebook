@@ -184,8 +184,15 @@ Replace `FILENAME` with your file name (e.g., `countriesDat.jsx`):
 
 ```
 import\s.*['"][^'"]*FILENAME['"]
+
 or
+
 import\s.*['"][^'"]*FILENAME.FILETYPE['"]
+
+or
+
+Even better:
+import\s.*['"][^'"]*FILENAME.*['"]
 ```
 
 ---
