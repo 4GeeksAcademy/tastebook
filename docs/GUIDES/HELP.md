@@ -164,7 +164,7 @@ To find all ES6 import statements (single-line):
 - `['"][^'"]+['"]` — matches the module path in quotes
 - `;` — matches the semicolon at the end
 
-#### To match imports like `import "module";` (side-effecimports):
+#### To match imports like `import "module";` (side-effect imports):
 
 ```
 ^import\s+['"][^'"]+['"];
