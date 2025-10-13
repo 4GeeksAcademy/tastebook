@@ -47,8 +47,8 @@ import { Messages }     from "./modules/messages/pages/Messages.jsx";
 import { ThemeTesting } from "./modules/theme-settings/ThemeTesting.jsx";
 
 // Miscellaneous
-import { Single } from "./pages/Single";
-import { Demo }   from "./pages/Demo";
+import { Single } from "./modules/miscellaneous/4geeks-defatult-files/Single.jsx";
+import { Demo }   from "./modules/miscellaneous/4geeks-defatult-files/Demo.jsx";
 
 
 
