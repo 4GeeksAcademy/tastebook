@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-// import ThemeSelector from "../components/ThemeSelector"; // DERPRECATED
-import ThemeToggle from "../components/ThemeToggle";
-import { useTheme } from "../hooks/useTheme";
+import ThemeSelector from "../components/ThemeSelector";
 import { 
     ChefHat, User, Mail, Settings, Search, Plus, Heart, 
     Star, Clock, Camera, Edit, Trash2, Eye, Download,
@@ -12,71 +10,29 @@ export const Theme = () => {
     const [activeTab, setActiveTab] = useState("buttons");
     const [showAlert, setShowAlert] = useState(true);
     const [progress] = useState(75);
-    const { theme, setTheme, currentTheme } = useTheme();
 
     return (
         <div className="container py-4">
-
-
             {/* Header Section */}
             <div className="row">
                 <div className="col-12">
-                    <h2>Bootstrap themes & UI Components Showcase</h2>
-                    <p className="text-muted">Toggle between light and dark themes and preview how all Bootstrap components will look.</p>
+                    <h2>Themes & UI Components Showcase</h2>
+                    <p className="text-muted">Choose your preferred theme and preview how all Bootstrap components will look.</p>
                 </div>
             </div>
-
-
 
             {/* Theme Selector */}
             <div className="row mt-3 mb-5">
                 <div className="col-md-6">
                     <div className="card shadow-sm">
-
                         <div className="card-header bg-primary text-white">
                             <h5 className="mb-0">
                                 <Settings size={20} className="me-2" />
                                 Theme Selection
                             </h5>
                         </div>
-
                         <div className="card-body">
-
-                            <div className="d-flex align-items-center justify-content-between mb-3">
-                                <div>
-                                    <h6 className="mb-1">Current Theme</h6>
-                                    <p className="text-muted mb-0">
-                                        {theme === 'auto' ? `Auto (currently ${currentTheme})` : theme.charAt(0).toUpperCase() + theme.slice(1)}
-                                    </p>
-                                </div>
-                                <ThemeToggle />
-                            </div>
-
-                            <div className="d-flex gap-2">
-                                <button 
-                                    className={`btn btn-sm ${theme === 'light' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                    onClick={() => setTheme('light')}
-                                >
-                                    Light
-                                </button>
-                                <button 
-                                    className={`btn btn-sm ${theme === 'dark' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                    onClick={() => setTheme('dark')}
-                                >
-                                    Dark
-                                </button>
-                                <button 
-                                    className={`btn btn-sm ${theme === 'auto' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                    onClick={() => setTheme('auto')}
-                                >
-                                    Auto
-                                </button>
-                            </div>
-
-                            <small className="text-muted d-block mt-2">
-                                Auto mode follows your system preference and updates automatically.
-                            </small>
-
+                            <ThemeSelector />
                         </div>
                     </div>
                 </div>

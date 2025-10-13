@@ -47,7 +47,7 @@ export const Footer = () => {
 
 							<div className="dropdown-menu dropdown-menu-end p-3" aria-labelledby="themeDropdown">
 								
-                                {/* <MiniThemeSelector /> */}
+                                {/* <MiniThemeSelector /> -- DEPRECATED */}
                         
 								{/* <hr className="my-2" /> */}
 

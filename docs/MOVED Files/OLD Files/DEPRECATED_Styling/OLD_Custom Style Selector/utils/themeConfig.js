@@ -4,31 +4,31 @@
 export const THEMES = {
     professional: {
         name: "Professional",
-        cssPath: "/themes/professional.css"
+        cssPath: "../styles/themes/professional.css"
     },
     main: {
         name: "Main",
-        cssPath: "/themes/main.css"
+        cssPath: "../styles/themes/main.css"
     },
     gradients: {
         name: "Gradients",
-        cssPath: "/themes/gradients.css"
+        cssPath: "../styles/themes/gradients.css"
     },
     light: {
         name: "Light", 
-        cssPath: "/themes/light.css"
+        cssPath: "../styles/themes/light.css"
     },
     dark: {
         name: "Dark",
-        cssPath: "/themes/dark.css"
+        cssPath: "../styles/themes/dark.css"
     },
     original: {
         name: "Original",
-        cssPath: "/themes/original.css"
+        cssPath: "../styles/themes/original.css"
     },
     recipes: {
         name: "Recipes",
-        cssPath: "/themes/recipes.css"
+        cssPath: "../styles/themes/recipes.css"
     }
 };
 
