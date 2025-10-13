@@ -217,7 +217,7 @@ grep -rE "import\\s.*['\"][^'\"]*FILENAME['\"]" .
 ### 5. What Does the `\` (Backslash) Mean in Regex?
 
 - The backslash `\` is the **escape character** in regex.
-- It gives special meaning to certain characters (e.g., `\dfor digit, `\w` for word character).
+- It gives special meaning to certain characters (e.g., `\d` for digit, `\w` for word character).
 - It also lets you match special characters literally (e.g., `` matches a period, not any character).
 - In many tools (like VS Code or grep), you need to double the backslash (`\\`) to escape it for the search engine.
 
