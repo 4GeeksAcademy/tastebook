@@ -12,11 +12,11 @@ import { Layout } from "./modules/layout/Layout.jsx";
 import { Home }   from "./modules/layout/Home.jsx";
 
 // Authentucation
-import { Login }  from "./pages/Login";
-import { Signup } from "./pages/Signup";
+import { Login }  from "./modules/auth/Login.jsx";
+import { Signup } from "./modules/auth/Signup.jsx";
 
-import { ResetPassword }    from "./pages/ResetPassword";
-import { PasswordRecovery } from "./pages/PasswordRecovery";
+import { ResetPassword }    from "./modules/auth/ResetPassword.jsx";
+import { PasswordRecovery } from "./modules/auth/PasswordRecovery.jsx";
 
 // Admin Access
 import { AdminAccess }  from "./pages/AdminAccess";
