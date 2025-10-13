@@ -1,7 +1,8 @@
 import React, { useEffect } from "react"
 import { Link } from "react-router-dom";
+
 import useGlobalReducer from "../../shared/hooks/useGlobalReducer.jsx";
-import food from "../shared/assets/img/table_food.jpg";
+// import food from "../../shared/assets/img/table_food.jpg";
 
 export const Home = () => {
 

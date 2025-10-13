@@ -18,7 +18,7 @@ import {
   MessageCircle
 } from "lucide-react";
 import { EditDescriptionModal } from "../components/EditDescriptionModal";
-import { COUNTRIES, CountryFlag } from "../shared/assets/data/countriesData.jsx";
+import { COUNTRIES, CountryFlag } from "../shared/utils/country-flag-name-display/countriesData.jsx";
 import CollectionCard from "../components/CollectionCard";
 
 export const UserProfile = () => {

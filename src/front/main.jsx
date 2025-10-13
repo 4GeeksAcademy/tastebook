@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client'
 // CUSTOM CSS AND SCSS
 
 // SCSS imports
-import '../shared/styles/scss-bootstrap-custom-theme.scss'; // COMPLETE Custom Bootstrap theme with SCSS variables
+import './shared/styles/scss-bootstrap-custom-theme.scss'; // COMPLETE Custom Bootstrap theme with SCSS variables
 // import '../shared/styles/simple-custom.scss';            // SIMPLE   Custom Bootstrap theme with SCSS variables
 
 // CSS custom theme 

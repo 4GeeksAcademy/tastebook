@@ -230,3 +230,8 @@ grep -rE "import\\s.*['\"][^'\"]*FILENAME['\"]" .
 
 **Tip:**
 You can use these patterns to find, audit, or refactor imports across your project quickly!
+
+
+
+
+import\s.*['"][^'"]*FILENAME.*['"]
