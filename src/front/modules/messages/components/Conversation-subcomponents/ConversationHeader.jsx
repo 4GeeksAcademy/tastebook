@@ -1,6 +1,6 @@
 import React from "react";
 import { MoreVertical, ArrowLeft, Trash2 } from "lucide-react";
-import UserAvatar from "../../../../components/UserAvatar";
+import UserAvatar from "../../../../shared/shared-components/UserAvatar";
 
 /**
  * Chat header component with participant info and actions

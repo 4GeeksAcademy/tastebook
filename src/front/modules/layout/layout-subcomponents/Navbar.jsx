@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle, Menu, User } from "lucide-react";
 
-import UserAvatar from "../../../components/UserAvatar";
+import UserAvatar from "../../../shared/shared-components/UserAvatar";
 import socketService from "../../../shared/utils/socketService";
 
 import ThemeToggle from "../../theme-settings/components/ThemeToggle"; //Imported for final CSS styling implementation

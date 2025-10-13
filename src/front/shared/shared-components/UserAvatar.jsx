@@ -5,23 +5,24 @@ const UserAvatar = ({
   imageUrl, 
   username, 
   fullName, 
-  size = "medium", // "small", "medium", "large", "xl"
-  className = "",
+  size        = "medium", // "small", "medium", "large", "xl"
+  className   = "",
   showTooltip = true,
   onClick
 }) => {
+
   const sizeClasses = {
-    small: "24px",
+    small:  "24px",
     medium: "40px", 
-    large: "64px",
-    xl: "96px"
+    large:  "64px",
+    xl:     "96px"
   };
 
   const iconSizes = {
-    small: 12,
+    small:  12,
     medium: 20,
-    large: 32,
-    xl: 48
+    large:  32,
+    xl:     48
   };
 
   const displayName = fullName || username || "User";
@@ -33,11 +34,11 @@ const UserAvatar = ({
     .toUpperCase();
 
   const avatarStyle = {
-    width: sizeClasses[size],
-    height: sizeClasses[size],
-    minWidth: sizeClasses[size],
+    width:     sizeClasses[size],
+    height:    sizeClasses[size],
+    minWidth:  sizeClasses[size],
     minHeight: sizeClasses[size],
-    cursor: onClick ? 'pointer' : 'default'
+    cursor:    onClick ? 'pointer' : 'default'
   };
 
   const avatarContent = imageUrl ? (
