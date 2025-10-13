@@ -19,7 +19,7 @@ import { ResetPassword }    from "./modules/auth/ResetPassword.jsx";
 import { PasswordRecovery } from "./modules/auth/PasswordRecovery.jsx";
 
 // Admin Access
-import { AdminAccess }  from "./pages/AdminAccess";
+import { AdminAccess }  from "./modules/admin-backpanel/AdminAccess.jsx";
 
 // Settings module
 import { Settings }     from "./pages/Settings";
