@@ -189,7 +189,7 @@
                         <tbody>
                             {% for country, total in top_countries %}
                                 <tr>
-                                    <td>{{ country or 'Unknown' }}</td>
+                                    <td>{{ country.name if country else 'Unknown' }} ({{ country.code if country else '?' }})</td>
                                     <td>{{ total }}</td>
                                 </tr>
                             {% else %}

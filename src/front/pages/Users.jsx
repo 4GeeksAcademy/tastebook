@@ -280,10 +280,10 @@ export const Users = () => {
                         <div className="text-muted mb-2 d-flex align-items-center justify-content-center">
                           <Globe size={14} className="me-1" />
                           <small className="d-flex align-items-center">
-                            {user.country ? (
+                            {user.country && user.country.code ? (
                               <>
-                                {COUNTRIES.find(c => c.code === user.country)?.name || user.country}
-                                <CountryFlag countryCode={user.country} size={14} className="ms-1" />
+                                {COUNTRIES.find(c => c.code === user.country.code)?.name || user.country.name || user.country.code}
+                                <CountryFlag countryCode={user.country.code} size={18} className="ms-2" />
                               </>
                             ) : '-'}
                           </small>

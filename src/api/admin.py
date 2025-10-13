@@ -16,6 +16,7 @@ from sqlalchemy import func
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .models import db, User, Recipe, RecipeImage, Follow, Comment, Like, CommentLike
+from .countries import get_random_country
 
 faker = Faker()
 login_manager = LoginManager()
@@ -105,13 +106,23 @@ class DashboardAdminIndexView(AdminIndexView):
         recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
         recent_recipes = Recipe.query.order_by(Recipe.created_at.desc()).limit(5).all()
         top_countries = (
-            db.session.query(User.country, func.count(User.id).label('total'))
+            db.session.query(
+                User.country.op('->>')('code').label('code'),
+                User.country.op('->>')('name').label('name'),
+                func.count(User.id).label('total')
+            )
             .filter(User.country.isnot(None))
-            .group_by(User.country)
+            .group_by(User.country.op('->>')('code'), User.country.op('->>')('name'))
             .order_by(func.count(User.id).desc())
             .limit(5)
             .all()
         )
+
+        # Convert to the expected format for the template
+        top_countries = [
+            ({'code': row.code, 'name': row.name}, row.total)
+            for row in top_countries
+        ]
 
         return self.render(
             'admin/dashboard.html',
@@ -200,7 +211,7 @@ class AdminDataSeeder:
 
     @classmethod
     def create_test_users(cls, count: int) -> int:
-        created = 0
+        created  = 0
         password = os.getenv('ADMIN_TEST_USER_PASSWORD', 'Tastebook123!')
 
         for _ in range(count):
@@ -216,7 +227,7 @@ class AdminDataSeeder:
                 username      = username,
                 full_name     = faker.name(),
                 description   = faker.sentence(nb_words=12),
-                country       = faker.country() if random.random() > 0.2 else None,
+                country       = get_random_country(),
                 is_active     = True,
                 is_admin      = False,
                 plain_psswrd  = password if current_app.config.get('ENV') != 'production' else None,

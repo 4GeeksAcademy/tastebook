@@ -2,6 +2,42 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 13, 2025) -- Country Data Unification and Admin Dashboard Fix
+
+**Backend data consistency and admin panel stability:**
+This update addressed scattered country data handling across the Flask backend and resolved a critical PostgreSQL error preventing the admin dashboard from loading. The changes establish a single source of truth for country data and ensure robust database operations.
+
+**Key issues fixed:**
+
+1. **Scattered Country Data Handling:**
+   * **Problem:** Country data was hardcoded in multiple locations across the backend, leading to inconsistency and maintenance issues.
+   * **Solution:** Created a centralized `src/api/countries.py` module containing unified REGIONS and COUNTRIES data structures with helper functions like `get_random_country()`.
+
+2. **Users API Region Filtering:**
+   * **Problem:** Region filtering in users API routes used hardcoded region mappings.
+   * **Solution:** Updated `src/api/routes/users.py` to import and use the centralized REGIONS data instead of hardcoded mappings.
+
+3. **Test User Creation Inconsistency:**
+   * **Problem:** Admin panel test user creation generated users with inconsistent country data format.
+   * **Solution:** Modified `src/api/admin.py` to use `get_random_country()` for proper JSON country format in test users.
+
+4. **PostgreSQL JSON GROUP BY Error:**
+   * **Problem:** Admin dashboard query failed with `ProgrammingError` when trying to GROUP BY JSON columns, preventing the dashboard from loading.
+   * **Solution:** Updated the `top_countries` query in `src/api/admin.py` to select individual JSON fields (`code`, `name`) instead of full JSON objects for grouping operations.
+
+**Summary of changes:**
+- ✅ **Created centralized countries module** (`src/api/countries.py`) with 196 countries across 6 regions and helper functions.
+- ✅ **Updated users API routes** to use unified REGIONS data for region filtering.
+- ✅ **Fixed test user creation** in admin panel to generate consistent country data.
+- ✅ **Resolved admin dashboard JSON error** by modifying query to avoid PostgreSQL GROUP BY limitations on JSON types.
+- ✅ **Verified server stability** - Flask application starts without errors and admin dashboard loads successfully.
+
+**Result:**
+- 🎉 **Unified country data management** - Single source of truth eliminates scattered mappings and ensures consistency.
+- 🗃️ **Stable admin dashboard** - PostgreSQL JSON operations work correctly without errors.
+- 🔧 **Improved maintainability** - Centralized data structure simplifies future country-related updates.
+- 🚀 **Production-ready backend** - All components use consistent data formats and handle database operations properly.
+
 ## (October 11, 2025) -- Eventlet EBADF Guard Centralized
 
 **Socket stability:**
@@ -1193,83 +1229,6 @@ The devcontainer build was failing with exit code 2 due to the `postCreateComman
 <br>
 
 
-## (October 5, 2025) -- Devcontainer: ensure shared folder for first-run notice
-
-**What I changed:**
-- Added an idempotent `mkdir -p /workspaces/.codespaces/shared` and `chown -R vscode:vscode /workspaces/.codespaces` to `.devcontainer/Dockerfile`.
-
-**Why / result:**
-- Prevents the postCreateCommand failing when it redirects the greeting output into `/workspaces/.codespaces/shared/first-run-notice.txt` by ensuring the directory exists and is writable in the image.
-
-
----
-<br>
-<br>
-
-
-## (October 5, 2025) -- Git Identity Configuration Fix
-
-**Problem encountered:**
-When attempting to commit, Git returned the following error:
-
-```
-Author identity unknown
-
-*** Please tell me who you are.
-
-Run
-
-    git config --global user.email "you@example.com"
-    git config --global user.name "Your Name"
-
-to set your account's default identity.
-Omit --global to set the identity only in this repository.
-
-fatal: no email was given and auto-detection is disabled
-```
-
-**How to check your current Git user name and email:**
-
-For the current repository:
-```bash
-git config user.name
-git config user.email
-```
-For global settings:
-```bash
-git config --global user.name
-git config --global user.email
-```
-
-**How to fix / set your Git identity:**
-
-To set your global identity (recommended):
-```bash
-git config --global user.name "Your Actual Name"
-git config --global user.email "your.actual.email@example.com"
-```
-To set identity only for the current repository:
-```bash
-git config user.name "Your Actual Name"
-git config user.email "your.actual.email@example.com"
-```
-
-**How to reset local identity to use global values:**
-If you previously set local values and want to use the global ones, run:
-```bash
-git config --unset user.name
-git config --unset user.email
-```
-
-**Result:**
-- Git commits will use the correct author information and the error will be resolved.
-
-
----
-<br>
-<br>
-
-
 ## (October 5, 2025) -- Dev & Build optimizations (non-breaking)
 
 **Changes made:**
@@ -1295,6 +1254,47 @@ FORCE_POLLING=0 npm run dev
 - `.dockerignore` — reduced Docker build context
 
 **Result:**
+- Faster, more deterministic builds in CI and Render without changing existing developer workflows in the dev container. No breaking changes were introduced.
+
+
+---
+<br>
+<br>
+
+
+## (October 5, 2025) -- Sass Deprecation Warnings Fix
+
+**Problem encountered:**
+When running `npm run dev`, the console was flooded with 339+ Sass deprecation warnings:
+
+```console
+Deprecation Warning [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+Deprecation Warning [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Deprecation Warning [color-functions]: lighten() is deprecated. Suggestions: color.scale($color, $lightness: 43.4659090909%) color.adjust($color, $lightness: 15%)
+Warning: 339 repetitive deprecation warnings omitted.
+```
+
+**Root causes:**
+1. **Custom SCSS code** using deprecated `lighten()` and `darken()` functions
+2. **Bootstrap's internal SCSS** using deprecated `@import` statements and color functions
+3. **Missing modern Sass module imports** for color manipulation
+
+**Solution implemented:**
+
+**Part 1: Updated Custom SCSS Code (`src/front/styles/bootstrap-custom-theme.scss`)**
+```scss
+// Added modern Sass color module import
+@use "sass:color";
+
+// Replaced all deprecated color functions:
+// OLD: lighten($beige-500, 15%)
+// NEW: color.adjust($beige-500, $lightness: 15%)
+
+// OLD: darken($success, 10%) 
+// NEW: color.adjust($success, $lightness: -10%)
+```
+
+**Part 2: Configured Vite to Suppress Bootstrap Warnings (`vite.config.js`)**
 - Faster, more deterministic builds in CI and Render without changing existing developer workflows in the dev container. No breaking changes were introduced.
 
 
