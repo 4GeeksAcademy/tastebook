@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Twitter, Github, Mail, Palette, Settings, ShieldCheck } from "lucide-react";
-import MiniThemeSelector from "./MiniThemeSelector";
+// import MiniThemeSelector from "./MiniThemeSelector"; // DEPRECATED
 import ThemeToggle from "./ThemeToggle";
 
 export const Footer = () => {

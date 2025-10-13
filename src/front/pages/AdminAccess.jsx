@@ -99,14 +99,26 @@ export const AdminAccess = () => {
                             <hr className="my-3" />
 
                             {adminStatus && adminStatus.admins && (
+                                
+                                
                                 <div className="mt-3">
-                                    <h6>Existing Admin Users:</h6>
+                                    
+                                    <h5>Existing Admin Users:</h5>
                                     <ul>
                                         {adminStatus.admins.map(admin => (
+
                                             <div key={admin.id}>
-                                                <li> <strong>ID:</strong>       {admin.id}       </li>
-                                                <li> <strong>Email:</strong>    {admin.email}    </li>
-                                                <li> <strong>Username:</strong> {admin.username} </li>
+
+
+                                                <div className="my-3">
+                                                    <ul className="list-unstyled">
+                                                        <li> <strong>ID:</strong>       {admin.id}       </li>
+                                                        <li> <strong>Email:</strong>    {admin.email}    </li>
+                                                        <li> <strong>Username:</strong> {admin.username} </li>
+                                                    </ul>
+                                                </div>
+
+
                                             </div>
                                         ))}
                                     </ul>
