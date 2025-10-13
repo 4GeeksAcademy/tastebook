@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, Star, StarOff, GripVertical, Camera, Trash2, Plus } from 'lucide-react';
 
-const MultiImageUpload = ({ 
+const RecipeMultiImageUpload = ({ 
   images = [], 
   onImagesChange, 
   onImageUpload, 
@@ -267,4 +267,4 @@ const MultiImageUpload = ({
   );
 };
 
-export default MultiImageUpload;
+export default RecipeMultiImageUpload;

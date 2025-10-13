@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { 
   ThumbsUp, 
   MessageSquare, 
@@ -10,7 +11,9 @@ import {
   Check,
   X
 } from 'lucide-react';
+
 import CommentForm from './CommentForm';
+
 
 /**
  * Comment Component

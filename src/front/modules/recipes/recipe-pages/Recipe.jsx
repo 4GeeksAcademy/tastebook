@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Clock, Users, ChefHat, Calendar, ArrowLeft, Camera, User, ExternalLink, Share2, Edit, Bookmark } from 'lucide-react';
-import CommentSection from '../components/CommentSection';
-import { LikeButton } from '../components/LikeButton';
-import AddToCollectionModal from '../components/AddToCollectionModal';
+import CommentSection from '../recipe-comments-subcomponents/CommentSection';
+import { LikeButton } from '../recipe-subcomponents/LikeButton';
+import AddToCollectionModal from '../recipe-subcomponents/AddToCollectionModal';
 
 export const Recipe = () => {
   const { id } = useParams();

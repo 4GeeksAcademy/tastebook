@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, Minus, Save, Edit, X, ArrowLeft } from 'lucide-react';
-import MultiImageUpload from '../components/MultiImageUpload.jsx';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Minus, Save, BadgePlus, X } from 'lucide-react';
+import RecipeMultiImageUpload from '../recipe-subcomponents/RecipeMultiImageUpload.jsx';
 
-export const ModifyRecipe = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  
+export const CreateRecipe = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -15,12 +12,13 @@ export const ModifyRecipe = () => {
   });
   
   const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: '', type: '' });
   const [countdown, setCountdown] = useState(null);
   const [countdownInterval, setCountdownInterval] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [createdRecipeId, setCreatedRecipeId] = useState(null);
+
+  const navigate = useNavigate();
 
   // Show alert without auto-dismiss
   const showAlert = (message, type = 'success') => {
@@ -51,124 +49,6 @@ export const ModifyRecipe = () => {
       setCountdownInterval(null);
     }
     setCountdown(null);
-  };
-
-  // Fetch current user and recipe data
-  useEffect(() => {
-    const loadData = async () => {
-      await fetchCurrentUser();
-      await fetchRecipe();
-    };
-    loadData();
-  }, [id]);
-
-  // Authorization check when both user and recipe data are available
-  useEffect(() => {
-    if (currentUser && formData.title && !loading) {
-      // Recipe is loaded, check authorization
-      const checkAuthorization = async () => {
-        try {
-          const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-          const response = await fetch(`${backendUrl}/api/recipe/${id}`);
-          
-          if (response.ok) {
-            const data = await response.json();
-            const recipe = data.recipe;
-            
-            if (recipe.author && currentUser.user_id !== recipe.author.user_id) {
-              showAlert('You are not authorized to modify this recipe', 'danger');
-              setTimeout(() => navigate(`/recipe/${id}`), 2000);
-              return;
-            }
-          }
-        } catch (error) {
-          console.error('Error checking authorization:', error);
-        }
-      };
-      
-      checkAuthorization();
-    }
-  }, [currentUser, formData.title, loading, id, navigate]);
-
-  const fetchCurrentUser = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-      const response = await fetch(`${backendUrl}/api/settings`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCurrentUser(data.current_user);
-      }
-    } catch (error) {
-      console.error('Error fetching current user:', error);
-    }
-  };
-
-  const fetchRecipe = async () => {
-    try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-      const response = await fetch(`${backendUrl}/api/recipe/${id}`);
-      
-      if (!response.ok) {
-        throw new Error('Recipe not found');
-      }
-
-      const data = await response.json();
-      const recipe = data.recipe;
-
-      // Check if user is authorized to modify this recipe
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-
-
-      // Set form data
-      setFormData({
-        title: recipe.title || '',
-        description: recipe.description || '',
-        ingredients: recipe.ingredients && recipe.ingredients.length > 0 
-          ? recipe.ingredients 
-          : [{ ingredient: '', quantity: '', unit: '' }],
-        instructions: recipe.instructions && recipe.instructions.length > 0 
-          ? recipe.instructions 
-          : ['']
-      });
-
-      // Set images
-      if (recipe.images && recipe.images.length > 0) {
-        const existingImages = recipe.images.map(img => ({
-          id: img.id,
-          url: img.url,
-          image_id: img.image_id,
-          is_primary: img.is_primary,
-          display_order: img.display_order,
-          existing: true // Mark as existing to differentiate from new uploads
-        })).sort((a, b) => a.display_order - b.display_order);
-        
-        setImages(existingImages);
-      }
-
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching recipe:', error);
-      showAlert('Failed to load recipe', 'danger');
-      setLoading(false);
-    }
   };
 
   const handleInputChange = (e) => {
@@ -231,22 +111,24 @@ export const ModifyRecipe = () => {
     }
   };
 
-  // Image upload handler - For new images
+  // Image upload handler - Just store files for later upload
   const handleImageUpload = async (file) => {
+    // Add image file with preview for display
     const fileImage = {
       id: `file-${Date.now()}`,
       file,
       preview: URL.createObjectURL(file),
-      is_primary: false,
-      existing: false
+      is_primary: false
     };
     
     setImages(prev => [...prev, fileImage]);
+    // Remove alert - no need to notify user for every image added
   };
 
   // Image delete handler
   const handleImageDelete = async (imageId) => {
     setImages(prev => prev.filter(img => img.id !== imageId));
+    // Remove alert - no need to notify user for every image removed
   };
 
   // Set primary image handler
@@ -255,6 +137,7 @@ export const ModifyRecipe = () => {
       ...img,
       is_primary: img.id === imageId
     })));
+    // Remove alert - no need to notify user for primary image change
   };
 
   // Image reorder handler
@@ -302,9 +185,9 @@ export const ModifyRecipe = () => {
 
       const token = localStorage.getItem('token');
       
-      // Update the recipe
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/recipe/${id}`, {
-        method: 'PUT',
+      // Create the recipe first
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/recipe`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -314,101 +197,124 @@ export const ModifyRecipe = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        showAlert(errorData.msg || 'Failed to update recipe', 'danger');
+        showAlert(errorData.msg || 'Failed to create recipe', 'danger');
         setIsSubmitting(false);
         return;
       }
 
       const data = await response.json();
-      console.log('✅ Recipe updated successfully');
+      const recipeId = data.recipe.recipe_id;
+      setCreatedRecipeId(recipeId);
       
-      // Handle image updates (if needed)
-      const newImages = images.filter(img => !img.existing);
-      if (newImages.length > 0) {
-        showAlert(`Recipe updated! Uploading ${newImages.length} new image${newImages.length > 1 ? 's' : ''}...`, 'info');
+      console.log('✅ Recipe created successfully:', { recipeId, authorId: data.recipe.author_id });
+      
+      // If we have images, upload them - STOP EVERYTHING if any image fails
+      if (images.length > 0) {
+        showAlert(`Recipe created! Uploading ${images.length} image${images.length > 1 ? 's' : ''}...`, 'info');
         
-        // Upload new images
-        for (let i = 0; i < newImages.length; i++) {
-          const img = newImages[i];
+        // Add a small delay to ensure database transaction is fully committed
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Upload images one by one to better handle errors
+        for (let i = 0; i < images.length; i++) {
+          const img = images[i];
           const imageFormData = new FormData();
           imageFormData.append('image', img.file);
           imageFormData.append('is_primary', img.is_primary ? 'true' : 'false');
           
-          const uploadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/recipe/${id}/upload-image`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            },
-            body: imageFormData
-          });
+          console.log(`📤 Uploading image ${i + 1}/${images.length} for recipe ${recipeId}...`);
           
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json().catch(() => ({}));
-            console.error('❌ Image upload failed:', errorData);
-            showAlert(`❌ Failed to upload image ${i + 1}: ${errorData.error || 'Unknown error'}`, 'danger');
-            setIsSubmitting(false);
-            return;
+          // Retry logic for image upload (handles timing issues)
+          let uploadResponse;
+          let uploadSuccess = false;
+          const maxRetries = 3;
+          
+          for (let retry = 0; retry < maxRetries; retry++) {
+            if (retry > 0) {
+              console.log(`🔄 Retrying image upload ${i + 1}, attempt ${retry + 1}/${maxRetries}...`);
+              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 500 * retry));
+            }
+            
+            uploadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/recipe/${recipeId}/upload-image`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              },
+              body: imageFormData
+            });
+            
+            if (uploadResponse.ok) {
+              uploadSuccess = true;
+              break;
+            }
+            
+            // If it's the last retry, we'll handle the error below
+            if (retry === maxRetries - 1) {
+              break;
+            }
           }
+          
+          if (!uploadSuccess) {
+            const errorData = await uploadResponse.json().catch(() => ({}));
+            console.error('❌ Image upload failed after retries:', {
+              status: uploadResponse.status,
+              statusText: uploadResponse.statusText,
+              errorData,
+              recipeId,
+              imageIndex: i + 1
+            });
+            const errorMessage = `Failed to upload image ${i + 1} after ${maxRetries} attempts: ${errorData.error || `HTTP ${uploadResponse.status} - ${uploadResponse.statusText}`}`;
+            showAlert(`❌ ${errorMessage}. Recipe creation stopped.`, 'danger');
+            setIsSubmitting(false);
+            return; // STOP - do not continue if any image fails
+          }
+          
+          console.log(`✅ Image ${i + 1} uploaded successfully`);
         }
         
-        showAlert(`✅ Recipe updated successfully with ${newImages.length} new image${newImages.length > 1 ? 's' : ''}!`, 'success');
+        // All images uploaded successfully
+        showAlert(`✅ Recipe created successfully with ${images.length} image${images.length > 1 ? 's' : ''}!`, 'success');
       } else {
-        showAlert('✅ Recipe updated successfully!', 'success');
+        // No images to upload
+        showAlert('✅ Recipe created successfully!', 'success');
       }
 
-      // Start countdown to navigate back
-      startCountdown(15, () => navigate(`/recipe/${id}`));
+      // Start countdown to navigate
+      startCountdown(20, () => navigate(`/recipe/${recipeId}`));
       
     } catch (error) {
       console.error('Submit error:', error);
-      showAlert(`❌ Error updating recipe: ${error.message}`, 'danger');
+      showAlert(`❌ Error creating recipe: ${error.message}`, 'danger');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-3 text-muted">Loading recipe...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
+
     <div className="container py-4">
       <div className="row justify-content-center">
         <div className="col-lg-8">
           <div className="card shadow">
-            <div className="card-header bg-warning text-dark">
-              <div className="d-flex justify-content-between align-items-center">
-                <h2 className="mb-0">
-                  <Edit className="me-2" size={30} />
-                  Modify Recipe
-                </h2>
-                <button
-                  type="button"
-                  className="btn btn-outline-dark btn-sm"
-                  onClick={() => navigate(`/recipe/${id}`)}
-                >
-                  <ArrowLeft size={16} className="me-1" />
-                  Back to Recipe
-                </button>
-              </div>
+
+
+            <div className="card-header bg-primary">
+              <h2 className="mb-0">
+                <BadgePlus className="me-2" size={30} />
+                Create New Recipe
+              </h2>
             </div>
 
+
             <div className="card-body">
+
               <form onSubmit={handleSubmit}>
                 
                 {/* Recipe Images Section */}
                 <div className="mb-4">
                   <label className="form-label fw-bold">Recipe Images</label>
-                  <MultiImageUpload
+                  <RecipeMultiImageUpload
                     images={images}
                     onImageUpload={handleImageUpload}
                     onImageDelete={handleImageDelete}
@@ -582,13 +488,15 @@ export const ModifyRecipe = () => {
                 {/* Countdown display */}
                 {countdown !== null && (
                   <div className="alert alert-info mb-3 d-flex align-items-center justify-content-between">
-                    <span>Redirecting to your recipe in {countdown} seconds...</span>
+                    <span>Redirecting to your new recipe in {countdown} seconds...</span>
                     <button
                       type="button"
                       className="btn btn-outline-primary btn-sm"
                       onClick={() => {
                         clearCountdown();
-                        navigate(`/recipe/${id}`);
+                        if (createdRecipeId) {
+                          navigate(`/recipe/${createdRecipeId}`);
+                        }
                       }}
                     >
                       Go Now
@@ -602,7 +510,7 @@ export const ModifyRecipe = () => {
                     type="button"
                     onClick={() => {
                       clearCountdown();
-                      navigate(`/recipe/${id}`);
+                      navigate('/');
                     }}
                     className="btn btn-outline-secondary me-md-2"
                     disabled={isSubmitting}
@@ -611,7 +519,7 @@ export const ModifyRecipe = () => {
                   </button>
                   <button
                     type="submit"
-                    className="btn btn-warning"
+                    className="btn btn-primary"
                     disabled={isSubmitting || countdown !== null}
                   >
                     {isSubmitting ? (
@@ -619,12 +527,12 @@ export const ModifyRecipe = () => {
                         <div className="spinner-border spinner-border-sm me-2" role="status">
                           <span className="visually-hidden">Loading...</span>
                         </div>
-                        Updating Recipe...
+                        Creating Recipe...
                       </>
                     ) : (
                       <>
                         <Save size={16} className="me-1" />
-                        Update Recipe
+                        Create Recipe
                       </>
                     )}
                   </button>

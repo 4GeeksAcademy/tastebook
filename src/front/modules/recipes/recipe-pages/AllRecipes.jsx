@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Grid3X3, List, X, RotateCcw, User, Utensils } from 'lucide-react';
-import { LikeIcon } from '../components/LikeButton';
+import { LikeIcon } from '../recipe-subcomponents/LikeButton';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 

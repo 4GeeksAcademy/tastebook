@@ -29,11 +29,11 @@ import { AllUsers }     from "./pages/AllUsers.jsx";
 import { UserProfile }  from "./pages/UserProfile";
 
 // Recipes
-import { AllRecipes }   from "./pages/AllRecipes.jsx";
-import { Recipe }       from "./pages/Recipe";
-import { CreateRecipe } from "./pages/CreateRecipe";
-import { ModifyRecipe } from "./pages/ModifyRecipe";
-import { LikedRecipes } from "./pages/LikedRecipes.jsx";
+import { AllRecipes }   from "./modules/recipes/recipe-pages/AllRecipes.jsx";
+import { Recipe }       from "./modules/recipes/recipe-pages/Recipe.jsx";
+import { CreateRecipe } from "./modules/recipes/recipe-pages/CreateRecipe.jsx";
+import { ModifyRecipe } from "./modules/recipes/recipe-pages/ModifyRecipe.jsx";
+import { LikedRecipes } from "./modules/recipes/recipe-pages/LikedRecipes.jsx";
 
 // Collections
 import { CollectionView }    from "./pages/CollectionView";
