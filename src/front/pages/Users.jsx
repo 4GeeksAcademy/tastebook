@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Users as UsersIcon, CircleUserRound, ChefHat, Calendar, Filter, ArrowUpDown, ArrowUp, ArrowDown, Globe } from "lucide-react";
-import { REGIONS, COUNTRIES, CountryFlag } from "../assets/data/countriesData.jsx";
+import { REGIONS, COUNTRIES, CountryFlag } from "../shared/assets/data/countriesData.jsx";
 
 export const Users = () => {
   const [users, setUsers] = useState([]);

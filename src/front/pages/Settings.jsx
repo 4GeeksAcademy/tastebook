@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { User, KeyRound, Mail, BookOpenText, Image, Edit, X, Camera, Globe } from "lucide-react";
 import ImageUpload from "../components/ImageUpload";
-import { COUNTRIES, CountryFlag } from "../assets/data/countriesData.jsx";
+import { COUNTRIES, CountryFlag } from "../shared/assets/data/countriesData.jsx";
 
 export const Settings = () => {
   const [userData, setUserData] = useState(null);

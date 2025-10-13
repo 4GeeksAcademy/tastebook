@@ -1,5 +1,5 @@
 import React from 'react';
-import { CountryFlag, getCountryNameByCode } from '../assets/data/countriesData.jsx';
+import { CountryFlag, getCountryNameByCode } from '../shared/assets/data/countriesData.jsx';
 
 /**
  * Reusable component to display country name with flag
