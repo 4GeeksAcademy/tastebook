@@ -25,8 +25,8 @@ import { AdminAccess }  from "./modules/admin-backpanel/AdminAccess.jsx";
 import { Settings }     from "./pages/Settings";
 
 // User profile
-import { AllUsers }     from "./pages/AllUsers.jsx";
-import { UserProfile }  from "./pages/UserProfile";
+import { AllUsers }     from "./modules/user-profile/user-profile-pages/AllUsers.jsx";
+import { UserProfile }  from "./modules/user-profile/user-profile-pages/UserProfile.jsx";
 
 // Recipes
 import { AllRecipes }   from "./modules/recipes/recipe-pages/AllRecipes.jsx";
