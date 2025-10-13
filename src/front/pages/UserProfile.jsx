@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { EditDescriptionModal } from "../components/EditDescriptionModal";
 import { COUNTRIES, CountryFlag } from "../shared/utils/country-flag-name-display/countriesData.jsx";
-import CollectionCard from "../components/CollectionCard";
+import CollectionCard from "../modules/collections/collections-subcomponents/CollectionCard.jsx";
 
 export const UserProfile = () => {
   const { username } = useParams();

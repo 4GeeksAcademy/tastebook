@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import CollectionCard from '../components/CollectionCard';
-import CollectionModal from '../components/CollectionModal';
+import CollectionCard from '../collections-subcomponents/CollectionCard';
+import CollectionModal from '../collections-subcomponents/CollectionModal';
 import { PlusCircle, Search } from 'lucide-react';
 
 export const MyCollections = () => {

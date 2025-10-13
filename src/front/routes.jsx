@@ -36,9 +36,9 @@ import { ModifyRecipe } from "./modules/recipes/recipe-pages/ModifyRecipe.jsx";
 import { LikedRecipes } from "./modules/recipes/recipe-pages/LikedRecipes.jsx";
 
 // Collections
-import { CollectionView }    from "./pages/CollectionView";
-import { MyCollections }     from "./pages/MyCollections";
-import { PublicCollections } from "./pages/PublicCollections";
+import { CollectionView }    from "./modules/collections/collections-pages/CollectionView.jsx";
+import { MyCollections }     from "./modules/collections/collections-pages/MyCollections.jsx";
+import { PublicCollections } from "./modules/collections/collections-pages/PublicCollections.jsx";
 
 // Messages
 import { Messages }     from "./modules/messages/pages/Messages.jsx";

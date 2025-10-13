@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Filter, Grid, List as ListIcon, ChevronDown, User, BookOpen } from 'lucide-react';
-import CollectionCard from '../components/CollectionCard';
+import CollectionCard from '../collections-subcomponents/CollectionCard';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 
