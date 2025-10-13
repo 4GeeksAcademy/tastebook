@@ -6,22 +6,26 @@ import { LikeIcon } from '../components/LikeButton';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 export const AllRecipes = () => {
-    const [recipes, setRecipes] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+
+    
+    const [recipes,    setRecipes]    = useState([]);
+    const [loading,    setLoading]    = useState(true);
+    const [error,      setError]      = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filters, setFilters] = useState({
+    const [filters,    setFilters]    = useState({
         category: '',
         dietary: '',
         maxCookingTime: '',
         minLikes: ''
     });
+
     const [pagination, setPagination] = useState({
         total: 0,
         limit: 12,
         offset: 0,
         hasMore: false
     });
+
     const [view, setView] = useState('grid'); // 'grid' or 'list'
 
     // Fetch recipes from API
@@ -111,6 +115,8 @@ export const AllRecipes = () => {
 
     // Recipe Card Component
     const RecipeCard = ({ recipe }) => (
+
+        // Card Container
         <div className={`card h-100 shadow-sm border-0 ${view === 'list' ? 'd-flex flex-row' : ''}`}
              style={{ 
                  transition: 'all 0.3s ease',
@@ -221,25 +227,13 @@ export const AllRecipes = () => {
         </div>
     );
 
-    if (loading && recipes.length === 0) {
-        return (
-            <div className="min-vh-100 py-5">
-                <div className="container">
-                    <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '60vh' }}>
-                        <div className="spinner-border text-primary mb-4" style={{ width: '3rem', height: '3rem' }} role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </div>
-                        <h4 className="text-primary mb-2">Loading delicious recipes...</h4>
-                        <p className="text-muted">Please wait while we fetch the latest recipes for you</p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     return (
+
         <div className="min-vh-100 py-4">
+
             <div className="container">
+
+
                 {/* Header Section */}
                 <div className="text-center mb-5">
                     <div className="mx-auto" style={{ maxWidth: '800px' }}>
@@ -285,51 +279,59 @@ export const AllRecipes = () => {
 
                     {/* Filter Controls */}
                     <div className="border-top pt-4">
+
                         <h6 className="text-secondary mb-3 fw-semibold">
                             <i className="fas fa-filter me-2"></i>
                             Filter Options
                         </h6>
+
                         <div className="row g-3">
+
                             <div className="col-lg-3 col-md-6">
+
                                 <label htmlFor="category-filter" className="form-label text-secondary small fw-semibold">
                                     Category
                                 </label>
+
                                 <select
                                     id="category-filter"
                                     value={filters.category}
                                     onChange={(e) => handleFilterChange('category', e.target.value)}
                                     className="form-select"
                                 >
-                                    <option value="">All Categories</option>
-                                    <option value="appetizer">Appetizers</option>
-                                    <option value="main-course">Main Courses</option>
-                                    <option value="dessert">Desserts</option>
-                                    <option value="beverage">Beverages</option>
-                                    <option value="breakfast">Breakfast</option>
-                                    <option value="lunch">Lunch</option>
-                                    <option value="dinner">Dinner</option>
-                                    <option value="snack">Snacks</option>
+                                    <option value=""            >All Categories</option>
+                                    <option value="appetizer"   >Appetizers</option>
+                                    <option value="main-course" >Main Courses</option>
+                                    <option value="dessert"     >Desserts</option>
+                                    <option value="beverage"    >Beverages</option>
+                                    <option value="breakfast"   >Breakfast</option>
+                                    <option value="lunch"       >Lunch</option>
+                                    <option value="dinner"      >Dinner</option>
+                                    <option value="snack"       >Snacks</option>
                                 </select>
                             </div>
 
+
                             <div className="col-lg-3 col-md-6">
+
                                 <label htmlFor="dietary-filter" className="form-label text-secondary small fw-semibold">
                                     Dietary Preferences
                                 </label>
+
                                 <select
                                     id="dietary-filter"
                                     value={filters.dietary}
                                     onChange={(e) => handleFilterChange('dietary', e.target.value)}
                                     className="form-select"
                                 >
-                                    <option value="">All Diets</option>
-                                    <option value="vegetarian">Vegetarian</option>
-                                    <option value="vegan">Vegan</option>
-                                    <option value="gluten-free">Gluten-Free</option>
-                                    <option value="dairy-free">Dairy-Free</option>
-                                    <option value="keto">Keto</option>
-                                    <option value="paleo">Paleo</option>
-                                    <option value="low-carb">Low-Carb</option>
+                                    <option value=""            >All Diets</option>
+                                    <option value="vegetarian"  >Vegetarian</option>
+                                    <option value="vegan"       >Vegan</option>
+                                    <option value="gluten-free" >Gluten-Free</option>
+                                    <option value="dairy-free"  >Dairy-Free</option>
+                                    <option value="keto"        >Keto</option>
+                                    <option value="paleo"       >Paleo</option>
+                                    <option value="low-carb"    >Low-Carb</option>
                                 </select>
                             </div>
 
@@ -343,12 +345,12 @@ export const AllRecipes = () => {
                                     onChange={(e) => handleFilterChange('maxCookingTime', e.target.value)}
                                     className="form-select"
                                 >
-                                    <option value="">Any Time</option>
-                                    <option value="15">15 min</option>
-                                    <option value="30">30 min</option>
-                                    <option value="60">1 hour</option>
-                                    <option value="120">2 hours</option>
-                                    <option value="180">3+ hours</option>
+                                    <option value=""    >Any Time</option>
+                                    <option value="15"  >15 min</option>
+                                    <option value="30"  >30 min</option>
+                                    <option value="60"  >1 hour</option>
+                                    <option value="120" >2 hours</option>
+                                    <option value="180" >3+ hours</option>
                                 </select>
                             </div>
 
@@ -407,31 +409,40 @@ export const AllRecipes = () => {
                     </div>
                 </div>
 
-                {/* Error Message */}
-                {error && (
-                    <div className="my-4">
-                        <div className="alert alert-danger d-flex align-items-center justify-content-between shadow-sm border-0" role="alert">
-                            <div className="d-flex align-items-center">
-                                <i className="fas fa-exclamation-triangle me-3 fs-5"></i>
-                                <div>
-                                    <strong>Error loading recipes</strong>
-                                    <div className="small text-danger-emphasis">{error}</div>
+                {/* Recipes Section */}
+                <div className="mb-5">
+                    {/* Error Message */}
+                    {error && (
+                        <div className="my-4">
+                            <div className="alert alert-danger d-flex align-items-center justify-content-between shadow-sm border-0" role="alert">
+                                <div className="d-flex align-items-center">
+                                    <i className="fas fa-exclamation-triangle me-3 fs-5"></i>
+                                    <div>
+                                        <strong>Error loading recipes</strong>
+                                        <div className="small text-danger-emphasis">{error}</div>
+                                    </div>
                                 </div>
+                                <button 
+                                    onClick={() => fetchRecipes({ offset: 0 })}
+                                    className="btn btn-outline-danger btn-sm"
+                                >
+                                    <i className="fas fa-redo me-1"></i>
+                                    Try Again
+                                </button>
                             </div>
-                            <button 
-                                onClick={() => fetchRecipes({ offset: 0 })}
-                                className="btn btn-outline-danger btn-sm"
-                            >
-                                <i className="fas fa-redo me-1"></i>
-                                Try Again
-                            </button>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Recipes Grid/List */}
-                {recipes.length > 0 ? (
-                    <div className="mb-5">
+                    {/* Recipes Grid/List or Loading */}
+                    {loading && recipes.length === 0 ? (
+                        <div className="text-center py-5">
+                            <div className="spinner-border text-primary mb-4" style={{ width: '3rem', height: '3rem' }} role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                            <h4 className="text-primary mb-2">Loading delicious recipes...</h4>
+                            <p className="text-muted">Please wait while we fetch the latest recipes for you</p>
+                        </div>
+                    ) : recipes.length > 0 ? (
                         <div className={view === 'grid' ? 'row g-4' : 'd-flex flex-column gap-3'}>
                             {recipes.map((recipe) => (
                                 <div key={recipe.recipe_id} className={view === 'grid' ? 'col-xl-4 col-lg-6 col-md-6' : ''}>
@@ -439,9 +450,7 @@ export const AllRecipes = () => {
                                 </div>
                             ))}
                         </div>
-                    </div>
-                ) : !loading && (
-                    <div className="my-5">
+                    ) : (
                         <div className="text-center py-5">
                             <div className="mb-4">
                                 <Search size={64} className="opacity-50" />
@@ -461,8 +470,8 @@ export const AllRecipes = () => {
                                 </button>
                             )}
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
 
                 {/* Load More Button */}
                 {pagination.hasMore && (
