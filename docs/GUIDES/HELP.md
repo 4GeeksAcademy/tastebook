@@ -145,7 +145,7 @@ Consider this for future projects with Flask backend:
 ## Quickguide: Using Regex to Find Imports in Your Codebase
 
 ### Why Use Regex for Imports?
-Regex (regular expressions) let you search for patterns icode, not just exact text. This is very useful for finding alimport statements, especially if you want to update or audidependencies.
+Regex (regular expressions) let you search for patterns in code, not just exact text. This is very useful for finding all import statements, especially if you want to update or audit dependencies.
 
 ---
 
