@@ -1,6 +1,6 @@
 {
     // "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    // "editor.defaultFormatter": "esbenp.prettier-vscode",
 
 
     // --- STOPPED the built-in markdown preview editor for .md files ---
@@ -9,9 +9,9 @@
     // },
 
 
-    "[javascriptreact]": {
-        "editor.defaultFormatter": "vscode.typescript-language-features"
-    },
+    // "[javascriptreact]": {
+    //     "editor.defaultFormatter": "vscode.typescript-language-features"
+    // },
 
     // Python Environments config
     // Set to pipenv so VS Code uses the project's Pipfile/Pipfile.lock
