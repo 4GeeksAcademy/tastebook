@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 // import ThemeSelector from "../components/ThemeSelector"; // DERPRECATED
 import ThemeToggle from "../components/ThemeToggle";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../shared/hooks/useTheme";
 import { 
     ChefHat, User, Mail, Settings, Search, Plus, Heart, 
     Star, Clock, Camera, Edit, Trash2, Eye, Download,

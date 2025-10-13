@@ -18,7 +18,7 @@ import '../shared/styles/scss-bootstrap-custom-theme.scss'; // COMPLETE Custom B
 
 import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
 import { router } from "./routes";  // Import the router configuration
-import { StoreProvider } from './hooks/useGlobalReducer';  // Import the StoreProvider for global state management
+import { StoreProvider } from './shared/hooks/useGlobalReducer';  // Import the StoreProvider for global state management
 import { BackendURL } from './components/BackendURL';
 
 const Main = () => {
