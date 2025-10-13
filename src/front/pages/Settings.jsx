@@ -67,7 +67,7 @@ export const Settings = () => {
           email: user.email || "",
           full_name: user.full_name || "",
           username: user.username || "",
-          country: user.country || ""
+          country: user.country || null
         });
       } catch (err) {
         setError("Failed to load user info.");
@@ -79,7 +79,17 @@ export const Settings = () => {
   }, [token]);
 
   const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'country') {
+      if (value === '') {
+        setForm({ ...form, country: null });
+      } else {
+        const selectedCountry = COUNTRIES.find(c => c.code === value);
+        setForm({ ...form, country: selectedCountry ? { code: selectedCountry.code, name: selectedCountry.name } : null });
+      }
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handlePasswordChange = e => {
@@ -279,7 +289,7 @@ export const Settings = () => {
         email: userData.email || "",
         full_name: userData.full_name || "",
         username: userData.username || "",
-        country: userData.country || ""
+        country: userData.country || null
       });
     }
   };
@@ -359,8 +369,8 @@ export const Settings = () => {
                           <p className="text-muted">
                             {userData?.country ? (
                               <span className="d-flex align-items-center">
-                                {COUNTRIES.find(c => c.code === userData.country)?.name || userData.country}
-                                <CountryFlag countryCode={userData.country} size={18} className="ms-2" />
+                                {userData.country.name || userData.country}
+                                <CountryFlag countryCode={userData.country.code} size={18} className="ms-2" />
                               </span>
                             ) : 'Not specified'}
                           </p>
@@ -397,7 +407,7 @@ export const Settings = () => {
 
                       <div className="col-md-6">
                         <label className="form-label fw-semibold"><Globe size={16} className="me-1" /> Country</label>
-                        <select name="country" className="form-select" value={form.country || ""} onChange={handleChange}>
+                        <select name="country" className="form-select" value={form.country?.code || ""} onChange={handleChange}>
                           <option value="">Select a country</option>
                           {COUNTRIES.map(country => (
                             <option key={country.code} value={country.code}>
@@ -408,8 +418,8 @@ export const Settings = () => {
                         {form.country && (
                           <div className="mt-2 d-flex align-items-center">
                             <small className="text-muted me-2">Selected:</small>
-                            <CountryFlag countryCode={form.country} size={16} className="me-2" />
-                            <small className="text-muted">{COUNTRIES.find(c => c.code === form.country)?.name}</small>
+                            <CountryFlag countryCode={form.country.code} size={16} className="me-2" />
+                            <small className="text-muted">{form.country.name}</small>
                           </div>
                         )}
                       </div>

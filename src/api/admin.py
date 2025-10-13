@@ -5,7 +5,8 @@ from datetime import datetime
 from typing import Dict, List
 from uuid import uuid4
 
-from faker import Faker
+from faker import Faker # Module to generate fake data for testing
+
 from flask import current_app, flash, redirect, request, url_for
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
@@ -203,24 +204,23 @@ class AdminDataSeeder:
         password = os.getenv('ADMIN_TEST_USER_PASSWORD', 'Tastebook123!')
 
         for _ in range(count):
-            suffix = uuid4().hex[:6]
+            suffix   = uuid4().hex[:6]
             username = f"{cls.USER_PREFIX}_{suffix}"
-            email = f"{cls.USER_PREFIX}.{suffix}@example.com"
+            email    = f"{cls.USER_PREFIX}.{suffix}@example.com"
 
             if User.query.filter((User.username == username) | (User.email == email)).first():
                 continue
 
             user = User(
-                email=email,
-                username=username,
-                full_name=faker.name(),
-                description=faker.sentence(nb_words=12),
-                country=faker.country()
-                if random.random() > 0.2 else None,
-                is_active=True,
-                is_admin=False,
-                plain_psswrd=password if current_app.config.get('ENV') != 'production' else None,
-                hashed_psswrd=generate_password_hash(password)
+                email         = email,
+                username      = username,
+                full_name     = faker.name(),
+                description   = faker.sentence(nb_words=12),
+                country       = faker.country() if random.random() > 0.2 else None,
+                is_active     = True,
+                is_admin      = False,
+                plain_psswrd  = password if current_app.config.get('ENV') != 'production' else None,
+                hashed_psswrd = generate_password_hash(password)
             )
 
             db.session.add(user)
@@ -367,11 +367,12 @@ def setup_admin(app):
 
     class UserAdmin(SecureModelView):
         column_list = ['id', 'email', 'username', 'full_name', 'country', 'is_active', 'is_admin', 'created_at']
-        column_searchable_list = ['email', 'username', 'full_name', 'country']
-        column_filters = ['is_active', 'is_admin', 'country', 'created_at']
+        column_searchable_list = ['email', 'username', 'full_name']
+        column_filters = ['is_active', 'is_admin', 'created_at']
         column_default_sort = ('created_at', True)
         column_formatters = {
-            'created_at': lambda _v, _c, m, _p: m.created_at.strftime('%Y-%m-%d %H:%M') if m.created_at else '—'
+            'created_at': lambda _v, _c, m, _p: m.created_at.strftime('%Y-%m-%d %H:%M') if m.created_at else '—',
+            'country': lambda _v, _c, m, _p: f"{m.country.get('name', '—')} ({m.country.get('code', '—')})" if m.country else '—'
         }
         form_columns = ['email', 'username', 'full_name', 'description', 'country', 'is_active', 'is_admin', 'plain_psswrd', 'cloudinary_url', 'cloudinary_img_id']
         form_widget_args = {

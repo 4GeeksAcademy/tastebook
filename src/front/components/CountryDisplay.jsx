@@ -3,19 +3,20 @@ import { CountryFlag, getCountryNameByCode } from '../assets/data/countriesData.
 
 /**
  * Reusable component to display country name with flag
- * @param {string} countryCode - ISO country code (e.g., 'US', 'CA', 'MX')
- * @param {number} flagSize - Size of the flag icon in pixels (default: 16)
- * @param {string} className - Additional CSS classes
- * @param {boolean} showName - Whether to show the country name (default: true)
- * @param {boolean} flagFirst - Whether to show flag before name (default: false)
+ * @param {string}  countryCode - ISO country code (e.g., 'US', 'CA', 'MX')
+ * @param {number}  flagSize    - Size of the flag icon in pixels (default: 16)
+ * @param {string}  className   - Additional CSS classes
+ * @param {boolean} showName    - Whether to show the country name (default: true)
+ * @param {boolean} flagFirst   - Whether to show flag before name (default: false)
  */
 const CountryDisplay = ({ 
   countryCode, 
-  flagSize = 16, 
+  flagSize  = 16, 
   className = "", 
-  showName = true, 
+  showName  = true, 
   flagFirst = false 
 }) => {
+
   if (!countryCode) return null;
 
   const countryName = getCountryNameByCode(countryCode);

@@ -44,8 +44,10 @@ class User(db.Model):
     username:        Mapped[str]      = mapped_column( String(40),   unique=True,         nullable=False)
     full_name:       Mapped[str]      = mapped_column( String(80),                        nullable=False)
     description:     Mapped[str]      = mapped_column( Text,                              nullable=True)
-    country:         Mapped[str]      = mapped_column( String(100),                       nullable=True)
     is_active:       Mapped[bool]     = mapped_column( Boolean,      default=True,        nullable=False)
+    
+    # Country in ISO format with full name (e.g., {'code': 'US', 'name': 'United States'})
+    country:         Mapped[Optional[Dict[str, str]]] = mapped_column( JSON,              nullable=True)
     
     is_admin:        Mapped[bool]     = mapped_column( Boolean,      default=False,       nullable=False)
 
