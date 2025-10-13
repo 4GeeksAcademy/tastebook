@@ -1,6 +1,5 @@
 // Import necessary components and functions from react-router-dom.
 
-
 import {
     createBrowserRouter,
     createRoutesFromElements,
@@ -8,39 +7,49 @@ import {
 } from "react-router-dom";
 
 
-import { Layout } from "./pages/Layout";
-import { Home }   from "./pages/Home";
+// Layout
+import { Layout } from "./modules/layout/Layout.jsx";
+import { Home }   from "./modules/layout/Home.jsx";
 
-import { Login }  from "./pages/Login";
-import { Signup } from "./pages/Signup";
+// Authentucation
+import { Login }  from "./modules/auth/Login.jsx";
+import { Signup } from "./modules/auth/Signup.jsx";
 
-import { ResetPassword }    from "./pages/ResetPassword";
-import { PasswordRecovery } from "./pages/PasswordRecovery";
+import { ResetPassword }    from "./modules/auth/ResetPassword.jsx";
+import { PasswordRecovery } from "./modules/auth/PasswordRecovery.jsx";
 
-import { Settings } from "./pages/Settings";
-import { AdminAccess } from "./pages/AdminAccess";
+// Admin Access
+import { AdminAccess }  from "./modules/admin-backpanel/AdminAccess.jsx";
 
-import { UserProfile } from "./pages/UserProfile";
-import { Users }       from "./pages/Users";
+// Settings
+import { Settings }     from "./modules/user-settings/Settings.jsx";
 
-import { AllRecipes }   from "./pages/AllRecipes.jsx";
-import { Recipe }       from "./pages/Recipe";
-import { CreateRecipe } from "./pages/CreateRecipe";
-import { ModifyRecipe } from "./pages/ModifyRecipe";
+// User profile
+import { AllUsers }     from "./modules/user-profile/user-profile-pages/AllUsers.jsx";
+import { UserProfile }  from "./modules/user-profile/user-profile-pages/UserProfile.jsx";
 
-import { CollectionView }    from "./pages/CollectionView";
-import { PublicCollections } from "./pages/PublicCollections";
+// Recipes
+import { AllRecipes }   from "./modules/recipes/recipe-pages/AllRecipes.jsx";
+import { Recipe }       from "./modules/recipes/recipe-pages/Recipe.jsx";
+import { CreateRecipe } from "./modules/recipes/recipe-pages/CreateRecipe.jsx";
+import { ModifyRecipe } from "./modules/recipes/recipe-pages/ModifyRecipe.jsx";
+import { LikedRecipes } from "./modules/recipes/recipe-pages/LikedRecipes.jsx";
 
-import { LikedRecipes }  from "./pages/LikedRecipes.jsx";
-import { MyCollections } from "./pages/MyCollections";
+// Collections
+import { CollectionView }    from "./modules/collections/collections-pages/CollectionView.jsx";
+import { MyCollections }     from "./modules/collections/collections-pages/MyCollections.jsx";
+import { PublicCollections } from "./modules/collections/collections-pages/PublicCollections.jsx";
 
-import { Messages }      from "./messages/pages/Messages";
+// Messages
+import { Messages }     from "./modules/messages/pages/Messages.jsx";
 
-import { Theme } from "./pages/Theme";
+// Theme settings
+import { ThemeTesting } from "./modules/theme-settings/ThemeTesting.jsx";
 
+// Miscellaneous
+import { Single } from "./modules/miscellaneous/4geeks-defatult-files/Single.jsx";
+import { Demo }   from "./modules/miscellaneous/4geeks-defatult-files/Demo.jsx";
 
-import { Single } from "./pages/Single";
-import { Demo }   from "./pages/Demo";
 
 
 export const router = createBrowserRouter(
@@ -55,7 +64,7 @@ export const router = createBrowserRouter(
       <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
 
-        {/* Nested Routes: Defines sub-routes within the Layout component. */}
+        {/* NESTED ROUTES: Defines sub-routes within the Layout component. */}
 
 
         {/* Home */}
@@ -76,7 +85,7 @@ export const router = createBrowserRouter(
         <Route path= "/admin-access" element={<AdminAccess />} />
 
         {/* Users and User Public Profile */}
-        <Route path= "/users"           element={<Users />} />
+        <Route path= "/users"           element={<AllUsers />} />
         <Route path= "/user/:username"  element={<UserProfile />} />
 
         {/* User Specific Pages  */}
@@ -98,7 +107,7 @@ export const router = createBrowserRouter(
         <Route path= "/messages/:chatId"  element={<Messages />} />
 
         {/* Theme */}
-        <Route path= "/theme" element={<Theme />} />
+        <Route path= "/theme" element={<ThemeTesting />} />
 
 
         {/* Miscellaneous, Testing and Extras*/}

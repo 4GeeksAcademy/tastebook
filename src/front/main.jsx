@@ -5,21 +5,21 @@ import ReactDOM from 'react-dom/client'
 // CUSTOM CSS AND SCSS
 
 // SCSS imports
-import './styles/scss-bootstrap-custom-theme.scss'; // COMPLETE Custom Bootstrap theme with SCSS variables
-// import './styles/simple-custom.scss';            // SIMPLE   Custom Bootstrap theme with SCSS variables
+import './shared/styles/scss-bootstrap-custom-theme.scss'; // COMPLETE Custom Bootstrap theme with SCSS variables
+// import '../shared/styles/simple-custom.scss';            // SIMPLE   Custom Bootstrap theme with SCSS variables
 
 // CSS custom theme 
-// import './styles/custom-theme.css'
+// import '../shared/styles/custom-theme.css'
 // ----------------------------------------------------------------------
 
 
 // JS Bootstrap module (or it can be in `index.html`)
 // import 'bootstrap/dist/js/bootstrap.bundle.min.js';  // Bootstrap JS components
 
-import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
-import { router } from "./routes";  // Import the router configuration
-import { StoreProvider } from './hooks/useGlobalReducer';  // Import the StoreProvider for global state management
-import { BackendURL } from './components/BackendURL';
+import { RouterProvider }           from "react-router-dom";  // Import RouterProvider to use the router
+import { router }                   from "./routes";  // Import the router configuration
+import { StoreProvider }            from './shared/hooks/useGlobalReducer';  // Import the StoreProvider for global state management
+import { MisssingBackendUrlNotice } from './modules/miscellaneous/4geeks-defatult-files/MisssingBackendUrlNotice';
 
 const Main = () => {
     
@@ -28,7 +28,7 @@ const Main = () => {
     
     if(! import.meta.env.VITE_BACKEND_URL ||  import.meta.env.VITE_BACKEND_URL == "") return (
         <React.StrictMode>
-              <BackendURL/ >
+              <MisssingBackendUrlNotice/ >
         </React.StrictMode>
         );
     return (

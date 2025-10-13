@@ -139,3 +139,99 @@ Consider this for future projects with Flask backend:
     *   **Root Cause:** The `flask-admin` library is no longer actively maintained (last release in 2021), so it is not expected to be updated to remove this legacy dependency.
     *   **Solution (Workaround):** Pinned `setuptools = "<81"` in the `Pipfile`. This is the community-accepted workaround, which instructs the build process to use a version of `setuptools` that still includes `pkg_resources`. This is a safe, non-invasive fix that silences the warning and prevents future breakage without modifying the application's logic or the `flask-admin` library itself.
     *   **Long-Term Strategy:** For future projects, migrating to an actively maintained alternative like `Flask-AppBuilder` is recommended. For this project, the current workaround is the most stable and appropriate solution.
+
+---
+
+## Quickguide: Using Regex to Find Imports in Your Codebase
+
+### Why Use Regex for Imports?
+Regex (regular expressions) let you search for patterns in code, not just exact text. This is very useful for finding all import statements, especially if you want to update or audit dependencies.
+
+---
+
+### 1. Basic Regex for Import Statements
+
+To find all ES6 import statements (single-line):
+
+```
+^import\s.+from\s+['"][^'"]+['"];
+```
+
+- `^import` — matches lines starting with `import`
+- `\s` — matches whitespace
+- `.+` — matches one or more characters (the imported items)
+- `from\s+` — matches the word `from` and whitespace
+- `['"][^'"]+['"]` — matches the module path in quotes
+- `;` — matches the semicolon at the end
+
+#### To match imports like `import "module";` (side-effect imports):
+
+```
+^import\s+['"][^'"]+['"];
+```
+
+#### To match both types at once:
+
+```
+^import\s.*from\s+['"][^'"]+['"]|^import\s+['"][^'"]+['"];
+```
+
+---
+
+### 2. Find Imports of a Specific File
+
+Replace `FILENAME` with your file name (e.g., `countriesData.jsx`):
+
+```
+import\s.*['"][^'"]*FILENAME['"]
+
+or
+
+import\s.*['"][^'"]*FILENAME.FILETYPE['"]
+
+or
+
+Even better:
+import\s.*['"][^'"]*FILENAME.*['"]
+```
+
+---
+
+### 3. Using Regex in VS Code
+
+1. Press `Ctrl+Shift+F` to open global search.
+2. Click the `.*` icon to enable regex mode.
+3. Paste your regex pattern.
+4. Replace `FILENAME` as needed.
+
+---
+
+### 4. Using Regex in the Terminal (grep)
+
+```sh
+grep -rE "import\\s.*['\"][^'\"]*FILENAME['\"]" .
+```
+
+---
+
+### 5. What Does the `\` (Backslash) Mean in Regex?
+
+- The backslash `\` is the **escape character** in regex.
+- It gives special meaning to certain characters (e.g., `\d` for digit, `\w` for word character).
+- It also lets you match special characters literally (e.g., `` matches a period, not any character).
+- In many tools (like VS Code or grep), you need to double the backslash (`\\`) to escape it for the search engine.
+
+**Examples:**
+- `\.` matches a literal dot (`.`)
+- `\\` matches a literal backslash (`\`)
+- `\d` matches any digit
+
+---
+
+**Tip:**
+You can use these patterns to find, audit, or refactor imports across your project quickly!
+
+
+
+
+import\s.*['"][^'"]*FILENAME.*['"]
