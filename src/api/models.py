@@ -16,8 +16,8 @@ from typing import List, Optional, Dict, Any
 #########################################################################################
 #############                       DATABASE TABLES                         #############
 #############                          TasteBook                            #############
-#############                           Database                            #############
-#############                       with SQL Alchemy                        #############
+#############                       ORM Models with                         #############
+#############                         SQL Alchemy                           #############
 #########################################################################################
 #########################################################################################
 
@@ -466,8 +466,7 @@ class Recipe(db.Model):
     # Serialization #
     #---------------#
     def serialize(self, current_user_id: Optional[int] = None) -> Dict[str, Any]:
-        """
-        Serialize recipe data
+        """Serialize recipe data
         
         Args:
             current_user_id: ID of the current user to check if they liked the recipe
@@ -509,10 +508,10 @@ class RecipeImage(db.Model):
     recipe_id: Mapped[int] = mapped_column( Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
 
     # Cloudinary fields
-    url:          Mapped[str]      = mapped_column( String(255),                      nullable=False)
-    image_id:     Mapped[str]      = mapped_column( String(100),                      nullable=False)
-    is_primary:   Mapped[bool]     = mapped_column( Boolean,     default=False,       nullable=False)
-    display_order: Mapped[int]     = mapped_column( Integer,     default=0,           nullable=False)
+    url:           Mapped[str]      = mapped_column( String(255),                      nullable=False)
+    image_id:      Mapped[str]      = mapped_column( String(100),                      nullable=False)
+    is_primary:    Mapped[bool]     = mapped_column( Boolean,     default=False,       nullable=False)
+    display_order: Mapped[int]      = mapped_column( Integer,     default=0,           nullable=False)
 
     uploaded_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True),          nullable=False,   default=func.now(), server_default=func.now())
 
@@ -629,11 +628,11 @@ class Comment(db.Model):
     #------------#
 
     # Primary Key
-    id:              Mapped[int]      = mapped_column( Integer,        primary_key=True, autoincrement=True)
+    id:                Mapped[int]           = mapped_column( Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
-    user_id:         Mapped[int]      = mapped_column( Integer,        ForeignKey("users.id",    ondelete="CASCADE"),  nullable=False)
-    recipe_id:       Mapped[int]      = mapped_column( Integer,        ForeignKey("recipes.id",  ondelete="CASCADE"),  nullable=False)
+    user_id:           Mapped[int]           = mapped_column( Integer, ForeignKey("users.id",    ondelete="CASCADE"),  nullable=False)
+    recipe_id:         Mapped[int]           = mapped_column( Integer, ForeignKey("recipes.id",  ondelete="CASCADE"),  nullable=False)
     parent_comment_id: Mapped[Optional[int]] = mapped_column( Integer, ForeignKey("comments.id", ondelete="CASCADE"),  nullable=True)
 
     # Content and State Fields
@@ -653,11 +652,9 @@ class Comment(db.Model):
         ### Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
         CheckConstraint("char_length(content) > 0", name='check_comment_content_not_empty'),
 
-
         # Only one pinned comment per recipe (now enforced at DB layer with partial unique index)
         ### Note: This index is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
         Index('unique_pinned_comment_per_recipe', 'recipe_id', unique=True, postgresql_where=text('is_pinned = true')),
-
 
         # Prevent self-referencing at deeper than one level (now enforced at DB layer)
         ### Note: This constraint is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
@@ -941,14 +938,14 @@ class CommentLike(db.Model):
 
 
 ############################################
-##########      COLLECTIONS      ###########
+##########     COLLECTIONS       ###########
 ##########   Association table   ###########
-##########      and TABLE        ###########
+##########      and Table        ###########
 ############################################
 
 
     #-------------------#
-    # Association Table #
+    # ASSOCIATION TABLE #
     #-------------------#
 
 class CollectionRecipe(db.Model):
@@ -958,7 +955,6 @@ class CollectionRecipe(db.Model):
     We keep an explicit association object to allow ordering and additional metadata
     (for example: position in collection, notes, or when it was added).
     """
-
     __tablename__ = "collection_recipe"
 
     # Primary Key
@@ -1066,8 +1062,8 @@ class Collection(db.Model):
             "is_public":     self.is_public,
             "created_at":    self.created_at.isoformat() if self.created_at else None,
             "owner": {
-                "user_id":  self.owner.id,
-                "username":  self.owner.username,
+                "user_id":        self.owner.id,
+                "username":       self.owner.username,
                 "cloudinary_url": self.owner.cloudinary_url
             } if self.owner else None,
             "recipe_count": len(self.collection_recipes)
@@ -1078,9 +1074,9 @@ class Collection(db.Model):
             data["recipes"] = [
                 {
                     "collection_recipe_id": cr.id,
-                    "display_order": cr.display_order,
-                    "added_at": cr.added_at.isoformat() if cr.added_at else None,
-                    "recipe": cr.recipe.serialize(current_user_id=current_user_id) if cr.recipe else None
+                    "display_order":        cr.display_order,
+                    "added_at":             cr.added_at.isoformat() if cr.added_at else None,
+                    "recipe":               cr.recipe.serialize(current_user_id=current_user_id) if cr.recipe else None
                 }
                 for cr in sorted(self.collection_recipes, key=lambda c: c.display_order)
             ]
@@ -1219,9 +1215,10 @@ class Chat(db.Model):
 
         return data
 
-    #------------------------#
+    
+    #-------------------------#
     # Optimized Class Methods #
-    #------------------------#
+    #-------------------------#
     
     @classmethod
     def get_optimized_chat_list(cls, user_id: int):
@@ -1678,7 +1675,7 @@ class Message(db.Model):
     is_edited:    Mapped[bool]     = mapped_column( Boolean,      default=False,        nullable=False)
 
     # Timestamps
-    created_at:   Mapped[datetime] = mapped_column( DateTime(timezone=True),            nullable=False,   default=func.now(), server_default=func.now())
+    created_at:   Mapped[datetime]           = mapped_column( DateTime(timezone=True),  nullable=False,   default=func.now(), server_default=func.now())
     read_at:      Mapped[Optional[datetime]] = mapped_column( DateTime(timezone=True),  nullable=True)
     edited_at:    Mapped[Optional[datetime]] = mapped_column( DateTime(timezone=True),  nullable=True)
            
@@ -1710,9 +1707,9 @@ class Message(db.Model):
     )
 
 
-    #-----------------#
-    # Helper Methods  #
-    #-----------------#
+    #----------------#
+    # Helper Methods #
+    #----------------#
     
     def mark_as_read(self):
         """Mark the message as read and set read timestamp."""
