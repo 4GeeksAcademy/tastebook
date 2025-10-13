@@ -1,5 +1,20 @@
+
+
+// THIS REUSABLE COMPONENT IS NOT BEING CURRENTLY USED
+
+// There a Rect component in CountryDisplay.jsx that is being used instead
+// with "import ReactCountryFlag from 'react-country-flag';" and "<ReactCountryFlag />""
+
+// This is a use example:
+//      {/* Example usage of CountryDisplay component */}
+//      <div className="mb-4 text-center">
+//          <CountryDisplay countryCode="US" flagSize={32} className="mx-2" showName={true} flagFirst={true} />
+//          {/* This will display the US flag and the country name "United States" */}
+//      </div>
+
 import React from 'react';
-import { CountryFlag, getCountryNameByCode } from '../shared/assets/data/countriesData.jsx';
+import { CountryFlag, getCountryNameByCode } from './countriesData.jsx';
+
 
 /**
  * Reusable component to display country name with flag
