@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, Camera, Trash2, User, HelpCircle } from 'lucide-react';
 
-const ImageUpload = ({ 
+const ProfileImageUpload = ({ 
   currentImageUrl, 
   onImageUpload, 
   onImageDelete, 
@@ -261,4 +261,4 @@ const ImageUpload = ({
   );
 };
 
-export default ImageUpload;
+export default ProfileImageUpload;

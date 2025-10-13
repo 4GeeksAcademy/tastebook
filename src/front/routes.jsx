@@ -21,8 +21,8 @@ import { PasswordRecovery } from "./modules/auth/PasswordRecovery.jsx";
 // Admin Access
 import { AdminAccess }  from "./modules/admin-backpanel/AdminAccess.jsx";
 
-// Settings module
-import { Settings }     from "./pages/Settings";
+// Settings
+import { Settings }     from "./modules/user-settings/Settings.jsx";
 
 // User profile
 import { AllUsers }     from "./modules/user-profile/user-profile-pages/AllUsers.jsx";

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { User, KeyRound, Mail, BookOpenText, Image, Edit, X, Camera, Globe } from "lucide-react";
-import ImageUpload from "../components/ImageUpload";
-import { COUNTRIES, CountryFlag } from "../shared/utils/country-flag-name-display/countriesData.jsx";
+import ProfileImageUpload from "./user-settings-subcomponents/ProfileImageUpload.jsx";
+import { COUNTRIES, CountryFlag } from "../../shared/utils/country-flag-name-display/countriesData.jsx";
 
 export const Settings = () => {
   const [userData, setUserData] = useState(null);
@@ -438,7 +438,7 @@ export const Settings = () => {
               {activePanel === "image" && (
                 <div className="text-center">
                   <h5 className="mb-4">Manage Your Profile Image</h5>
-                  <ImageUpload
+                  <ProfileImageUpload
                     currentImageUrl={userData?.cloudinary_url}
                     onImageUpload={handleImageUpload}
                     onImageDelete={handleImageDelete}
