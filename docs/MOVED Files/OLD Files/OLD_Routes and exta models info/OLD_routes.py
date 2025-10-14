@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import os
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Recipe, RecipeImage, Follow, Comment, CommentLike, Like, Collection, CollectionRecipe, Chat, Message
+from api.models import db, User, Recipe, RecipeImage, Follow, RecipeComment, CommentLike, RecipeLike, Collection, CollectionRecipe, Chat, Message
 from api.utils import generate_sitemap, APIException
 
 from api.websocket_events import emit_new_message, emit_messages_read, emit_chat_deleted
@@ -1679,7 +1679,7 @@ def get_recipe_comments(recipe_id):
             pass  # User not authenticated
         
         # Build query for main comments only (no parent_comment_id)
-        query = Comment.query.filter_by(recipe_id=recipe_id, parent_comment_id=None)
+        query = RecipeComment.query.filter_by(recipe_id=recipe_id, parent_comment_id=None)
         
         # Handle pinned comments - always show pinned comment first
         pinned_comment = query.filter_by(is_pinned=True).first()
@@ -1689,16 +1689,16 @@ def get_recipe_comments(recipe_id):
         
         if sort_by == 'likes':
             # Sort by like count (using the relationship)
-            non_pinned_query = non_pinned_query.outerjoin(CommentLike).group_by(Comment.id)
+            non_pinned_query = non_pinned_query.outerjoin(CommentLike).group_by(RecipeComment.id)
             if sort_order == 'desc':
-                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).desc(), Comment.date_created.desc())
+                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).desc(), RecipeComment.date_created.desc())
             else:
-                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).asc(), Comment.date_created.asc())
+                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).asc(), RecipeComment.date_created.asc())
         else:  # default to date
             if sort_order == 'desc':
-                non_pinned_query = non_pinned_query.order_by(Comment.date_created.desc())
+                non_pinned_query = non_pinned_query.order_by(RecipeComment.date_created.desc())
             else:
-                non_pinned_query = non_pinned_query.order_by(Comment.date_created.asc())
+                non_pinned_query = non_pinned_query.order_by(RecipeComment.date_created.asc())
         
         # Get total count for pagination (excluding pinned from count since it's always shown)
         total_non_pinned = non_pinned_query.count()
@@ -1728,8 +1728,8 @@ def get_recipe_comments(recipe_id):
                 "has_more": offset + limit < total_non_pinned
             },
             "stats": {
-                "total_comments": Comment.query.filter_by(recipe_id=recipe_id).count(),
-                "main_comments": Comment.query.filter_by(recipe_id=recipe_id, parent_comment_id=None).count(),
+                "total_comments": RecipeComment.query.filter_by(recipe_id=recipe_id).count(),
+                "main_comments": RecipeComment.query.filter_by(recipe_id=recipe_id, parent_comment_id=None).count(),
                 "has_pinned": pinned_comment is not None
             }
         }), 200
@@ -1784,7 +1784,7 @@ def create_comment(recipe_id):
         # If this is a reply, validate parent comment
         parent_comment = None
         if parent_comment_id:
-            parent_comment = Comment.query.get(parent_comment_id)
+            parent_comment = RecipeComment.query.get(parent_comment_id)
             if not parent_comment:
                 return jsonify({"error": "Parent comment not found"}), 404
             
@@ -1796,7 +1796,7 @@ def create_comment(recipe_id):
                 return jsonify({"error": "Cannot reply to a reply. Only one level of nesting allowed"}), 400
         
         # Create new comment
-        new_comment = Comment(
+        new_comment = RecipeComment(
             user_id=current_user_id,
             recipe_id=recipe_id,
             parent_comment_id=parent_comment_id,
@@ -1842,7 +1842,7 @@ def update_comment(comment_id):
         current_user_id = get_jwt_identity()
         
         # Find the comment
-        comment = Comment.query.get(comment_id)
+        comment = RecipeComment.query.get(comment_id)
         if not comment:
             return jsonify({"error": "Comment not found"}), 404
         
@@ -1896,7 +1896,7 @@ def delete_comment(comment_id):
         current_user_id = get_jwt_identity()
         
         # Find the comment
-        comment = Comment.query.get(comment_id)
+        comment = RecipeComment.query.get(comment_id)
         if not comment:
             return jsonify({"error": "Comment not found"}), 404
         
@@ -1941,7 +1941,7 @@ def toggle_comment_like(comment_id):
             return jsonify({"error": "Invalid user"}), 401
         
         # Find the comment
-        comment = Comment.query.get(comment_id)
+        comment = RecipeComment.query.get(comment_id)
         if not comment:
             return jsonify({"error": "Comment not found"}), 404
         
@@ -2000,7 +2000,7 @@ def toggle_comment_pin(comment_id):
         current_user_id = get_jwt_identity()
         
         # Find the comment
-        comment = Comment.query.get(comment_id)
+        comment = RecipeComment.query.get(comment_id)
         if not comment:
             return jsonify({"error": "Comment not found"}), 404
         
@@ -2022,7 +2022,7 @@ def toggle_comment_pin(comment_id):
             action = "unpinned"
         else:
             # Unpin any currently pinned comment for this recipe
-            current_pinned = Comment.query.filter_by(
+            current_pinned = RecipeComment.query.filter_by(
                 recipe_id=comment.recipe_id,
                 is_pinned=True,
                 parent_comment_id=None
@@ -2084,7 +2084,7 @@ def toggle_recipe_like(recipe_id):
             return jsonify({"error": "Recipe not found"}), 404
         
         # Check if user has already liked this recipe
-        existing_like = Like.query.filter_by(
+        existing_like = RecipeLike.query.filter_by(
             user_id=current_user_id,
             recipe_id=recipe_id
         ).first()
@@ -2096,7 +2096,7 @@ def toggle_recipe_like(recipe_id):
             is_liked = False
         else:
             # Like the recipe (add new like)
-            new_like = Like(
+            new_like = RecipeLike(
                 user_id=current_user_id,
                 recipe_id=recipe_id
             )
@@ -2146,7 +2146,7 @@ def get_user_liked_recipes():
         order = request.args.get('order', 'desc', type=str)  # asc or desc
         
         # Base query for liked recipes
-        query = db.session.query(Recipe).join(Like).filter(Like.user_id == current_user_id)
+        query = db.session.query(Recipe).join(RecipeLike).filter(RecipeLike.user_id == current_user_id)
         
         # Apply search filter if provided
         if search:
@@ -2162,7 +2162,7 @@ def get_user_liked_recipes():
         if sort_by == 'liked_date':
             # Sort by when the user liked the recipe (Like table already joined)
             query = query.order_by(
-                Like.created_at.desc() if order == 'desc' else Like.created_at.asc()
+                RecipeLike.created_at.desc() if order == 'desc' else RecipeLike.created_at.asc()
             )
         elif sort_by == 'recipe_name':
             query = query.order_by(
@@ -2174,7 +2174,7 @@ def get_user_liked_recipes():
             )
         else:
             # Default to liked date descending (Like table already joined)
-            query = query.order_by(Like.created_at.desc())
+            query = query.order_by(RecipeLike.created_at.desc())
         
         # Paginate results
         paginated_recipes = query.paginate(
@@ -2187,7 +2187,7 @@ def get_user_liked_recipes():
         recipes_data = []
         for recipe in paginated_recipes.items:
             # Get the like date for this user
-            like = Like.query.filter_by(user_id=current_user_id, recipe_id=recipe.id).first()
+            like = RecipeLike.query.filter_by(user_id=current_user_id, recipe_id=recipe.id).first()
             
             recipe_data = recipe.serialize(current_user_id=current_user_id)
             recipe_data['liked_at'] = like.created_at.isoformat() if like else None

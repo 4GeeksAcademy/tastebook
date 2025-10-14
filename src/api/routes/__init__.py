@@ -9,15 +9,15 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from api.models import User
 
 # Import all route modules
-from .auth import auth_bp
-from .users import users_bp
-from .recipes import recipes_bp
-from .cloudinary import cloudinary_bp
-from .comments import comments_bp
-from .collections import collections_bp
-from .messaging import messaging_bp
-from .likes_recipes import likes_bp
-from .admin_access import admin_access_bp
+from .auth           import auth_bp
+from .users          import users_bp
+from .recipes        import recipes_bp
+from .cloudinary     import cloudinary_bp
+from .comments       import comments_bp
+from .collections    import collections_bp
+from .messaging      import messaging_bp
+from .likes_recipes  import likes_bp
+from .admin_access   import admin_access_bp
 
 # Create the main API blueprint
 api = Blueprint('api', __name__)

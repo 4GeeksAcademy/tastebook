@@ -6,7 +6,7 @@ Handles comment CRUD operations and comment likes/pins.
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from api.models import db, User, Recipe, Comment, CommentLike
+from api.models import db, User, Recipe, RecipeComment, CommentLike
 
 # Create comments blueprint
 comments_bp = Blueprint('comments', __name__)
@@ -45,7 +45,7 @@ def get_recipe_comments(recipe_id):
             pass  # User not authenticated
         
         # Build query for main comments only (no parent_comment_id)
-        query = Comment.query.filter_by(recipe_id=recipe_id, parent_comment_id=None)
+        query = RecipeComment.query.filter_by(recipe_id=recipe_id, parent_comment_id=None)
         
         # Handle pinned comments - always show pinned comment first
         pinned_comment = query.filter_by(is_pinned=True).first()
@@ -55,16 +55,16 @@ def get_recipe_comments(recipe_id):
         
         if sort_by == 'likes':
             # Sort by like count (using the relationship)
-            non_pinned_query = non_pinned_query.outerjoin(CommentLike).group_by(Comment.id)
+            non_pinned_query = non_pinned_query.outerjoin(CommentLike).group_by(RecipeComment.id)
             if sort_order == 'desc':
-                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).desc(), Comment.created_at.desc())
+                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).desc(), RecipeComment.created_at.desc())
             else:
-                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).asc(), Comment.created_at.asc())
+                non_pinned_query = non_pinned_query.order_by(db.func.count(CommentLike.id).asc(), RecipeComment.created_at.asc())
         else:  # default to date
             if sort_order == 'desc':
-                non_pinned_query = non_pinned_query.order_by(Comment.created_at.desc())
+                non_pinned_query = non_pinned_query.order_by(RecipeComment.created_at.desc())
             else:
-                non_pinned_query = non_pinned_query.order_by(Comment.created_at.asc())
+                non_pinned_query = non_pinned_query.order_by(RecipeComment.created_at.asc())
         
         # Get total count for pagination (excluding pinned from count since it's always shown)
         total_non_pinned = non_pinned_query.count()
@@ -94,8 +94,8 @@ def get_recipe_comments(recipe_id):
                 "has_more": offset + limit < total_non_pinned
             },
             "stats": {
-                "total_comments": Comment.query.filter_by(recipe_id=recipe_id).count(),
-                "main_comments": Comment.query.filter_by(recipe_id=recipe_id, parent_comment_id=None).count(),
+                "total_comments": RecipeComment.query.filter_by(recipe_id=recipe_id).count(),
+                "main_comments": RecipeComment.query.filter_by(recipe_id=recipe_id, parent_comment_id=None).count(),
                 "has_pinned": pinned_comment is not None
             }
         }), 200
@@ -150,7 +150,7 @@ def create_comment(recipe_id):
         # If this is a reply, validate parent comment
         parent_comment = None
         if parent_comment_id:
-            parent_comment = Comment.query.get(parent_comment_id)
+            parent_comment = RecipeComment.query.get(parent_comment_id)
             if not parent_comment:
                 return jsonify({"error": "Parent comment not found"}), 404
             
@@ -162,7 +162,7 @@ def create_comment(recipe_id):
                 return jsonify({"error": "Cannot reply to a reply. Only one level of nesting allowed"}), 400
         
         # Create new comment
-        new_comment = Comment(
+        new_comment = RecipeComment(
             user_id=current_user_id,
             recipe_id=recipe_id,
             parent_comment_id=parent_comment_id,
@@ -208,7 +208,7 @@ def update_comment(comment_id):
         current_user_id = get_jwt_identity()
         
         # Find the comment
-        comment = Comment.query.get(comment_id)
+        comment = RecipeComment.query.get(comment_id)
         if not comment:
             return jsonify({"error": "Comment not found"}), 404
         
@@ -262,7 +262,7 @@ def delete_comment(comment_id):
         current_user_id = get_jwt_identity()
         
         # Find the comment
-        comment = Comment.query.get(comment_id)
+        comment = RecipeComment.query.get(comment_id)
         if not comment:
             return jsonify({"error": "Comment not found"}), 404
         
@@ -307,7 +307,7 @@ def toggle_comment_like(comment_id):
             return jsonify({"error": "Invalid user"}), 401
         
         # Find the comment
-        comment = Comment.query.get(comment_id)
+        comment = RecipeComment.query.get(comment_id)
         if not comment:
             return jsonify({"error": "Comment not found"}), 404
         
@@ -366,7 +366,7 @@ def toggle_comment_pin(comment_id):
         current_user_id = get_jwt_identity()
         
         # Find the comment
-        comment = Comment.query.get(comment_id)
+        comment = RecipeComment.query.get(comment_id)
         if not comment:
             return jsonify({"error": "Comment not found"}), 404
         
@@ -388,7 +388,7 @@ def toggle_comment_pin(comment_id):
             action = "unpinned"
         else:
             # Unpin any currently pinned comment for this recipe
-            current_pinned = Comment.query.filter_by(
+            current_pinned = RecipeComment.query.filter_by(
                 recipe_id=comment.recipe_id,
                 is_pinned=True,
                 parent_comment_id=None

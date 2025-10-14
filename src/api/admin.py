@@ -15,7 +15,7 @@ from flask_login import LoginManager, current_user, login_user, logout_user
 from sqlalchemy import func
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .models import db, User, Recipe, RecipeImage, Follow, Comment, Like, CommentLike
+from .models import db, User, Recipe, RecipeImage, Follow, RecipeComment, RecipeLike, CommentLike
 from .countries import get_random_country
 
 faker = Faker()
@@ -49,7 +49,7 @@ def _safe_int(value, default: int, minimum: int, maximum: int) -> int:
 
 
 class AdminPolicy:
-    """Centralises admin access rules so we can tweak them easily."""
+    """Centralises admin access rules so I can tweak them easily."""
 
     def is_admin(self, user: User | None) -> bool:
         if not user or not getattr(user, 'is_active', False):
@@ -97,10 +97,10 @@ class DashboardAdminIndexView(AdminIndexView):
             return redirect(url_for('.login', next=request.url))
 
         stats = {
-            'users': db.session.query(func.count(User.id)).scalar() or 0,
-            'recipes': db.session.query(func.count(Recipe.id)).scalar() or 0,
-            'comments': db.session.query(func.count(Comment.id)).scalar() or 0,
-            'likes': db.session.query(func.count(Like.id)).scalar() or 0,
+            'users':    db.session.query(func.count(User.id)).scalar() or 0,
+            'recipes':  db.session.query(func.count(Recipe.id)).scalar() or 0,
+            'comments': db.session.query(func.count(RecipeComment.id)).scalar() or 0,
+            'likes':    db.session.query(func.count(RecipeLike.id)).scalar() or 0,
         }
 
         recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
@@ -140,7 +140,7 @@ class DashboardAdminIndexView(AdminIndexView):
             return redirect(request.args.get('next') or url_for('.index'))
 
         if request.method == 'POST':
-            email = (request.form.get('email') or '').strip().lower()
+            email    = (request.form.get('email') or '').strip().lower()
             password = request.form.get('password') or ''
             remember = bool(request.form.get('remember'))
 
@@ -313,15 +313,22 @@ def load_admin_user(user_id: str):  # pragma: no cover - flask-login hook
 
 def ensure_admin_account(app) -> User | None:
     """Ensure there is at least one administrator user for the control panel."""
-    email = os.getenv('ADMIN_SEED_EMAIL')
-    password = os.getenv('ADMIN_SEED_PASSWORD')
-    username = os.getenv('ADMIN_SEED_USERNAME', 'tastebook-admin')
+    email     = os.getenv('ADMIN_SEED_EMAIL')
+    password  = os.getenv('ADMIN_SEED_PASSWORD')
+    username  = os.getenv('ADMIN_SEED_USERNAME', 'tastebook-admin')
     full_name = os.getenv('ADMIN_SEED_FULL_NAME', 'Tastebook Administrator')
 
     if not email or not password:
         return None
 
     with app.app_context():
+        # Check if User table exists before trying to query
+        from sqlalchemy import inspect
+        inspector = inspect(db.engine)
+        if 'users' not in inspector.get_table_names():
+            # Tables don't exist yet, skip admin account creation
+            return None
+            
         existing = User.query.filter(func.lower(User.email) == email.lower()).first()
         if existing:
             if not existing.is_admin:
@@ -337,15 +344,15 @@ def ensure_admin_account(app) -> User | None:
             collision_counter += 1
 
         user = User(
-            email=email,
-            username=unique_username,
-            full_name=full_name,
-            description='Auto-created admin account',
-            country=None,
-            is_active=True,
-            is_admin=True,
-            plain_psswrd=password if app.config.get('ENV') != 'production' else None,
-            hashed_psswrd=generate_password_hash(password)
+            email         = email,
+            username      = unique_username,
+            full_name     = full_name,
+            description   = 'Auto-created admin account',
+            country       = None,
+            is_active     = True,
+            is_admin      = True,
+            plain_psswrd  = password if app.config.get('ENV') != 'production' else None,
+            hashed_psswrd = generate_password_hash(password)
         )
 
         db.session.add(user)
@@ -377,13 +384,13 @@ def setup_admin(app):
     )
 
     class UserAdmin(SecureModelView):
-        column_list = ['id', 'email', 'username', 'full_name', 'country', 'is_active', 'is_admin', 'created_at']
+        column_list = ['id','is_admin', 'email', 'username', 'full_name', 'country', 'is_active', 'plain_psswrd', 'created_at']
         column_searchable_list = ['email', 'username', 'full_name']
         column_filters = ['is_active', 'is_admin', 'created_at']
         column_default_sort = ('created_at', True)
         column_formatters = {
             'created_at': lambda _v, _c, m, _p: m.created_at.strftime('%Y-%m-%d %H:%M') if m.created_at else '—',
-            'country': lambda _v, _c, m, _p: f"{m.country.get('name', '—')} ({m.country.get('code', '—')})" if m.country else '—'
+            'country':    lambda _v, _c, m, _p: f"{m.country.get('name', '—')} ({m.country.get('code', '—')})" if m.country else '—'
         }
         form_columns = ['email', 'username', 'full_name', 'description', 'country', 'is_active', 'is_admin', 'plain_psswrd', 'cloudinary_url', 'cloudinary_img_id']
         form_widget_args = {
@@ -413,35 +420,38 @@ def setup_admin(app):
         form_columns = ['recipe_id', 'url', 'image_id', 'is_primary', 'display_order']
 
     class FollowAdmin(SecureModelView):
-        column_list = ['id', 'follower_id', 'followed_id', 'created_at']
+        column_list =    ['id', 'follower_id', 'followed_id', 'created_at']
         column_filters = ['follower_id', 'followed_id', 'created_at']
-        form_columns = ['follower_id', 'followed_id']
+        form_columns =   ['follower_id', 'followed_id']
 
-    class CommentAdmin(SecureModelView):
-        column_list = ['id', 'user_id', 'recipe_id', 'content', 'is_pinned', 'is_edited', 'created_at']
+    class RecipeCommentAdmin(SecureModelView):
+        column_list =            ['id', 'user_id', 'recipe_id', 'content', 'is_pinned', 'is_edited', 'created_at']
         column_searchable_list = ['content']
-        column_filters = ['user_id', 'recipe_id', 'is_pinned', 'is_edited', 'created_at']
-        form_columns = ['user_id', 'recipe_id', 'parent_comment_id', 'content', 'is_edited', 'is_pinned']
+        column_filters =         ['user_id', 'recipe_id', 'is_pinned', 'is_edited', 'created_at']
+        form_columns =           ['user_id', 'recipe_id', 'parent_comment_id', 'content', 'is_edited', 'is_pinned']
 
-    class LikeAdmin(SecureModelView):
-        column_list = ['id', 'user_id', 'recipe_id', 'created_at']
-        column_filters = ['user_id', 'recipe_id', 'created_at']
-        form_columns = ['user_id', 'recipe_id']
-
+    class RecipeLikeAdmin(SecureModelView):
+        column_list =    ['id', 'user_id', 'recipe_id', 'created_at']
+        column_filters = [      'user_id', 'recipe_id', 'created_at']
+        form_columns =   [      'user_id', 'recipe_id']
+      
     class CommentLikeAdmin(SecureModelView):
-        column_list = ['id', 'user_id', 'comment_id', 'created_at']
-        column_filters = ['user_id', 'comment_id', 'created_at']
-        form_columns = ['user_id', 'comment_id']
+        column_list =    ['id', 'user_id', 'comment_id', 'created_at']
+        column_filters = [      'user_id', 'comment_id', 'created_at']
+        form_columns =   [      'user_id', 'comment_id']
 
-    admin.add_view(UserAdmin(User, db.session, category='Content'))
-    admin.add_view(RecipeAdmin(Recipe, db.session, category='Content'))
-    admin.add_view(RecipeImageAdmin(RecipeImage, db.session, category='Content'))
-    admin.add_view(FollowAdmin(Follow, db.session, category='Social'))
-    admin.add_view(CommentAdmin(Comment, db.session, category='Social'))
-    admin.add_view(LikeAdmin(Like, db.session, category='Engagement'))
-    admin.add_view(CommentLikeAdmin(CommentLike, db.session, category='Engagement'))
 
-    admin.add_link(MenuLink(name='View Tastebook', url='/'))
-    admin.add_link(MenuLink(name='Visit API Docs', url='/api'))
+    admin.add_view( UserAdmin          (User,          db.session, name="Users"))
+    admin.add_view( FollowAdmin        (Follow,        db.session,               category='Social'))
+
+    admin.add_view( RecipeAdmin        (Recipe,        db.session,               category='Content'))
+    admin.add_view( RecipeImageAdmin   (RecipeImage,   db.session,               category='Content'))
+    admin.add_view( RecipeLikeAdmin    (RecipeLike,    db.session,               category='Engagement'))
+    admin.add_view( RecipeCommentAdmin (RecipeComment, db.session,               category='Social'))
+    admin.add_view( CommentLikeAdmin   (CommentLike,   db.session,               category='Engagement'))
+
+
+    admin.add_link( MenuLink( name='View Tastebook', url='/'))
+    admin.add_link( MenuLink( name='Visit API Docs', url='/api'))
 
 

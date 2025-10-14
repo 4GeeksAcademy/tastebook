@@ -7,7 +7,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import or_
 
-from api.models import db, User, Recipe, Like
+from api.models import db, User, Recipe, RecipeLike
 
 # Create likes blueprint
 likes_bp = Blueprint('likes', __name__)
@@ -35,7 +35,7 @@ def toggle_recipe_like(recipe_id):
             return jsonify({"error": "Recipe not found"}), 404
         
         # Check if user has already liked this recipe
-        existing_like = Like.query.filter_by(
+        existing_like = RecipeLike.query.filter_by(
             user_id=current_user_id,
             recipe_id=recipe_id
         ).first()
@@ -47,7 +47,7 @@ def toggle_recipe_like(recipe_id):
             is_liked = False
         else:
             # Like the recipe (add new like)
-            new_like = Like()
+            new_like = RecipeLike()
             new_like.user_id = current_user_id
             new_like.recipe_id = recipe_id
             db.session.add(new_like)
@@ -97,7 +97,7 @@ def get_user_liked_recipes():
         order = request.args.get('order', 'desc', type=str)  # asc or desc
         
         # Base query for liked recipes
-        query = db.session.query(Recipe).join(Like).filter(Like.user_id == current_user_id)
+        query = db.session.query(Recipe).join(RecipeLike).filter(RecipeLike.user_id == current_user_id)
         
         # Apply search filter if provided
         if search:
@@ -113,7 +113,7 @@ def get_user_liked_recipes():
         if sort_by == 'liked_date':
             # Sort by when the user liked the recipe (Like table already joined)
             query = query.order_by(
-                Like.created_at.desc() if order == 'desc' else Like.created_at.asc()
+                RecipeLike.created_at.desc() if order == 'desc' else RecipeLike.created_at.asc()
             )
         elif sort_by == 'recipe_name':
             query = query.order_by(
@@ -125,7 +125,7 @@ def get_user_liked_recipes():
             )
         else:
             # Default to liked date descending (Like table already joined)
-            query = query.order_by(Like.created_at.desc())
+            query = query.order_by(RecipeLike.created_at.desc())
         
         # Paginate results
         paginated_recipes = query.paginate(  # type: ignore
@@ -138,7 +138,7 @@ def get_user_liked_recipes():
         recipes_data = []
         for recipe in paginated_recipes.items:
             # Get the like date for this user
-            like = Like.query.filter_by(user_id=current_user_id, recipe_id=recipe.id).first()
+            like = RecipeLike.query.filter_by(user_id=current_user_id, recipe_id=recipe.id).first()
             
             recipe_data = recipe.serialize(current_user_id=current_user_id)
             recipe_data['liked_at'] = like.created_at.isoformat() if like else None

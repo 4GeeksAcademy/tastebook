@@ -45,13 +45,13 @@ def create_admin():
 		hashed_password = generate_password_hash(password)
 		
 		new_admin = User(
-			email=email,
-			username=username,
-			full_name=full_name,
-			plain_psswrd=password,
-			hashed_psswrd=hashed_password,
-			is_admin=True,
-			is_active=True
+			email         = email,
+			username      = username,
+			full_name     = full_name,
+			plain_psswrd  = password,
+			hashed_psswrd = hashed_password,
+			is_admin      = True,
+			is_active     = True
 		)
 
 		db.session.add(new_admin)

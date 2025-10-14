@@ -15,7 +15,9 @@ from typing import List, Optional, Dict, Any
 #########################################################################################
 #########################################################################################
 #############                       DATABASE TABLES                         #############
+#############                                                               #############
 #############                          TasteBook                            #############
+#############                                                               #############
 #############                       ORM Models with                         #############
 #############                         SQL Alchemy                           #############
 #########################################################################################
@@ -25,9 +27,9 @@ from typing import List, Optional, Dict, Any
 db = SQLAlchemy()
 
 
-#######################################
-###########      USERS      ###########
-#######################################
+#############################################
+##########          USERS          ##########
+#############################################
 
 class User(db.Model):
     __tablename__ = "users"
@@ -90,15 +92,15 @@ class User(db.Model):
     )
 
     # One-to-many relationship with Comment --> shows all comments created by this user
-    comments: Mapped[List["Comment"]] = relationship(
-        "Comment",
+    comments: Mapped[List["RecipeComment"]] = relationship(
+        "RecipeComment",
         back_populates="author",
         cascade="all, delete-orphan"
     )
 
     # One-to-many relationship with Like --> shows all recipe likes by this user
-    recipe_likes: Mapped[List["Like"]] = relationship(
-        "Like",
+    recipe_likes: Mapped[List["RecipeLike"]] = relationship(
+        "RecipeLike",
         back_populates="user",
         cascade="all, delete-orphan"
     )
@@ -322,6 +324,78 @@ class User(db.Model):
 
 
 #############################################
+##########         FOLLOWS        ###########
+#############################################
+
+class Follow(db.Model):
+    __tablename__ = "follows"
+
+    #------------#
+    # Attributes #
+    #------------#
+
+    # Primary Key
+    id:          Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
+
+    # Foreign Keys
+    follower_id: Mapped[int] = mapped_column( Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    followed_id: Mapped[int] = mapped_column( Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
+    # Remaining Attributes
+    created_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True), default=func.now(), server_default=func.now(),    nullable=False)
+
+
+    #-------------------#
+    # Table Constraints #
+    #-------------------#
+    __table_args__ = (
+        # Prevent users from following themselves
+        CheckConstraint("follower_id != followed_id",  name='check_no_self_follow'),
+        # Each follow relationship should be unique (no duplicate follows)
+        UniqueConstraint('follower_id', 'followed_id', name='unique_follow_relationship')
+    )
+
+
+    #-----------#
+    # Relations #
+    #-----------#
+
+    # Many-to-one relationship with User (follower) --> shows who is doing the following
+    follower: Mapped["User"] = relationship(
+        "User",
+        foreign_keys=[follower_id],
+        back_populates="following_relationships"
+    )
+
+    # Many-to-one relationship with User (followed) --> shows who is being followed
+    followed: Mapped["User"] = relationship(
+        "User", 
+        foreign_keys=[followed_id],
+        back_populates="follower_relationships"
+    )
+
+
+    #---------------#
+    # Serialization #
+    #---------------#
+    def serialize(self) -> Dict[str, Any]:
+        return {
+            "follow_id":   self.id,
+            "follower_id": self.follower_id,
+            "followed_id": self.followed_id,
+            "created_at":  self.created_at.isoformat() if self.created_at else None
+        }
+
+
+    #-----------------#
+    # __repr__ Method #
+    #-----------------#
+    def __repr__(self):
+        return f"<Follow ID {self.id} | Follower: {self.follower_id} | Followed: {self.followed_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
+
+
+
+#############################################
 ##########         RECIPES         ##########
 #############################################
 
@@ -400,15 +474,15 @@ class Recipe(db.Model):
     )
 
     # One-to-many relationship with Comment --> shows all comments for this recipe
-    comments: Mapped[List["Comment"]] = relationship(
-        "Comment",
+    comments: Mapped[List["RecipeComment"]] = relationship(
+        "RecipeComment",
         back_populates="recipe",
         cascade="all, delete-orphan"
     )
 
     # One-to-many relationship with Like --> shows all likes for this recipe
-    likes: Mapped[List["Like"]] = relationship(
-        "Like",
+    likes: Mapped[List["RecipeLike"]] = relationship(
+        "RecipeLike",
         back_populates="recipe",
         cascade="all, delete-orphan"
     )
@@ -442,8 +516,8 @@ class Recipe(db.Model):
     @like_count.expression
     def like_count_expression(cls):
         return (
-            select(func.count(Like.id))
-            .where(Like.recipe_id == cls.id)
+            select(func.count(RecipeLike.id))
+            .where(RecipeLike.recipe_id == cls.id)
             .scalar_subquery()
         )
 
@@ -456,8 +530,8 @@ class Recipe(db.Model):
         if user_id is None:
             return False
         return db.session.query(
-            db.session.query(Like)
-            .filter(Like.user_id == user_id, Like.recipe_id == self.id)
+            db.session.query(RecipeLike)
+            .filter(RecipeLike.user_id == user_id, RecipeLike.recipe_id == self.id)
             .exists()
         ).scalar()
 
@@ -495,7 +569,7 @@ class Recipe(db.Model):
 
 
 #############################################
-#########       RECIPE IMAGES       #########
+#########      (recipe) IMAGES      #########
 #############################################
 
 class RecipeImage(db.Model):
@@ -545,11 +619,11 @@ class RecipeImage(db.Model):
 
 
 #############################################
-##########         FOLLOWS        ###########
+##########    (recipe) LIKES      ###########
 #############################################
 
-class Follow(db.Model):
-    __tablename__ = "follows"
+class RecipeLike(db.Model):
+    __tablename__ = "recipe_likes"
 
     #------------#
     # Attributes #
@@ -559,21 +633,19 @@ class Follow(db.Model):
     id:          Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
-    follower_id: Mapped[int] = mapped_column( Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    followed_id: Mapped[int] = mapped_column( Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id:     Mapped[int] = mapped_column( Integer, ForeignKey("users.id",   ondelete="CASCADE"), nullable=False)
+    recipe_id:   Mapped[int] = mapped_column( Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
 
-    # Remaining Attributes
-    created_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True), default=func.now(), server_default=func.now(),    nullable=False)
+    # Timestamp
+    created_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True), default=func.now(), server_default=func.now(),      nullable=False)
 
 
     #-------------------#
     # Table Constraints #
     #-------------------#
     __table_args__ = (
-        # Prevent users from following themselves
-        CheckConstraint("follower_id != followed_id",  name='check_no_self_follow'),
-        # Each follow relationship should be unique (no duplicate follows)
-        UniqueConstraint('follower_id', 'followed_id', name='unique_follow_relationship')
+        # Each user can only like a recipe once
+        UniqueConstraint('user_id', 'recipe_id', name='unique_user_recipe_like'),
     )
 
 
@@ -581,18 +653,16 @@ class Follow(db.Model):
     # Relations #
     #-----------#
 
-    # Many-to-one relationship with User (follower) --> shows who is doing the following
-    follower: Mapped["User"] = relationship(
+    # Many-to-one relationship with User --> shows who liked the recipe
+    user: Mapped["User"] = relationship(
         "User",
-        foreign_keys=[follower_id],
-        back_populates="following_relationships"
+        back_populates="recipe_likes"
     )
 
-    # Many-to-one relationship with User (followed) --> shows who is being followed
-    followed: Mapped["User"] = relationship(
-        "User", 
-        foreign_keys=[followed_id],
-        back_populates="follower_relationships"
+    # Many-to-one relationship with Recipe --> shows which recipe was liked
+    recipe: Mapped["Recipe"] = relationship(
+        "Recipe",
+        back_populates="likes"
     )
 
 
@@ -601,10 +671,10 @@ class Follow(db.Model):
     #---------------#
     def serialize(self) -> Dict[str, Any]:
         return {
-            "follow_id":   self.id,
-            "follower_id": self.follower_id,
-            "followed_id": self.followed_id,
-            "created_at":  self.created_at.isoformat() if self.created_at else None
+            "like_id":    self.id,
+            "user_id":    self.user_id,
+            "recipe_id":  self.recipe_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None
         }
 
 
@@ -612,16 +682,16 @@ class Follow(db.Model):
     # __repr__ Method #
     #-----------------#
     def __repr__(self):
-        return f"<Follow ID {self.id} | Follower: {self.follower_id} | Followed: {self.followed_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
+        return f"<Like ID {self.id} | User: {self.user_id} | Recipe: {self.recipe_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
 
 
 
 #############################################
-##########        COMMENTS        ###########
+##########    (recipe) COMMENTS    ##########
 #############################################
 
-class Comment(db.Model):
-    __tablename__ = "comments"
+class RecipeComment(db.Model):
+    __tablename__ = "recipe_comments"
 
     #------------#
     # Attributes #
@@ -633,7 +703,7 @@ class Comment(db.Model):
     # Foreign Keys
     user_id:           Mapped[int]           = mapped_column( Integer, ForeignKey("users.id",    ondelete="CASCADE"),  nullable=False)
     recipe_id:         Mapped[int]           = mapped_column( Integer, ForeignKey("recipes.id",  ondelete="CASCADE"),  nullable=False)
-    parent_comment_id: Mapped[Optional[int]] = mapped_column( Integer, ForeignKey("comments.id", ondelete="CASCADE"),  nullable=True)
+    parent_comment_id: Mapped[Optional[int]] = mapped_column( Integer, ForeignKey("recipe_comments.id", ondelete="CASCADE"),  nullable=True)
 
     # Content and State Fields
     content:         Mapped[str]      = mapped_column( Text,                         nullable=False)
@@ -656,9 +726,10 @@ class Comment(db.Model):
         ### Note: This index is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
         Index('unique_pinned_comment_per_recipe', 'recipe_id', unique=True, postgresql_where=text('is_pinned = true')),
 
-        # Prevent self-referencing at deeper than one level (now enforced at DB layer)
+        # Prevent self-referencing at deeper than one level (REMOVED: PostgreSQL doesn't support subqueries in check constraints)
         ### Note: This constraint is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
-        CheckConstraint("parent_comment_id IS NULL OR (SELECT c.parent_comment_id FROM comments c WHERE c.id = parent_comment_id) IS NULL", name='check_no_deep_comment_nesting'),
+        # CheckConstraint("parent_comment_id IS NULL OR (SELECT c.parent_comment_id FROM comments c WHERE c.id = parent_comment_id) IS NULL", name='check_no_deep_comment_nesting')
+        # This will be enforced at the application level instead
     )
 
 
@@ -680,16 +751,16 @@ class Comment(db.Model):
 
     # Self-referential relationship for nested comments (only one level deep)
     # One-to-many relationship with Comment (parent) --> shows replies to this comment
-    replies: Mapped[List["Comment"]] = relationship(
-        "Comment",
+    replies: Mapped[List["RecipeComment"]] = relationship(
+        "RecipeComment",
         foreign_keys=[parent_comment_id],
         back_populates="parent_comment",
         cascade="all, delete-orphan"
     )
 
     # Many-to-one relationship with Comment (parent) --> shows the parent comment if this is a reply
-    parent_comment: Mapped[Optional["Comment"]] = relationship(
-        "Comment",
+    parent_comment: Mapped[Optional["RecipeComment"]] = relationship(
+        "RecipeComment",
         foreign_keys=[parent_comment_id],
         back_populates="replies",
         remote_side=[id]
@@ -728,8 +799,8 @@ class Comment(db.Model):
     @replies_count.expression
     def replies_count_expression(cls):
         return (
-            select(func.count(Comment.id))
-            .where(Comment.parent_comment_id == cls.id)
+            select(func.count(RecipeComment.id))
+            .where(RecipeComment.parent_comment_id == cls.id)
             .scalar_subquery()
         )
 
@@ -803,75 +874,7 @@ class Comment(db.Model):
 
 
 #############################################
-##########      RECIPE LIKES      ###########
-#############################################
-
-class Like(db.Model):
-    __tablename__ = "recipe_likes"
-
-    #------------#
-    # Attributes #
-    #------------#
-
-    # Primary Key
-    id:          Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
-
-    # Foreign Keys
-    user_id:     Mapped[int] = mapped_column( Integer, ForeignKey("users.id",   ondelete="CASCADE"), nullable=False)
-    recipe_id:   Mapped[int] = mapped_column( Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
-
-    # Timestamp
-    created_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True), default=func.now(), server_default=func.now(),      nullable=False)
-
-
-    #-------------------#
-    # Table Constraints #
-    #-------------------#
-    __table_args__ = (
-        # Each user can only like a recipe once
-        UniqueConstraint('user_id', 'recipe_id', name='unique_user_recipe_like'),
-    )
-
-
-    #-----------#
-    # Relations #
-    #-----------#
-
-    # Many-to-one relationship with User --> shows who liked the recipe
-    user: Mapped["User"] = relationship(
-        "User",
-        back_populates="recipe_likes"
-    )
-
-    # Many-to-one relationship with Recipe --> shows which recipe was liked
-    recipe: Mapped["Recipe"] = relationship(
-        "Recipe",
-        back_populates="likes"
-    )
-
-
-    #---------------#
-    # Serialization #
-    #---------------#
-    def serialize(self) -> Dict[str, Any]:
-        return {
-            "like_id":    self.id,
-            "user_id":    self.user_id,
-            "recipe_id":  self.recipe_id,
-            "created_at": self.created_at.isoformat() if self.created_at else None
-        }
-
-
-    #-----------------#
-    # __repr__ Method #
-    #-----------------#
-    def __repr__(self):
-        return f"<Like ID {self.id} | User: {self.user_id} | Recipe: {self.recipe_id} | Created: {self.created_at.strftime('%Y-%m-%d') if self.created_at else 'N/A'}>"
-
-
-
-#############################################
-##########     COMMENT LIKES      ###########
+##########    (comment) LIKES     ###########
 #############################################
 
 class CommentLike(db.Model):
@@ -886,7 +889,7 @@ class CommentLike(db.Model):
 
     # Foreign Keys
     user_id:     Mapped[int] = mapped_column( Integer, ForeignKey("users.id",    ondelete="CASCADE"), nullable=False)
-    comment_id:  Mapped[int] = mapped_column( Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=False)
+    comment_id:  Mapped[int] = mapped_column( Integer, ForeignKey("recipe_comments.id", ondelete="CASCADE"), nullable=False)
 
     # Timestamp
     created_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True),  default=func.now(), server_default=func.now(),      nullable=False)
@@ -912,8 +915,8 @@ class CommentLike(db.Model):
     )
 
     # Many-to-one relationship with Comment --> shows which comment was liked
-    comment: Mapped["Comment"] = relationship(
-        "Comment",
+    comment: Mapped["RecipeComment"] = relationship(
+        "RecipeComment",
         back_populates="likes"
     )
 
@@ -938,15 +941,16 @@ class CommentLike(db.Model):
 
 
 ############################################
-##########     COLLECTIONS       ###########
-##########   Association table   ###########
-##########      and Table        ###########
+##########      COLLECTIONS      ###########
+##########                       ###########
+##########   association table   ###########
+########## and Collections Table ###########
 ############################################
 
 
-    #-------------------#
-    # ASSOCIATION TABLE #
-    #-------------------#
+###########################
+###  Association table  ###
+###########################
 
 class CollectionRecipe(db.Model):
     """Association table between Collection and Recipe.
@@ -999,9 +1003,9 @@ class CollectionRecipe(db.Model):
         return f"<CollectionRecipe ID {self.id} | Collection: {self.collection_id} | Recipe: {self.recipe_id}>"
 
 
-    #-------#
-    # TABLE #
-    #-------#
+###########################
+###  COLLECTIONS table  ###
+###########################
 
 class Collection(db.Model):
     """User-created collection of recipes (similar to YouTube playlists).
@@ -1011,24 +1015,36 @@ class Collection(db.Model):
     """
     __tablename__ = "collections"
 
+    #------------#
+    # Attributes #
+    #------------#
+
     # Primary Key
     id:        Mapped[int] = mapped_column( Integer, primary_key=True, autoincrement=True)
 
     # Foreign Key to User (owner)
     owner_id:  Mapped[int] = mapped_column( Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
-    # Attributes
     title:         Mapped[str]           = mapped_column( String(120),                  nullable=False)
     description:   Mapped[Optional[str]] = mapped_column( Text,                         nullable=True)
     is_public:     Mapped[bool]          = mapped_column( Boolean,  default=False,      nullable=False)
     created_at:    Mapped[datetime]      = mapped_column( DateTime(timezone=True),      nullable=False,  default=func.now(), server_default=func.now())
 
+
+    #-------------------#
+    # Table Constraints #
+    #-------------------#
     __table_args__ = (
         # Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
         CheckConstraint("char_length(title) > 0", name='check_collection_title_not_empty'),
     )
 
-    # Relations
+
+    #-----------#
+    # Relations #
+    #-----------#
+
+    # Many-to-one relationship with User (owner) --> shows the user who owns this collection
     owner: Mapped["User"] = relationship(
         "User",
         back_populates="collections"
@@ -1052,7 +1068,11 @@ class Collection(db.Model):
         overlaps="collections,recipes"
     )
 
-    # Serialization
+
+
+    #---------------#
+    # Serialization #
+    #---------------#
     def serialize(self, include_recipes: bool = False, current_user_id: Optional[int] = None) -> Dict[str, Any]:
         data = {
             "collection_id": self.id,
@@ -1070,7 +1090,7 @@ class Collection(db.Model):
         }
 
         if include_recipes:
-            # Include serialized recipes in the order defined by collection_recipes
+        # Include serialized recipes in the order defined by collection_recipes
             data["recipes"] = [
                 {
                     "collection_recipe_id": cr.id,
@@ -1080,17 +1100,20 @@ class Collection(db.Model):
                 }
                 for cr in sorted(self.collection_recipes, key=lambda c: c.display_order)
             ]
-
         return data
 
+
+    #-----------------#
+    # __repr__ Method #
+    #-----------------#
     def __repr__(self):
         return f"<Collection ID {self.id} | Title: {self.title} | Owner: {self.owner_id} | Public: {self.is_public}>"
 
 
 
-######################################
-##########      CHATS      ###########
-######################################
+#############################################
+##########         CHATS          ###########
+#############################################
 
 class Chat(db.Model):
     """Chat represents a conversation between two users.
@@ -1644,16 +1667,15 @@ class Chat(db.Model):
         return f"<Chat ID {self.id} | Users: {self.user1_id}, {self.user2_id}>"
 
 
-#########################################
-##########      MESSAGES      ###########
-#########################################
+#############################################
+##########        MESSAGES        ###########
+#############################################
 
 class Message(db.Model):
     """Message represents a single message within a chat.
     
     Each message belongs to a chat and has a sender.
     """
-    
     __tablename__ = "messages"
 
     #------------#

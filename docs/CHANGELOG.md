@@ -2,6 +2,33 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 14, 2025) -- Database Migration Fixes: Admin Account Creation and PostgreSQL Constraints
+
+**Migration stability:**
+This update resolved critical database migration issues that were preventing the application from deploying properly.
+
+**Key issues fixed:**
+
+1. **Admin Account Creation During Migration:**
+   * **Problem:** The `ensure_admin_account` function was attempting to query the `users` table before it existed during migration, causing "relation 'users' does not exist" errors.
+   * **Solution:** Added table existence check using SQLAlchemy inspector to skip admin account creation when tables don't exist yet.
+
+2. **Unsupported PostgreSQL Check Constraint:**
+   * **Problem:** A check constraint for preventing deep comment nesting used subqueries, which PostgreSQL doesn't support in check constraints.
+   * **Solution:** Removed the database constraint and confirmed that application-level validation in the comment creation endpoint already enforces the one-level nesting rule.
+
+**Summary of changes:**
+- ✅ **Fixed migration timing issue** - Admin account creation now checks for table existence before running
+- ✅ **Removed unsupported constraint** - PostgreSQL subquery check constraint replaced with application validation
+- ✅ **Regenerated clean migration** - New migration file without problematic constraints
+- ✅ **Verified successful deployment** - Database migrations now complete without errors
+
+**Result:**
+- 🎉 **Stable migrations** - Database setup works reliably across all environments
+- 🗃️ **PostgreSQL compatibility** - All constraints use supported database features
+- 🔧 **Application-level validation** - Comment nesting rules enforced in API endpoints
+- 🚀 **Production-ready** - Clean database schema with proper constraint handling.
+
 ## (October 13, 2025) -- Country Data Unification and Admin Dashboard Fix
 
 **Backend data consistency and admin panel stability:**
