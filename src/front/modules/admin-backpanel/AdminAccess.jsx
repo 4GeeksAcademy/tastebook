@@ -63,14 +63,6 @@ export const AdminAccess = () => {
                                 <li>Log in using admin credentials.</li>
                             </ol>
 
-                            {/* <div className="alert alert-info">
-                                <strong>Default Admin Credentials:</strong><br />
-                                Email: admin_user@flask.backpanel.com<br />
-                                Username: admin-user<br />
-                                Password: 9xJ*JSp#i$^W%5YTsyebFO
-                            </div> */}
-
-
                             <hr className="my-3" />
 
                             <div className="mt-4">

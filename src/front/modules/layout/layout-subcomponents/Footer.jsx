@@ -64,7 +64,7 @@ export const Footer = () => {
 							</div>
 						</div>
 
-						{/* Direct Link to Theme Settings -COMMENTED OUT */}
+						{/* Direct Link to Theme Settings --- COMMENTED OUT */}
 						{/* <Link to="/theme" className="text-muted" title="Theme settings">
 							<Settings size={16} strokeWidth={2} />
 						</Link> */}

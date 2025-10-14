@@ -1,5 +1,5 @@
 import { Outlet }  from "react-router-dom"
-import ScrollToTop from "./layout-subcomponents/ScrollToTop"
+import ScrollToTop from "./ScrollToTop"
 import { Navbar }  from "./layout-subcomponents/Navbar"
 import { Footer }  from "./layout-subcomponents/Footer"
 
