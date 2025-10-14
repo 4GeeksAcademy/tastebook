@@ -640,7 +640,7 @@ class Comment(db.Model):
     is_edited:       Mapped[bool]     = mapped_column( Boolean,   default=False,     nullable=False)
     is_pinned:       Mapped[bool]     = mapped_column( Boolean,   default=False,     nullable=False)
 
-    created_at:      Mapped[datetime] = mapped_column( DateTime(timezone=True),      nullable=False,   default=func.now(), server_default=func.now(),)
+    created_at:      Mapped[datetime] = mapped_column( DateTime(timezone=True),      nullable=False,   default=func.now(), server_default=func.now())
 
 
     #-------------------#
