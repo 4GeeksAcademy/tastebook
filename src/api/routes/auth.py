@@ -21,9 +21,10 @@ def send_recovery_email(email, token):
     This function should implement the actual email sending logic.
     For demonstration purposes, we'll just print the recovery link.
     """
-    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+    frontend_url  = os.environ.get("FRONTEND_URL", "http://localhost:3000")
     recovery_link = f"{frontend_url}/reset-password/{token}"
     print(f"Send this link to {email}: {recovery_link}")
+
 
 
 ############################################
@@ -88,6 +89,7 @@ def signup():
         return jsonify({'error': str(e)}), 500
 
 
+
 ############################################
 #######   CHECK USERNAME EXISTS      #######
 ############################################
@@ -109,6 +111,7 @@ def check_username():
     exists = User.query.filter_by(username=username).first() is not None
 
     return jsonify({"exists": exists}), 200
+
 
 
 ############################################
@@ -162,6 +165,7 @@ def handle_login():
         return jsonify({'error': str(e)}), 500
 
 
+
 ############################################
 #######       Email Validation       #######
 ############################################
@@ -172,7 +176,8 @@ def handle_login():
 """
 @auth_bp.route('/recovery-validation', methods=['POST'])
 def recover_account():
-    data = request.get_json()
+
+    data  = request.get_json()
     email = data.get("email")
 
     if not email:
@@ -185,14 +190,15 @@ def recover_account():
     # Generate recovery token using itsdangerous
     secret_key = os.environ.get("SECRET_KEY", "default_secret")
     serializer = URLSafeTimedSerializer(secret_key)
-    token = serializer.dumps(user.email, salt="password-recovery")
+    token      = serializer.dumps(user.email, salt="password-recovery")
+
     send_recovery_email(user.email, token)
 
     return jsonify({"msg": "Recovery email sent.", "token": token}), 200
 
 
 ############################################
-#######     Change Password          #######
+#######      Change Password         #######
 #######     as logged out user       #######
 ############################################
 """ JSON request body to change password:
@@ -203,7 +209,7 @@ def recover_account():
 @auth_bp.route('/reset-password/<token>', methods=['POST'])
 def reset_password(token):
 
-    data = request.get_json()
+    data         = request.get_json()
     new_password = data.get("new_password")
 
     if not new_password:
@@ -212,6 +218,7 @@ def reset_password(token):
     # Verify token using itsdangerous
     secret_key = os.environ.get("SECRET_KEY", "default_secret")
     serializer = URLSafeTimedSerializer(secret_key)
+
     try:
         email = serializer.loads(token, salt="password-recovery", max_age=3600)  # 1 hour expiration
     except SignatureExpired:
@@ -223,7 +230,7 @@ def reset_password(token):
     if not user:
         return jsonify({"error": "User not found."}), 404
 
-    user.plain_psswrd = new_password
+    user.plain_psswrd  = new_password
     user.hashed_psswrd = generate_password_hash(new_password)
 
     db.session.commit()

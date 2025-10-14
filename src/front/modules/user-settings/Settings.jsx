@@ -45,17 +45,22 @@ export const Settings = () => {
       test: (pw) => /[^A-Za-z0-9]/.test(pw)
     }
   ];
+
   const isPasswordValid = passwordRequirements.every(r => r.test(passwordForm.password));
 
+
   useEffect(() => {
+
     const fetchUserInfo = async () => {
+
       if (!backendUrl) {
         setError("Backend URL not configured.");
         return;
       }
+
       setLoading(true);
+
       try {
-        // const resp = await fetch(`${store.backendURL}/settings`, {
         const resp = await fetch(backendUrl + "/api/settings", {
           method: "GET",
           headers: {
@@ -68,10 +73,10 @@ export const Settings = () => {
         const user = data.current_user || {};
         setUserData(user);
         setForm({
-          email: user.email || "",
+          email:     user.email     || "",
           full_name: user.full_name || "",
-          username: user.username || "",
-          country: user.country || null
+          username:  user.username  || "",
+          country:   user.country   || null
         });
       } catch (err) {
         setError("Failed to load user info.");
@@ -142,6 +147,7 @@ export const Settings = () => {
       });
       
       const data = await resp.json();
+      
       if (!resp.ok) throw new Error(data?.error || "Failed to upload image.");
       
       const updatedUserData = { ...userData, ...data.user };
@@ -308,12 +314,13 @@ export const Settings = () => {
         <div className="col-md-3 mb-4">
 
           <div className="list-group">
-            <button className={`list-group-item list-group-item-action ${activePanel === "profile" ? "active" : ""}`} onClick={() => setActivePanel("profile")}> <User size={18} className="me-2" /> Profile Info </button>
-            <button className={`list-group-item list-group-item-action ${activePanel === "image" ? "active" : ""}`} onClick={() => setActivePanel("image")}> <Camera size={18} className="me-2" /> Profile Image </button>
-            <button className={`list-group-item list-group-item-action ${activePanel === "password" ? "active" : ""}`} onClick={() => setActivePanel("password")}> <KeyRound size={18} className="me-2" /> Change Password </button>
+            <button className={`list-group-item list-group-item-action ${activePanel === "profile"  ? "active" : ""}`} onClick={() => setActivePanel("profile")}  > <User     size={18} className="me-2" /> Profile Info </button>
+            <button className={`list-group-item list-group-item-action ${activePanel === "image"    ? "active" : ""}`} onClick={() => setActivePanel("image")}    > <Camera   size={18} className="me-2" /> Profile Image </button>
+            <button className={`list-group-item list-group-item-action ${activePanel === "password" ? "active" : ""}`} onClick={() => setActivePanel("password")} > <KeyRound size={18} className="me-2" /> Change Password </button>
           </div>
 
         </div>
+
 
         <div className="col-md-9">
 
@@ -324,6 +331,7 @@ export const Settings = () => {
               {/* <h3 className="mb-4">Settings</h3> */}
 
               {loading && <div className="alert alert-info">Loading...</div>}
+
               {error && (
                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
                   {error}
@@ -335,6 +343,7 @@ export const Settings = () => {
                   ></button>
                 </div>
               )}
+
               {success && (
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
                   {success}
@@ -493,17 +502,23 @@ export const Settings = () => {
                   )}
                   
                   <div className="col-12">
+
                     <label className="form-label fw-semibold"><KeyRound size={16} className="me-1" /> Confirm New Password</label>
+                  
                     <input type="password" name="confirm_password" className="form-control" value={passwordForm.confirm_password} onChange={handlePasswordChange} required />
+                   
                     {passwordMatchError && (
                       <div className="text-danger mt-1" style={{fontSize: "0.875em"}}>
                         {passwordMatchError}
                       </div>
                     )}
+                    
                   </div>
+
                   <div className="col-12 mt-3">
                     <button type="submit" className="btn btn-success" disabled={loading || !isPasswordValid || passwordMatchError || !passwordForm.password || !passwordForm.confirm_password}>Change Password</button>
                   </div>
+
                 </form>
               )}
 

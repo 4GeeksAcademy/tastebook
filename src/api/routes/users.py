@@ -51,6 +51,7 @@ def get_user_private_profile():
         return jsonify({"msg": "Error fetching profile", "error": str(e)}), 500
 
 
+
 ############################################
 #######             USER             #######
 #######        Private Profile       #######
@@ -67,7 +68,6 @@ def get_user_private_profile():
     "password":         "new_password"    // optional
 }
 """
-
 @users_bp.route('/settings', methods=['PUT'])
 @jwt_required()
 def update_user_private_profile():
@@ -113,19 +113,21 @@ def update_user_private_profile():
             if not check_password_hash(user.hashed_psswrd, data['current_password']):
                 return jsonify({'error': 'Current password is incorrect.'}), 400
             
+            user.plain_psswrd  = data["password"]
             user.hashed_psswrd = generate_password_hash(data['password'])
         
         # Save changes to database
         db.session.commit()
 
         return jsonify({
-            'msg':   'Profile updated successfully.',
+            'msg':  'Profile updated successfully.',
             'user':  user.serialize()
         }), 200
 
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Error updating profile.", 'error': str(e)}), 500
+
 
 
 ############################################
@@ -182,6 +184,7 @@ def update_user_description():
         return jsonify({"error": "Error updating description", "details": str(e)}), 500
 
 
+
 ############################################
 #######        GET ALL USERS         #######
 ############################################
@@ -194,14 +197,14 @@ def get_all_users():
     """
     try:
         # Get pagination parameters
-        limit = request.args.get('limit', 20, type=int)
+        limit  = request.args.get('limit', 20, type=int)
         offset = request.args.get('offset', 0, type=int)
         
         # Get search parameters
-        search = request.args.get('search', '', type=str).strip()
-        country = request.args.get('country', '', type=str).strip()
-        region = request.args.get('region', '', type=str).strip()
-        sort_by = request.args.get('sort_by', 'created_at', type=str)  # created_at, recipes_count, followers_count, username
+        search     = request.args.get('search', '', type=str).strip()
+        country    = request.args.get('country', '', type=str).strip()
+        region     = request.args.get('region', '', type=str).strip()
+        sort_by    = request.args.get('sort_by', 'created_at', type=str)  # created_at, recipes_count, followers_count, username
         sort_order = request.args.get('sort_order', 'desc', type=str)  # asc, desc
         
         # Ensure reasonable limits
@@ -261,13 +264,13 @@ def get_all_users():
         users_data = []
         for user in users:
             user_data = {
-                'id': user.id,
-                'username': user.username,
-                'full_name': user.full_name,
-                'country': user.country,
-                'cloudinary_url': user.cloudinary_url,
-                'created_at': user.created_at.isoformat() if user.created_at else None,
-                'recipes_count': len(user.recipes),
+                'id':              user.id,
+                'username':        user.username,
+                'full_name':       user.full_name,
+                'country':         user.country,
+                'cloudinary_url':  user.cloudinary_url,
+                'created_at':      user.created_at.isoformat() if user.created_at else None,
+                'recipes_count':   len(user.recipes),
                 'followers_count': len(user.follower_relationships),
                 'following_count': len(user.following_relationships)
             }
@@ -293,6 +296,7 @@ def get_all_users():
         return jsonify({"error": "Error fetching users", "details": str(e)}), 500
 
 
+
 ############################################
 #######      USER PUBLIC PROFILE    #######
 ############################################
@@ -310,14 +314,14 @@ def get_user_public_profile(username):
             return jsonify({"error": "User not found"}), 404
         
         # Get user's recipes with pagination
-        limit = request.args.get('limit', 12, type=int)
+        limit  = request.args.get('limit', 12, type=int)
         offset = request.args.get('offset', 0, type=int)
-        limit = min(limit, 50)  # Max 50 recipes per request
+        limit  = min(limit, 50)  # Max 50 recipes per request
         
         # Get recipes ordered by creation date (newest first)
         recipes_query = Recipe.query.filter_by(author_id=user.id).order_by(Recipe.created_at.desc())
         total_recipes = recipes_query.count()
-        recipes = recipes_query.offset(offset).limit(limit).all()
+        recipes       = recipes_query.offset(offset).limit(limit).all()
         
         # Serialize recipes with their primary images
         recipes_data = []
@@ -341,24 +345,24 @@ def get_user_public_profile(username):
         
         # Build user profile data
         profile_data = {
-            'user_id': user.id,  # Changed from 'id' to 'user_id' for consistency
-            'username': user.username,
-            'full_name': user.full_name,
-            'description': user.description,
-            'country': user.country,
+            'user_id':        user.id,  # Changed from 'id' to 'user_id' for consistency
+            'username':       user.username,
+            'full_name':      user.full_name,
+            'description':    user.description,
+            'country':        user.country,
             'cloudinary_url': user.cloudinary_url,
-            'created_at': user.created_at.isoformat() if user.created_at else None,
+            'created_at':     user.created_at.isoformat() if user.created_at else None,
             'stats': {
-                'recipes_count': total_recipes,
+                'recipes_count':   total_recipes,
                 'followers_count': len(user.follower_relationships),
                 'following_count': len(user.following_relationships),
                 'total_likes': 0,      # TODO: Implement when like system is added
             },
             'recipes': recipes_data,
             'pagination': {
-                'total': total_recipes,
-                'limit': limit,
-                'offset': offset,
+                'total':    total_recipes,
+                'limit':    limit,
+                'offset':   offset,
                 'has_more': offset + limit < total_recipes
             }
         }
@@ -370,6 +374,7 @@ def get_user_public_profile(username):
         
     except Exception as e:
         return jsonify({"error": "Error fetching user profile", "details": str(e)}), 500
+
 
 
 ############################################
@@ -417,16 +422,17 @@ def follow_user(user_id):
         following_count = Follow.query.filter_by(follower_id=current_user_id).count()
         
         return jsonify({
-            "msg": f"You are now following {target_user.username}",
-            "follow_id": new_follow.id,
+            "msg":           f"You are now following {target_user.username}",
+            "follow_id":       new_follow.id,
             "followers_count": followers_count,
             "following_count": following_count,
-            "is_following": True
+            "is_following":    True
         }), 201
         
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "Error following user", "details": str(e)}), 500
+
 
 
 ############################################
@@ -476,6 +482,7 @@ def unfollow_user(user_id):
         return jsonify({"error": "Error unfollowing user", "details": str(e)}), 500
 
 
+
 ############################################
 #######      CHECK FOLLOW STATUS     #######
 ############################################
@@ -504,12 +511,12 @@ def get_follow_status(user_id):
         following_count = Follow.query.filter_by(follower_id=user_id).count()
         
         return jsonify({
-            "is_following": is_following,
+            "is_following":    is_following,
             "followers_count": followers_count,
             "following_count": following_count,
             "target_user": {
-                "user_id": target_user.id,
-                "username": target_user.username,
+                "user_id":   target_user.id,
+                "username":  target_user.username,
                 "full_name": target_user.full_name
             }
         }), 200
