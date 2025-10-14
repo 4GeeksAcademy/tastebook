@@ -235,3 +235,15 @@ You can use these patterns to find, audit, or refactor imports across your proje
 
 
 import\s.*['"][^'"]*FILENAME.*['"]
+
+
+-----------
+
+cd /workspaces/tastebook && pipenv run migrate
+cd /workspaces/tastebook && pipenv run upgrade
+
+cd /workspaces/tastebook && rm -f migrations/versions/bb9952d45e9a_.py
+cd /workspaces/tastebook && pipenv run migrate
+
+cd /workspaces/tastebook && pipenv run python -c "from src.app import app; print('App imported successfully')"
+cd /workspaces/tastebook && PYTHONPATH=/workspaces/tastebook/src pipenv run python -c "from app import app; print('App imported successfully')"
