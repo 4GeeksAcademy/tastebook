@@ -65,6 +65,7 @@ export const Recipe = () => {
       if (!token) return;
 
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+
       const response = await fetch(`${backendUrl}/api/settings`, {
         method: 'GET',
         headers: {
@@ -94,6 +95,7 @@ export const Recipe = () => {
 
       // Ensure we have a backend URL
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      
       const apiUrl = `${backendUrl}/api/recipe/${id}`;
       
       console.log('Fetching recipe from:', apiUrl); // Debug log

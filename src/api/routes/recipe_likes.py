@@ -9,15 +9,15 @@ from sqlalchemy import or_
 
 from api.models import db, User, Recipe, RecipeLike
 
-# Create likes blueprint
-likes_bp = Blueprint('likes', __name__)
+
+recipe_likes_bp = Blueprint('recipe_likes', __name__)
 
 
-##############################################
-### Toggle like/unlike for a recipe
-##############################################
-
-@likes_bp.route('/recipe/<int:recipe_id>/like', methods=['POST'])
+############################################
+#######      Toggle like/unlike      #######
+#######         for a recipe         #######
+############################################
+@recipe_likes_bp.route('/recipe/<int:recipe_id>/like', methods=['POST'])
 @jwt_required()
 def toggle_recipe_like(recipe_id):
     """
@@ -36,24 +36,26 @@ def toggle_recipe_like(recipe_id):
         
         # Check if user has already liked this recipe
         existing_like = RecipeLike.query.filter_by(
-            user_id=current_user_id,
-            recipe_id=recipe_id
+            user_id   = current_user_id,
+            recipe_id = recipe_id
         ).first()
         
         if existing_like:
             # Unlike the recipe (remove the like)
             db.session.delete(existing_like)
-            action = "unliked"
+            action   = "unliked"
             is_liked = False
         else:
             # Like the recipe (add new like)
             new_like = RecipeLike()
-            new_like.user_id = current_user_id
+
+            new_like.user_id   = current_user_id
             new_like.recipe_id = recipe_id
+
             db.session.add(new_like)
-            action = "liked"
+
+            action   = "liked"
             is_liked = True
-            
         
         # Save to database
         db.session.commit()
@@ -63,10 +65,10 @@ def toggle_recipe_like(recipe_id):
         like_count = updated_recipe.like_count if updated_recipe else 0
         
         return jsonify({
-            "msg": f"Recipe {action} successfully",
-            "is_liked": is_liked,
+            "msg":      f"Recipe {action} successfully",
+            "is_liked":   is_liked,
             "like_count": like_count,
-            "recipe_id": recipe_id
+            "recipe_id":  recipe_id
         }), 200
         
     except Exception as e:
@@ -74,11 +76,12 @@ def toggle_recipe_like(recipe_id):
         return jsonify({"error": "Error toggling recipe like", "details": str(e)}), 500
 
 
-##############################################
-### Get liked recipes for current user
-##############################################
 
-@likes_bp.route('/user/liked-recipes', methods=['GET'])
+############################################
+#######       Get liked recipes      #######
+#######       for current user       #######
+############################################
+@recipe_likes_bp.route('/user/liked-recipes', methods=['GET'])
 @jwt_required()
 def get_user_liked_recipes():
     """
@@ -90,11 +93,11 @@ def get_user_liked_recipes():
         current_user_id = get_jwt_identity()
         
         # Get query parameters
-        page = request.args.get('page', 1, type=int)
-        per_page = min(request.args.get('per_page', 12, type=int), 50)  # Max 50 per page
-        search = request.args.get('search', '', type=str).strip()
-        sort_by = request.args.get('sort_by', 'liked_date', type=str)  # liked_date, recipe_name, author_name
-        order = request.args.get('order', 'desc', type=str)  # asc or desc
+        page     =     request.args.get('page',     1,            type=int)
+        per_page = min(request.args.get('per_page', 12,           type=int), 50)  # Max 50 per page
+        search   =     request.args.get('search',   '',           type=str).strip()
+        sort_by  =     request.args.get('sort_by',  'liked_date', type=str)  # liked_date, recipe_name, author_name
+        order    =     request.args.get('order',    'desc',       type=str)  # asc or desc
         
         # Base query for liked recipes
         query = db.session.query(Recipe).join(RecipeLike).filter(RecipeLike.user_id == current_user_id)
@@ -129,9 +132,9 @@ def get_user_liked_recipes():
         
         # Paginate results
         paginated_recipes = query.paginate(  # type: ignore
-            page=page,
-            per_page=per_page,
-            error_out=False
+            page      = page,
+            per_page  = per_page,
+            error_out = False
         )
         
         # Serialize recipes with like information
@@ -145,9 +148,9 @@ def get_user_liked_recipes():
             
             # Add author information
             recipe_data['author'] = {
-                'user_id': recipe.author.id,
-                'username': recipe.author.username,
-                'full_name': recipe.author.full_name,
+                'user_id':        recipe.author.id,
+                'username':       recipe.author.username,
+                'full_name':      recipe.author.full_name,
                 'cloudinary_url': recipe.author.cloudinary_url
             }
             
@@ -164,29 +167,30 @@ def get_user_liked_recipes():
             "msg": "Liked recipes retrieved successfully",
             "recipes": recipes_data,
             "pagination": {
-                "page": page,
-                "per_page": per_page,
-                "total": paginated_recipes.total,
-                "pages": paginated_recipes.pages,
-                "has_prev": paginated_recipes.has_prev,
-                "has_next": paginated_recipes.has_next,
-                "prev_num": paginated_recipes.prev_num,
-                "next_num": paginated_recipes.next_num
+                "page":      page,
+                "per_page":  per_page,
+                "total":     paginated_recipes.total,
+                "pages":     paginated_recipes.pages,
+                "has_prev":  paginated_recipes.has_prev,
+                "has_next":  paginated_recipes.has_next,
+                "prev_num":  paginated_recipes.prev_num,
+                "next_num":  paginated_recipes.next_num
             },
-            "search": search,
+            "search":  search,
             "sort_by": sort_by,
-            "order": order
+            "order":   order
         }), 200
         
     except Exception as e:
         return jsonify({"error": "Error retrieving liked recipes", "details": str(e)}), 500
 
 
-##############################################
-### Get like status and count for a recipe
-##############################################
 
-@likes_bp.route('/recipe/<int:recipe_id>/like-info', methods=['GET'])
+############################################
+#######        Get like status       #######
+#######    and count for a recipe    #######
+############################################
+@recipe_likes_bp.route('/recipe/<int:recipe_id>/like-info', methods=['GET'])
 def get_recipe_like_info(recipe_id):
     """
     Get like count and like status for a recipe
@@ -211,9 +215,9 @@ def get_recipe_like_info(recipe_id):
             # User is not authenticated, which is fine
             pass
         
-        return jsonify({
-            "recipe_id": recipe_id,
-            "like_count": like_count,
+        return jsonify({     
+            "recipe_id":        recipe_id,
+            "like_count":       like_count,
             "is_liked_by_user": is_liked_by_user
         }), 200
         

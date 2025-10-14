@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from api.models import db, User, Recipe, Collection, CollectionRecipe
 
-# Create collections blueprint
+
 collections_bp = Blueprint('collections', __name__)
 
 
@@ -26,25 +26,28 @@ collections_bp = Blueprint('collections', __name__)
 @jwt_required()
 def create_collection():
     """Create a new collection for the authenticated user."""
+
     try:
         user_id = get_jwt_identity()
-        user = User.query.get(user_id)
+        user    = User.query.get(user_id)
+
         if not user:
             return jsonify({"error": "User not found"}), 404
 
         data = request.get_json() or {}
-        title = data.get('title')
+
+        title       = data.get('title')
         description = data.get('description')
-        is_public = data.get('is_public', False)
+        is_public   = data.get('is_public', False)
 
         if not title:
             return jsonify({"error": "Title is required"}), 400
 
         collection = Collection(
-            owner_id = user.id,
-            title = title,
+            owner_id    = user.id,
+            title       = title,
             description = description,
-            is_public = bool(is_public)
+            is_public   = bool(is_public)
         )
 
         db.session.add(collection)
@@ -57,6 +60,7 @@ def create_collection():
         return jsonify({"error": "Failed to create collection", "details": str(e)}), 500
 
 
+
 ############################################
 #######   GET USER'S COLLECTIONS     #######
 ############################################
@@ -66,24 +70,25 @@ def get_user_collections():
     """Get all collections for the authenticated user (private + public).
     
     Query parameters:
-    - public_only: true/false (default: false)
-    - private_only: true/false (default: false)
-    - search: search by title
-    - sort_by: created_at/title (default: created_at)
-    - order: asc/desc (default: desc)
+    - public_only:   true/false (default: false)
+    - private_only:  true/false (default: false)
+    - search:        search by title
+    - sort_by:       created_at/title (default: created_at)
+    - order:         asc/desc (default: desc)
     """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
+
         if not user:
             return jsonify({"error": "User not found"}), 404
 
         # Optional query params: public_only, private_only, search, sort_by
-        public_only = request.args.get('public_only')
+        public_only  = request.args.get('public_only')
         private_only = request.args.get('private_only')
-        search = request.args.get('search')
-        sort_by = request.args.get('sort_by', 'created_at')
-        order = request.args.get('order', 'desc')
+        search       = request.args.get('search')
+        sort_by      = request.args.get('sort_by', 'created_at')
+        order        = request.args.get('order', 'desc')
 
         query = Collection.query.filter_by(owner_id=user.id)
 
@@ -115,9 +120,10 @@ def get_user_collections():
         return jsonify({"error": "Failed to retrieve collections", "details": str(e)}), 500
 
 
-############################################
-#######   GET PUBLIC USER COLLECTIONS #######
-############################################
+
+###############################################
+#######   GET PUBLIC USER COLLECTIONS   #######
+###############################################
 @collections_bp.route('/user/<string:username>/collections', methods=['GET'])
 def get_public_collections_for_user(username):
     """Get all public collections for a given user (for public profile pages)."""
@@ -137,9 +143,10 @@ def get_public_collections_for_user(username):
         return jsonify({"error": "Failed to retrieve public collections", "details": str(e)}), 500
 
 
-############################################
-#######      GET SINGLE COLLECTION   #######
-############################################
+
+###############################################
+#######       GET SINGLE COLLECTION     #######
+###############################################
 @collections_bp.route('/collection/<int:collection_id>', methods=['GET'])
 def get_collection(collection_id):
     """Get a single collection. If private, only owner may access.
@@ -194,8 +201,8 @@ def get_collection(collection_id):
 
         return jsonify({
             "collection": collection.serialize(
-                include_recipes=include_recipes, 
-                current_user_id=current_user_id
+                include_recipes = include_recipes, 
+                current_user_id = current_user_id
             )
         }), 200
 
@@ -203,14 +210,15 @@ def get_collection(collection_id):
         return jsonify({"error": "Failed to retrieve collection", "details": str(e)}), 500
 
 
+
 ############################################
 #######     UPDATE COLLECTION        #######
 ############################################
 """ JSON request body to update a collection:
 {
-    "title":       "Updated Collection Name", // optional
-    "description": "Updated description",     // optional
-    "is_public":   false                      // optional
+    "title":       "Updated Collection Name",  // optional
+    "description": "Updated description",      // optional
+    "is_public":    false                      // optional
 }
 """
 @collections_bp.route('/collection/<int:collection_id>', methods=['PUT'])
@@ -251,6 +259,7 @@ def update_collection(collection_id):
         return jsonify({"error": "Failed to update collection", "details": str(e)}), 500
 
 
+
 ############################################
 #######     DELETE COLLECTION        #######
 ############################################
@@ -275,6 +284,7 @@ def delete_collection(collection_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "Failed to delete collection", "details": str(e)}), 500
+
 
 
 ############################################
@@ -312,17 +322,17 @@ def add_recipe_to_collection(collection_id):
 
         # Prevent duplicates via unique constraint; check first
         existing = CollectionRecipe.query.filter_by(
-            collection_id=collection.id, 
-            recipe_id=recipe.id
+            collection_id = collection.id, 
+            recipe_id     = recipe.id
         ).first()
         
         if existing:
             return jsonify({"msg": "Recipe already in collection"}), 200
 
         assoc = CollectionRecipe(
-            collection_id=collection.id, 
-            recipe_id=recipe.id, 
-            display_order=display_order
+            collection_id = collection.id, 
+            recipe_id     = recipe.id, 
+            display_order = display_order
         )
         
         db.session.add(assoc)
@@ -336,6 +346,7 @@ def add_recipe_to_collection(collection_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "Failed to add recipe to collection", "details": str(e)}), 500
+
 
 
 ############################################
@@ -383,15 +394,16 @@ def remove_recipe_from_collection(collection_id):
         return jsonify({"error": "Failed to remove recipe from collection", "details": str(e)}), 500
 
 
+
 ############################################
-#######   REORDER COLLECTION RECIPES #######
+#######  REORDER COLLECTION RECIPES  #######
 ############################################
 """ JSON request body to reorder recipes in collection:
 {
     "order": [
-        {"association_id": 1, "display_order": 0},
-        {"association_id": 3, "display_order": 1},
-        {"association_id": 2, "display_order": 2}
+        {"association_id": 1,  "display_order": 0},
+        {"association_id": 3,  "display_order": 1},
+        {"association_id": 2,  "display_order": 2}
     ]
 }
 """
@@ -430,6 +442,7 @@ def reorder_collection_recipes(collection_id):
         return jsonify({"error": "Failed to reorder collection", "details": str(e)}), 500
 
 
+
 ############################################
 #######   LIST PUBLIC COLLECTIONS    #######
 ############################################
@@ -438,14 +451,14 @@ def list_public_collections():
     """List public collections across the platform. Supports pagination, search, sort.
     
     Query parameters:
-    - page: page number (default: 1)
-    - per_page: items per page (default: 20)
-    - search: search by title
+    - page:      page number (default: 1)
+    - per_page:  items per page (default: 20)
+    - search:    search by title
     """
     try:
-        page = int(request.args.get('page', 1))
+        page     = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 20))
-        search = request.args.get('search')
+        search   = request.args.get('search')
 
         query = Collection.query.filter_by(is_public=True)
         
@@ -453,9 +466,9 @@ def list_public_collections():
             query = query.filter(Collection.title.ilike(f"%{search}%"))
 
         paginated = query.order_by(Collection.created_at.desc()).paginate(
-            page=page, 
-            per_page=per_page, 
-            error_out=False
+            page      = page, 
+            per_page  = per_page, 
+            error_out = False
         )
 
         collections = [c.serialize() for c in paginated.items]
@@ -463,10 +476,10 @@ def list_public_collections():
         return jsonify({
             "collections": collections, 
             "pagination": {
-                "page": page, 
+                "page":     page, 
                 "per_page": per_page, 
-                "total": paginated.total, 
-                "pages": paginated.pages
+                "total":    paginated.total, 
+                "pages":    paginated.pages
             }
         }), 200
 

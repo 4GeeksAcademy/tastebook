@@ -11,7 +11,7 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 from api.models import db, User
 
-# Create authentication blueprint
+
 auth_bp = Blueprint('auth', __name__)
 
 
@@ -38,7 +38,6 @@ def send_recovery_email(email, token):
     "password":   "example_password"
 }
 """
-
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
 
@@ -91,7 +90,8 @@ def signup():
 
 
 ############################################
-#######   CHECK USERNAME EXISTS      #######
+#######    CHECK USERNAME EXISTS     #######
+#######     in sign-up process       #######
 ############################################
 """ JSON request body:
 {
@@ -123,7 +123,6 @@ def check_username():
     "password": "secure_password"
 }
 """
-
 @auth_bp.route('/login', methods=['POST'])
 def handle_login():
 
@@ -156,9 +155,9 @@ def handle_login():
         access_token = create_access_token(identity=str(user.id))  # User identity (you can use ID or email)
 
         return jsonify({
-            "msg": "Login successful.",
-            "access_token": access_token,
-            "user": user.serialize()
+            "msg"          : "Login successful.",
+            "access_token" : access_token,
+            "user"         : user.serialize()
         }), 200
     
     except Exception as e:
@@ -168,6 +167,7 @@ def handle_login():
 
 ############################################
 #######       Email Validation       #######
+#######     for Password Recovery    #######
 ############################################
 """ JSON request body to validate email for recovery:
 {
@@ -194,11 +194,16 @@ def recover_account():
 
     send_recovery_email(user.email, token)
 
-    return jsonify({"msg": "Recovery email sent.", "token": token}), 200
+    return jsonify({
+        "msg"   : "Recovery email sent.",
+        "token" : token
+        }), 200
+
 
 
 ############################################
-#######      Change Password         #######
+#######    NEW PASSWORD HANDLING     #######
+#######    for Password Recovery     #######
 #######     as logged out user       #######
 ############################################
 """ JSON request body to change password:
@@ -209,9 +214,11 @@ def recover_account():
 @auth_bp.route('/reset-password/<token>', methods=['POST'])
 def reset_password(token):
 
+    # Get the new password from the request body
     data         = request.get_json()
     new_password = data.get("new_password")
 
+    # Validate input
     if not new_password:
         return jsonify({"error": "New password is required."}), 400
 
@@ -219,17 +226,24 @@ def reset_password(token):
     secret_key = os.environ.get("SECRET_KEY", "default_secret")
     serializer = URLSafeTimedSerializer(secret_key)
 
+    # Deserialize the token to get the email
     try:
         email = serializer.loads(token, salt="password-recovery", max_age=3600)  # 1 hour expiration
+
     except SignatureExpired:
         return jsonify({"error": "Token expired."}), 400
+    
     except BadSignature:
         return jsonify({"error": "Invalid token."}), 400
-
+    
+    # Find the user by email
     user = User.query.filter_by(email=email).first()
+
+    # Validate user existence
     if not user:
         return jsonify({"error": "User not found."}), 404
 
+    # Update the user's password
     user.plain_psswrd  = new_password
     user.hashed_psswrd = generate_password_hash(new_password)
 

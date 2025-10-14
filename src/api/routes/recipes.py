@@ -10,7 +10,7 @@ from decimal import Decimal
 
 from api.models import db, User, Recipe, RecipeImage
 
-# Create recipes blueprint
+
 recipes_bp = Blueprint('recipes', __name__)
 
 
@@ -51,9 +51,8 @@ recipes_bp = Blueprint('recipes', __name__)
     ]
 }
 """
-
 @recipes_bp.route('/new-recipe', methods=['POST'])
-@recipes_bp.route('/recipe', methods=['POST'])  # Alternative endpoint for frontend
+@recipes_bp.route('/recipe',     methods=['POST'])  # Alternative endpoint for frontend
 @jwt_required()
 def create_new_recipe():
 
@@ -121,14 +120,14 @@ def create_new_recipe():
         recipe_response = new_recipe.serialize()
 
         recipe_response['author'] = {
-            'user_id':     user.id,
-            'username':    user.username,
-            'full_name':   user.full_name,
-            'cloudinary_url': user.cloudinary_url
-        }
+            'user_id':         user.id,
+            'username':        user.username,
+            'full_name':       user.full_name,
+            'cloudinary_url':  user.cloudinary_url
+        } 
         
         return jsonify({
-            "msg":    "Recipe created successfully.",
+            "msg":   "Recipe created successfully.",
             "recipe": recipe_response
         }), 201
     
@@ -137,8 +136,9 @@ def create_new_recipe():
         return jsonify({"error": "Error creating recipe.", "error": str(e)}), 500
 
 
+
 ############################################
-#######        GET SINGLE RECIPE     #######
+#######       GET SINGLE RECIPE      #######
 ############################################
 @recipes_bp.route('/recipe/<int:recipe_id>', methods=['GET'])
 def get_single_recipe(recipe_id):
@@ -167,17 +167,17 @@ def get_single_recipe(recipe_id):
         author = User.query.get(recipe.author_id)
         if author:
             recipe_data['author'] = {
-                'user_id': author.id,
-                'username': author.username,
-                'full_name': author.full_name,
+                'user_id':        author.id,
+                'username':       author.username,
+                'full_name':      author.full_name,
                 'cloudinary_url': author.cloudinary_url
             }
         else:
             # Fallback if author is somehow missing
             recipe_data['author'] = {
-                'user_id': recipe.author_id,
-                'username': 'Unknown',
-                'full_name': 'Unknown User',
+                'user_id':        recipe.author_id,
+                'username':      'Unknown',
+                'full_name':     'Unknown User',
                 'cloudinary_url': None
             }
         
@@ -192,6 +192,7 @@ def get_single_recipe(recipe_id):
         
     except Exception as e:
         return jsonify({"error": "Error fetching recipe", "details": str(e)}), 500
+
 
 
 ############################################
@@ -214,7 +215,6 @@ def get_single_recipe(recipe_id):
     ]
 }
 """
-
 @recipes_bp.route('/recipe/<int:recipe_id>', methods=['PUT'])
 @jwt_required()
 def update_recipe(recipe_id):
@@ -274,8 +274,8 @@ def update_recipe(recipe_id):
 
         # Update recipe fields
         recipe.title = data["title"][:100]  # Ensure maximum length
-        recipe.description = data.get("description", "")  # Optional field
-        recipe.ingredients = ingredients
+        recipe.description  = data.get("description", "")  # Optional field
+        recipe.ingredients  = ingredients
         recipe.instructions = instructions
         
         # Save to database
@@ -288,9 +288,9 @@ def update_recipe(recipe_id):
         author = User.query.get(recipe.author_id)
         if author:
             recipe_response['author'] = {
-                'user_id': author.id,
-                'username': author.username,
-                'full_name': author.full_name,
+                'user_id':        author.id,
+                'username':       author.username,
+                'full_name':      author.full_name,
                 'cloudinary_url': author.cloudinary_url
             }
         
@@ -298,10 +298,11 @@ def update_recipe(recipe_id):
             "msg": "Recipe updated successfully.",
             "recipe": recipe_response
         }), 200
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "Error updating recipe.", "details": str(e)}), 500
+
 
 
 ############################################
@@ -315,16 +316,16 @@ def get_all_recipes():
     """
     try:
         # Get pagination parameters
-        limit = request.args.get('limit', 20, type=int)
+        limit  = request.args.get('limit', 20, type=int)
         offset = request.args.get('offset', 0, type=int)
-        limit = min(limit, 100)
+        limit  = min(limit, 100)
 
         # Future-proof filter parameters
-        category = request.args.get('category')
-        dietary = request.args.get('dietary')
+        category         = request.args.get('category')
+        dietary          = request.args.get('dietary')
         max_cooking_time = request.args.get('max_cooking_time', type=int)
-        min_likes = request.args.get('min_likes', type=int)
-        search = request.args.get('search')
+        min_likes        = request.args.get('min_likes',        type=int)
+        search           = request.args.get('search')
 
         # Start query
         query = Recipe.query
@@ -342,9 +343,9 @@ def get_all_recipes():
             query = query.filter(Recipe.title.ilike(f"%{search}%"))
 
         # Order and paginate
-        query = query.order_by(Recipe.created_at.desc())
+        query       = query.order_by(Recipe.created_at.desc())
         total_count = query.count()
-        recipes = query.offset(offset).limit(limit).all()
+        recipes     = query.offset(offset).limit(limit).all()
 
         # Get current user if authenticated (for like information)
         current_user_id = None
@@ -357,12 +358,12 @@ def get_all_recipes():
         recipes_data = []
         for recipe in recipes:
             recipe_data = recipe.serialize(current_user_id=current_user_id)
-            author = User.query.get(recipe.author_id)
+            author      = User.query.get(recipe.author_id)
             if author:
                 recipe_data['author'] = {
-                    'user_id': author.id,
-                    'username': author.username,
-                    'full_name': author.full_name,
+                    'user_id':        author.id,
+                    'username':       author.username,
+                    'full_name':      author.full_name,
                     'cloudinary_url': author.cloudinary_url
                 }
             primary_image = RecipeImage.query.filter_by(
@@ -380,9 +381,9 @@ def get_all_recipes():
             "msg": "Recipes retrieved successfully",
             "recipes": recipes_data,
             "pagination": {
-                "total": total_count,
-                "limit": limit,
-                "offset": offset,
+                "total":    total_count,
+                "limit":    limit,
+                "offset":   offset,
                 "has_more": offset + limit < total_count
             }
         }), 200

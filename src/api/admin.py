@@ -315,7 +315,7 @@ def ensure_admin_account(app) -> User | None:
     """Ensure there is at least one administrator user for the control panel."""
     email     = os.getenv('ADMIN_SEED_EMAIL')
     password  = os.getenv('ADMIN_SEED_PASSWORD')
-    username  = os.getenv('ADMIN_SEED_USERNAME', 'tastebook-admin')
+    username  = os.getenv('ADMIN_SEED_USERNAME',  'tastebook-admin')
     full_name = os.getenv('ADMIN_SEED_FULL_NAME', 'Tastebook Administrator')
 
     if not email or not password:
@@ -366,8 +366,8 @@ def setup_admin(app):
     app.config['FLASK_ADMIN_SWATCH'] = 'cyborg'
 
     login_manager.init_app(app)
-    login_manager.login_view = 'admin.login'
-    login_manager.login_message = 'Please log in to access the admin console.'
+    login_manager.login_view             = 'admin.login'
+    login_manager.login_message          = 'Please log in to access the admin console.'
     login_manager.login_message_category = 'warning'
 
     admin_template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -376,6 +376,7 @@ def setup_admin(app):
 
     ensure_admin_account(app)
 
+
     admin = Admin(
         app,
         name='TasteBook Admin',
@@ -383,17 +384,18 @@ def setup_admin(app):
         template_mode='bootstrap3'
     )
 
+
     class UserAdmin(SecureModelView):
-        column_list = ['id','is_admin', 'email', 'username', 'full_name', 'country', 'is_active', 'plain_psswrd', 'created_at']
-        column_searchable_list = ['email', 'username', 'full_name']
-        column_filters = ['is_active', 'is_admin', 'created_at']
-        column_default_sort = ('created_at', True)
-        column_formatters = {
+        column_list            = ['id','is_admin', 'email', 'username', 'full_name', 'country', 'is_active', 'plain_psswrd', 'created_at']
+        column_searchable_list = [                 'email', 'username', 'full_name']
+        column_filters         = [     'is_admin',                                              'is_active',                 'created_at']
+        column_default_sort    =                                                                                            ('created_at', True)
+        column_formatters      = {
             'created_at': lambda _v, _c, m, _p: m.created_at.strftime('%Y-%m-%d %H:%M') if m.created_at else '—',
             'country':    lambda _v, _c, m, _p: f"{m.country.get('name', '—')} ({m.country.get('code', '—')})" if m.country else '—'
         }
-        form_columns = ['email', 'username', 'full_name', 'description', 'country', 'is_active', 'is_admin', 'plain_psswrd', 'cloudinary_url', 'cloudinary_img_id']
-        form_widget_args = {
+        form_columns           = ['email', 'username', 'full_name', 'description', 'country', 'is_active', 'is_admin', 'plain_psswrd', 'cloudinary_url', 'cloudinary_img_id']
+        form_widget_args       = {
             'plain_psswrd': {
                 'placeholder': 'Leave blank to keep current password'
             }
@@ -407,38 +409,39 @@ def setup_admin(app):
                 model.hashed_psswrd = generate_password_hash(password)
             super().on_model_change(form, model, is_created)
 
+
     class RecipeAdmin(SecureModelView):
-        column_list = ['id', 'author_id', 'title', 'created_at']
+        column_list            = ['id', 'author_id', 'title', 'created_at']
         column_searchable_list = ['title', 'description']
-        column_filters = ['author_id', 'created_at']
-        column_default_sort = ('created_at', True)
-        form_columns = ['author_id', 'title', 'description', 'ingredients', 'instructions']
+        column_filters         = ['author_id', 'created_at']
+        column_default_sort    = ('created_at', True)
+        form_columns           = ['author_id', 'title', 'description', 'ingredients', 'instructions']
 
     class RecipeImageAdmin(SecureModelView):
-        column_list = ['id', 'recipe_id', 'url', 'is_primary', 'display_order', 'uploaded_at']
+        column_list    = ['id', 'recipe_id', 'url', 'is_primary', 'display_order', 'uploaded_at']
         column_filters = ['recipe_id', 'is_primary', 'uploaded_at']
-        form_columns = ['recipe_id', 'url', 'image_id', 'is_primary', 'display_order']
+        form_columns   = ['recipe_id', 'url', 'image_id', 'is_primary', 'display_order']
 
     class FollowAdmin(SecureModelView):
-        column_list =    ['id', 'follower_id', 'followed_id', 'created_at']
+        column_list    = ['id', 'follower_id', 'followed_id', 'created_at']
         column_filters = ['follower_id', 'followed_id', 'created_at']
-        form_columns =   ['follower_id', 'followed_id']
+        form_columns   = ['follower_id', 'followed_id']
 
     class RecipeCommentAdmin(SecureModelView):
-        column_list =            ['id', 'user_id', 'recipe_id', 'content', 'is_pinned', 'is_edited', 'created_at']
-        column_searchable_list = ['content']
-        column_filters =         ['user_id', 'recipe_id', 'is_pinned', 'is_edited', 'created_at']
-        form_columns =           ['user_id', 'recipe_id', 'parent_comment_id', 'content', 'is_edited', 'is_pinned']
+        column_list            = ['id', 'user_id', 'recipe_id', 'parent_comment_id', 'is_pinned',        'content',        'is_edited', 'created_at']
+        column_searchable_list =                                                                 ['content']
+        column_filters         = [      'user_id', 'recipe_id',                     'is_pinned',          'is_edited', 'created_at']
+        form_columns           = [      'user_id', 'recipe_id', 'parent_comment_id',        'content', 'is_edited', 'is_pinned']
 
     class RecipeLikeAdmin(SecureModelView):
-        column_list =    ['id', 'user_id', 'recipe_id', 'created_at']
+        column_list    = ['id', 'user_id', 'recipe_id', 'created_at']
         column_filters = [      'user_id', 'recipe_id', 'created_at']
-        form_columns =   [      'user_id', 'recipe_id']
+        form_columns   = [      'user_id', 'recipe_id']
       
     class CommentLikeAdmin(SecureModelView):
-        column_list =    ['id', 'user_id', 'comment_id', 'created_at']
+        column_list    = ['id', 'user_id', 'comment_id', 'created_at']
         column_filters = [      'user_id', 'comment_id', 'created_at']
-        form_columns =   [      'user_id', 'comment_id']
+        form_columns   = [      'user_id', 'comment_id']
 
 
     admin.add_view( UserAdmin          (User,          db.session, name="Users"))

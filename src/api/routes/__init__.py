@@ -9,15 +9,25 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from api.models import User
 
 # Import all route modules
-from .auth           import auth_bp
-from .users          import users_bp
-from .recipes        import recipes_bp
-from .cloudinary     import cloudinary_bp
-from .comments       import comments_bp
-from .collections    import collections_bp
-from .messaging      import messaging_bp
-from .likes_recipes  import likes_bp
-from .admin_access   import admin_access_bp
+
+from .admin_access     import admin_access_bp
+from .auth             import auth_bp
+from .cloudinary       import cloudinary_bp
+from .collections      import collections_bp
+from .recipe_likes     import recipe_likes_bp
+from .messaging        import messaging_bp
+from .recipe_comments  import recipe_comments_bp
+
+# ---------------------------
+
+from .users            import users_bp
+from .recipes          import recipes_bp
+
+
+
+
+# ---------------------------
+
 
 # Create the main API blueprint
 api = Blueprint('api', __name__)
@@ -26,17 +36,24 @@ api = Blueprint('api', __name__)
 CORS(api)
 
 # Register all sub-blueprints
-api.register_blueprint(auth_bp)
-api.register_blueprint(users_bp)
-api.register_blueprint(recipes_bp)
-api.register_blueprint(cloudinary_bp)
-api.register_blueprint(comments_bp)
-api.register_blueprint(collections_bp)
-api.register_blueprint(messaging_bp)
-api.register_blueprint(likes_bp)
-api.register_blueprint(admin_access_bp)
+api.register_blueprint( auth_bp                 )
+api.register_blueprint( users_bp                )
+api.register_blueprint( cloudinary_bp           )
+api.register_blueprint( recipes_bp              )
+api.register_blueprint( recipe_comments_bp      )
+
+api.register_blueprint( messaging_bp            )
+api.register_blueprint( collections_bp          )
+api.register_blueprint( recipe_likes_bp         )
+api.register_blueprint( admin_access_bp         )
+
+
+
+
 
 # Example and testing endpoints
+
+
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
     response_body = {

@@ -8,14 +8,15 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from api.models import db, User, Recipe, RecipeComment, CommentLike
 
-# Create comments blueprint
-comments_bp = Blueprint('comments', __name__)
+
+recipe_comments_bp = Blueprint('recipe_comments', __name__)
+
 
 
 ############################################
-#######    GET COMMENTS FOR RECIPE   #######
+#######   GET COMMENTS FOR RECIPE    #######
 ############################################
-@comments_bp.route('/recipe/<int:recipe_id>/comments', methods=['GET'])
+@recipe_comments_bp.route('/recipe/<int:recipe_id>/comments', methods=['GET'])
 def get_recipe_comments(recipe_id):
     """
     Get all comments for a specific recipe, organized hierarchically.
@@ -29,9 +30,9 @@ def get_recipe_comments(recipe_id):
             return jsonify({"error": "Recipe not found"}), 404
 
         # Get pagination parameters
-        limit = request.args.get('limit', 20, type=int)
-        offset = request.args.get('offset', 0, type=int)
-        sort_by = request.args.get('sort_by', 'date', type=str)  # date, likes
+        limit      = request.args.get('limit',       20,    type=int)
+        offset     = request.args.get('offset',      0,     type=int)
+        sort_by    = request.args.get('sort_by',    'date', type=str)  # date, likes
         sort_order = request.args.get('sort_order', 'desc', type=str)  # asc, desc
         
         # Ensure reasonable limits
@@ -88,9 +89,9 @@ def get_recipe_comments(recipe_id):
             "msg": "Comments retrieved successfully",
             "comments": comments_data,
             "pagination": {
-                "total": total_non_pinned + (1 if pinned_comment else 0),
-                "limit": limit,
-                "offset": offset,
+                "total":    total_non_pinned + (1 if pinned_comment else 0),
+                "limit":    limit,
+                "offset":   offset,
                 "has_more": offset + limit < total_non_pinned
             },
             "stats": {
@@ -104,17 +105,17 @@ def get_recipe_comments(recipe_id):
         return jsonify({"error": "Error fetching comments", "details": str(e)}), 500
 
 
+
 ############################################
 #######       CREATE NEW COMMENT     #######
 ############################################
 """ JSON request body to CREATE NEW COMMENT:
 {
-    "content": "This recipe looks amazing! Can't wait to try it.",
-    "parent_comment_id": null  // optional, for replies
+    "content": "This recipe looks amazing!",
+    "parent_comment_id": null                  // optional, for replies
 }
 """
-
-@comments_bp.route('/recipe/<int:recipe_id>/comments', methods=['POST'])
+@recipe_comments_bp.route('/recipe/<int:recipe_id>/comments', methods=['POST'])
 @jwt_required()
 def create_comment(recipe_id):
     """
@@ -136,8 +137,8 @@ def create_comment(recipe_id):
             return jsonify({"error": "Recipe not found"}), 404
         
         # Get request data
-        data = request.get_json()
-        content = data.get("content", "").strip()
+        data              = request.get_json()
+        content           = data.get("content", "").strip()
         parent_comment_id = data.get("parent_comment_id")
         
         # Validate content
@@ -163,12 +164,12 @@ def create_comment(recipe_id):
         
         # Create new comment
         new_comment = RecipeComment(
-            user_id=current_user_id,
-            recipe_id=recipe_id,
-            parent_comment_id=parent_comment_id,
-            content=content,
-            is_edited=False,
-            is_pinned=False
+            user_id           = current_user_id,
+            recipe_id         = recipe_id,
+            parent_comment_id = parent_comment_id,
+            content           = content,
+            is_edited         = False,
+            is_pinned         = False
         )
         
         # Save to database
@@ -179,13 +180,14 @@ def create_comment(recipe_id):
         comment_data = new_comment.serialize(include_replies=False, current_user_id=current_user_id)
         
         return jsonify({
-            "msg": "Comment created successfully",
+            "msg":    "Comment created successfully",
             "comment": comment_data
         }), 201
         
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "Error creating comment", "details": str(e)}), 500
+
 
 
 ############################################
@@ -196,8 +198,7 @@ def create_comment(recipe_id):
     "content": "Updated comment content here"
 }
 """
-
-@comments_bp.route('/comment/<int:comment_id>', methods=['PUT'])
+@recipe_comments_bp.route('/comment/<int:comment_id>', methods=['PUT'])
 @jwt_required()
 def update_comment(comment_id):
     """
@@ -218,6 +219,7 @@ def update_comment(comment_id):
         
         # Get request data
         data = request.get_json()
+
         new_content = data.get("content", "").strip()
         
         # Validate content
@@ -238,7 +240,7 @@ def update_comment(comment_id):
         comment_data = comment.serialize(include_replies=False, current_user_id=current_user_id)
         
         return jsonify({
-            "msg": "Comment updated successfully",
+            "msg":    "Comment updated successfully",
             "comment": comment_data
         }), 200
         
@@ -247,10 +249,11 @@ def update_comment(comment_id):
         return jsonify({"error": "Error updating comment", "details": str(e)}), 500
 
 
+
 ############################################
 #######       DELETE COMMENT         #######
 ############################################
-@comments_bp.route('/comment/<int:comment_id>', methods=['DELETE'])
+@recipe_comments_bp.route('/comment/<int:comment_id>', methods=['DELETE'])
 @jwt_required()
 def delete_comment(comment_id):
     """
@@ -278,8 +281,8 @@ def delete_comment(comment_id):
         db.session.commit()
         
         return jsonify({
-            "msg": "Comment deleted successfully",
-            "deleted_comment_id": comment_id,
+            "msg":                  "Comment deleted successfully",
+            "deleted_comment_id":    comment_id,
             "deleted_replies_count": replies_count
         }), 200
         
@@ -288,10 +291,11 @@ def delete_comment(comment_id):
         return jsonify({"error": "Error deleting comment", "details": str(e)}), 500
 
 
+
 ############################################
 #######       LIKE/UNLIKE COMMENT    #######
 ############################################
-@comments_bp.route('/comment/<int:comment_id>/like', methods=['POST'])
+@recipe_comments_bp.route('/comment/<int:comment_id>/like', methods=['POST'])
 @jwt_required()
 def toggle_comment_like(comment_id):
     """
@@ -322,26 +326,26 @@ def toggle_comment_like(comment_id):
             db.session.delete(existing_like)
             db.session.commit()
             
-            action = "unliked"
+            action   = "unliked"
             is_liked = False
         else:
             # Like the comment
             new_like = CommentLike(
-                user_id=current_user_id,
-                comment_id=comment_id
+                user_id    = current_user_id,
+                comment_id = comment_id
             )
             db.session.add(new_like)
             db.session.commit()
             
-            action = "liked"
+            action   = "liked"
             is_liked = True
         
         # Get updated like count
         like_count = CommentLike.query.filter_by(comment_id=comment_id).count()
         
         return jsonify({
-            "msg": f"Comment {action} successfully",
-            "is_liked": is_liked,
+            "msg":        f"Comment {action} successfully",
+            "is_liked":   is_liked,
             "like_count": like_count,
             "comment_id": comment_id
         }), 200
@@ -351,10 +355,11 @@ def toggle_comment_like(comment_id):
         return jsonify({"error": "Error toggling comment like", "details": str(e)}), 500
 
 
+
 ############################################
 #######      PIN/UNPIN COMMENT       #######
 ############################################
-@comments_bp.route('/comment/<int:comment_id>/pin', methods=['PUT'])
+@recipe_comments_bp.route('/comment/<int:comment_id>/pin', methods=['PUT'])
 @jwt_required()
 def toggle_comment_pin(comment_id):
     """
@@ -389,9 +394,9 @@ def toggle_comment_pin(comment_id):
         else:
             # Unpin any currently pinned comment for this recipe
             current_pinned = RecipeComment.query.filter_by(
-                recipe_id=comment.recipe_id,
-                is_pinned=True,
-                parent_comment_id=None
+                recipe_id         = comment.recipe_id,
+                is_pinned         = True,
+                parent_comment_id = None
             ).first()
             
             if current_pinned:
@@ -399,7 +404,7 @@ def toggle_comment_pin(comment_id):
             
             # Pin this comment
             comment.is_pinned = True
-            action = "pinned"
+            action            = "pinned"
         
         # Save to database
         db.session.commit()
@@ -408,8 +413,8 @@ def toggle_comment_pin(comment_id):
         comment_data = comment.serialize(include_replies=False, current_user_id=current_user_id)
         
         return jsonify({
-            "msg": f"Comment {action} successfully",
-            "comment": comment_data,
+            "msg":     f"Comment {action} successfully",
+            "comment":   comment_data,
             "is_pinned": comment.is_pinned
         }), 200
         

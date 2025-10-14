@@ -1029,6 +1029,7 @@ class Collection(db.Model):
     title:         Mapped[str]           = mapped_column( String(120),                  nullable=False)
     description:   Mapped[Optional[str]] = mapped_column( Text,                         nullable=True)
     is_public:     Mapped[bool]          = mapped_column( Boolean,  default=False,      nullable=False)
+  
     created_at:    Mapped[datetime]      = mapped_column( DateTime(timezone=True),      nullable=False,  default=func.now(), server_default=func.now())
 
 

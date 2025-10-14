@@ -22,13 +22,25 @@ cloudinary.config(
     secure     = True
 )
 
-# Create cloudinary blueprint
+
 cloudinary_bp = Blueprint('cloudinary', __name__)
 
 
-# =============================
-#   USER PROFILE IMAGE UPLOAD
-# =============================
+
+#################################################################
+#################################################################
+#############                                       #############
+#############              CLOUDINARY               #############
+#############          USER profile image           #############
+#############                                       #############
+#################################################################
+#################################################################
+
+
+############################################
+#######         User profile         #######
+#######         IMAGE UPLOAD         #######
+############################################
 @cloudinary_bp.route('/user/upload-image', methods=['POST'])
 @jwt_required()
 def upload_user_image():
@@ -83,9 +95,11 @@ def upload_user_image():
         return jsonify({'error': str(e)}), 500
 
 
-# =============================
-#   DELETE USER PROFILE IMAGE
-# =============================
+
+############################################
+#######         User profile         #######
+#######         DELETE IMAGE         #######
+############################################
 @cloudinary_bp.route('/user/delete-image', methods=['DELETE'])
 @jwt_required()
 def delete_user_image():
@@ -118,9 +132,25 @@ def delete_user_image():
         return jsonify({'error': str(e)}), 500
 
 
-# =============================
-#   RECIPE IMAGE UPLOAD
-# =============================
+
+# --------------------------------------------------------------------------------------------------
+
+
+
+#################################################################
+#################################################################
+#############                                       #############
+#############              CLOUDINARY               #############
+#############            RECIPES images             #############
+#############                                       #############
+#################################################################
+#################################################################
+
+
+############################################
+#######            Recipe            #######
+#######         IMAGE UPLOAD         #######
+############################################
 @cloudinary_bp.route('/recipe/<int:recipe_id>/upload-image', methods=['POST'])
 @jwt_required()
 def upload_recipe_image(recipe_id):
@@ -149,7 +179,7 @@ def upload_recipe_image(recipe_id):
         max_order = db.session.query(db.func.max(RecipeImage.display_order)).filter_by(recipe_id=recipe_id).scalar()
         next_order = (max_order or -1) + 1
         
-        # If is_primary, unset previous primary
+        # If 'is_primary', unset previous primary
         if is_primary:
             RecipeImage.query.filter_by(recipe_id=recipe_id, is_primary=True).update({'is_primary': False})
         
@@ -168,9 +198,11 @@ def upload_recipe_image(recipe_id):
         return jsonify({'error': str(e)}), 500
 
 
-# =============================
-#   TEMPORARY IMAGE UPLOAD
-# =============================
+
+############################################
+#######            Recipe            #######
+#######    TEMPORARY IMAGE UPLOAD    #######
+############################################
 @cloudinary_bp.route('/recipe/temp/upload-image', methods=['POST'])
 @jwt_required()
 def upload_temp_recipe_image():
@@ -213,9 +245,11 @@ def upload_temp_recipe_image():
         return jsonify({'error': str(e)}), 500
 
 
-# =============================
-#   ASSOCIATE TEMP IMAGES WITH RECIPE
-# =============================
+############################################
+#######           ASSOCIATE          #######
+#######       TEMPORARY IMAGES       #######
+#######          WITH RECIPE         #######
+############################################
 @cloudinary_bp.route('/recipe/<int:recipe_id>/associate-temp-images', methods=['POST'])
 @jwt_required()
 def associate_temp_images_with_recipe(recipe_id):
@@ -273,9 +307,11 @@ def associate_temp_images_with_recipe(recipe_id):
         return jsonify({'error': str(e)}), 500
 
 
-# =============================
-#   SET PRIMARY RECIPE IMAGE
-# =============================
+
+############################################
+#######              SET             #######
+#######     PRIMARY RECIPE IMAGE     #######
+############################################
 @cloudinary_bp.route('/recipe/<int:recipe_id>/image/<int:image_id>/set-primary', methods=['PUT'])
 @jwt_required()
 def set_primary_recipe_image(recipe_id, image_id):
@@ -299,9 +335,10 @@ def set_primary_recipe_image(recipe_id, image_id):
         return jsonify({'error': str(e)}), 500
 
 
-# =============================
-#   DELETE RECIPE IMAGE
-# =============================
+
+############################################
+#######     DELETE RECIPE IMAGE      #######
+############################################
 @cloudinary_bp.route('/recipe/<int:recipe_id>/image/<int:image_id>', methods=['DELETE'])
 @jwt_required()
 def delete_recipe_image(recipe_id, image_id):
@@ -325,9 +362,10 @@ def delete_recipe_image(recipe_id, image_id):
         return jsonify({'error': str(e)}), 500
 
 
-# =============================
-#   REORDER RECIPE IMAGES
-# =============================
+
+############################################
+#######     REORDER RECIPE IMAGES    #######
+############################################
 @cloudinary_bp.route('/recipe/<int:recipe_id>/reorder-images', methods=['PUT'])
 @jwt_required()
 def reorder_recipe_images(recipe_id):
@@ -366,9 +404,10 @@ def reorder_recipe_images(recipe_id):
         return jsonify({'error': str(e)}), 500
 
 
-# =============================
-#   GET RECIPE IMAGES
-# =============================
+
+############################################
+#######       GET RECIPE IMAGES      #######
+############################################
 @cloudinary_bp.route('/recipe/<int:recipe_id>/images', methods=['GET'])
 def get_recipe_images(recipe_id):
     """

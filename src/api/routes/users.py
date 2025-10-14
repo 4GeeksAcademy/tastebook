@@ -9,10 +9,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
 
 from api.models import db, User, Recipe, RecipeImage, Follow
+
 from api.countries import REGIONS
 
-# Create users blueprint
+
 users_bp = Blueprint('users', __name__)
+
 
 
 ############################################
@@ -201,11 +203,11 @@ def get_all_users():
         offset = request.args.get('offset', 0, type=int)
         
         # Get search parameters
-        search     = request.args.get('search', '', type=str).strip()
-        country    = request.args.get('country', '', type=str).strip()
-        region     = request.args.get('region', '', type=str).strip()
-        sort_by    = request.args.get('sort_by', 'created_at', type=str)  # created_at, recipes_count, followers_count, username
-        sort_order = request.args.get('sort_order', 'desc', type=str)  # asc, desc
+        search     = request.args.get('search',     '',           type=str).strip()
+        country    = request.args.get('country',    '',           type=str).strip()
+        region     = request.args.get('region',     '',           type=str).strip()
+        sort_by    = request.args.get('sort_by',    'created_at', type=str)  # created_at, recipes_count, followers_count, username
+        sort_order = request.args.get('sort_order', 'desc',       type=str)  # asc, desc
         
         # Ensure reasonable limits
         limit = min(limit, 100)  # Max 100 users per request
@@ -280,14 +282,14 @@ def get_all_users():
             "msg": "Users retrieved successfully",
             "users": users_data,
             "pagination": {
-                "total": total_count,
-                "limit": limit,
-                "offset": offset,
+                "total":    total_count,
+                "limit":    limit,
+                "offset":   offset,
                 "has_more": offset + limit < total_count
             },
             "filters": {
-                "search": search,
-                "sort_by": sort_by,
+                "search":     search,
+                "sort_by":    sort_by,
                 "sort_order": sort_order
             }
         }), 200
@@ -298,7 +300,7 @@ def get_all_users():
 
 
 ############################################
-#######      USER PUBLIC PROFILE    #######
+#######      USER PUBLIC PROFILE     #######
 ############################################
 @users_bp.route('/user/<string:username>', methods=['GET'])
 def get_user_public_profile(username):
@@ -320,6 +322,7 @@ def get_user_public_profile(username):
         
         # Get recipes ordered by creation date (newest first)
         recipes_query = Recipe.query.filter_by(author_id=user.id).order_by(Recipe.created_at.desc())
+        
         total_recipes = recipes_query.count()
         recipes       = recipes_query.offset(offset).limit(limit).all()
         
@@ -330,8 +333,8 @@ def get_user_public_profile(username):
             
             # Add primary image
             primary_image = RecipeImage.query.filter_by(
-                recipe_id=recipe.id, 
-                is_primary=True
+                recipe_id  = recipe.id, 
+                is_primary = True
             ).first()
             
             if not primary_image:
@@ -356,7 +359,7 @@ def get_user_public_profile(username):
                 'recipes_count':   total_recipes,
                 'followers_count': len(user.follower_relationships),
                 'following_count': len(user.following_relationships),
-                'total_likes': 0,      # TODO: Implement when like system is added
+                'total_likes':     0,   # TODO: Implement when like system is added
             },
             'recipes': recipes_data,
             'pagination': {
@@ -401,8 +404,8 @@ def follow_user(user_id):
         
         # Check if already following
         existing_follow = Follow.query.filter_by(
-            follower_id=current_user_id,
-            followed_id=user_id
+            follower_id = current_user_id,
+            followed_id = user_id
         ).first()
         
         if existing_follow:
@@ -410,8 +413,8 @@ def follow_user(user_id):
         
         # Create new follow relationship
         new_follow = Follow(
-            follower_id=current_user_id,
-            followed_id=user_id
+            follower_id = current_user_id,
+            followed_id = user_id
         )
         
         db.session.add(new_follow)
@@ -422,7 +425,7 @@ def follow_user(user_id):
         following_count = Follow.query.filter_by(follower_id=current_user_id).count()
         
         return jsonify({
-            "msg":           f"You are now following {target_user.username}",
+            "msg":            f"You are now following {target_user.username}",
             "follow_id":       new_follow.id,
             "followers_count": followers_count,
             "following_count": following_count,
@@ -471,10 +474,10 @@ def unfollow_user(user_id):
         following_count = Follow.query.filter_by(follower_id=current_user_id).count()
         
         return jsonify({
-            "msg": f"You have unfollowed {target_user.username}",
+            "msg":             f"You have unfollowed {target_user.username}",
             "followers_count": followers_count,
             "following_count": following_count,
-            "is_following": False
+            "is_following":    False
         }), 200
         
     except Exception as e:

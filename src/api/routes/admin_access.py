@@ -2,13 +2,24 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash
 from api.models import db, User
+import os
+
+# Optional: load environment variables from a .env file when available (no-op if python-dotenv
+# isn't installed). This keeps production deployments unaffected while allowing local dev to
+# set ADMIN_PASSWORD in a .env file.
+try:
+	from dotenv import load_dotenv
+	# load .env from project root if present
+	load_dotenv()
+except Exception:
+	pass
 
 admin_access_bp = Blueprint('admin_access', __name__)
 
 
 #########################################
-#######     Flask Admin Check     #######
-#######       and Creation        #######
+#######        Flask Admin        #######
+#######    admin-user Creation    #######
 #########################################
 @admin_access_bp.route('/create-admin', methods=['POST'])
 def create_admin():
@@ -30,7 +41,9 @@ def create_admin():
 		# data      = request.get_json() or {} # --> there is no request body
 		email     = 'admin_user@flask.backpanel.com'
 		username  = 'admin-user'
-		password  = '9xJ*JSp#i$^W%5YTsyebFO'
+		# Read admin password from environment variable ADMIN_PASSWORD, fallback to
+		# a default value if not set. Deployments should set ADMIN_PASSWORD securely.
+		password  = os.environ.get('ADMIN_PASSWORD', 'Tastebook123!')
 		full_name = 'Admin User'
 
 		if not email or not username or not password:
@@ -68,7 +81,8 @@ def create_admin():
 
 
 #########################################
-#######     Flask Admin Check     #######
+#######        Flask Admin        #######
+#######     admin-user Check      #######
 #########################################
 @admin_access_bp.route('/check-admin', methods=['GET'])
 def check_admin():
