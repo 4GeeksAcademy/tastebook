@@ -451,11 +451,10 @@ class Recipe(db.Model):
     # Table Constraints #
     #-------------------#
     __table_args__ = (
-        # Note: json_array_length() and char_length() are PostgreSQL-specific functions
-        # These constraints will fail on SQLite, MySQL, etc.
-        CheckConstraint("json_array_length(ingredients)  > 0",  name='check_has_ingredients'),
-        CheckConstraint("json_array_length(instructions) > 0",  name='check_has_instructions'),
-        CheckConstraint("char_length(title)              > 0",  name='check_title_not_empty'),
+        # Database-agnostic constraints using SQLAlchemy functions
+        CheckConstraint(func.length(title) > 0, name='check_title_not_empty'),
+        # Note: JSON array length validation moved to application level for cross-database compatibility
+        # json_array_length() is PostgreSQL-specific, so we validate ingredients/instructions arrays in Python
     )
 
 
@@ -537,6 +536,43 @@ class Recipe(db.Model):
             .filter(RecipeLike.user_id == user_id, RecipeLike.recipe_id == self.id)
             .exists()
         ).scalar()
+
+    def validate_data(self) -> List[str]:
+        """Validate recipe data before saving.
+        
+        Returns a list of validation error messages. Empty list means valid.
+        This handles constraints that can't be enforced at the database level
+        for cross-database compatibility.
+        """
+        errors = []
+        
+        # Validate title is not empty (also enforced by DB constraint)
+        if not self.title or not self.title.strip():
+            errors.append("Recipe title cannot be empty")
+        
+        # Validate ingredients array is not empty
+        if not self.ingredients or len(self.ingredients) == 0:
+            errors.append("Recipe must have at least one ingredient")
+        
+        # Validate instructions array is not empty  
+        if not self.instructions or len(self.instructions) == 0:
+            errors.append("Recipe must have at least one instruction")
+            
+        # Validate each ingredient has required fields
+        for i, ingredient in enumerate(self.ingredients):
+            if not isinstance(ingredient, dict):
+                errors.append(f"Ingredient {i+1} must be an object")
+            elif not ingredient.get('ingredient', '').strip():
+                errors.append(f"Ingredient {i+1} name cannot be empty")
+            elif not isinstance(ingredient.get('quantity'), (int, float)) or ingredient.get('quantity', 0) <= 0:
+                errors.append(f"Ingredient {i+1} must have a positive quantity")
+        
+        # Validate each instruction is not empty
+        for i, instruction in enumerate(self.instructions):
+            if not instruction or not instruction.strip():
+                errors.append(f"Instruction {i+1} cannot be empty")
+        
+        return errors
 
 
     #---------------#
@@ -722,18 +758,11 @@ class RecipeComment(db.Model):
     #-------------------#
     __table_args__ = (
 
-        # Ensure comment content is not empty
-        ### Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
-        CheckConstraint("char_length(content) > 0", name='check_comment_content_not_empty'),
+        # Database-agnostic constraint using SQLAlchemy functions (no DB-specific functions like int MySQL, SQLite, PostgreSQL, etc)
+        CheckConstraint(func.length(content) > 0, name='check_comment_content_not_empty'),
 
-        # Only one pinned comment per recipe (now enforced at DB layer with partial unique index)
-        ### Note: This index is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
-        Index('unique_pinned_comment_per_recipe', 'recipe_id', unique=True, postgresql_where=text('is_pinned = true')),
-
-        # Prevent self-referencing at deeper than one level (REMOVED: PostgreSQL doesn't support subqueries in check constraints)
-        ### Note: This constraint is PostgreSQL-specific. For other DBs, enforce via app logic or triggers.
-        # CheckConstraint("parent_comment_id IS NULL OR (SELECT c.parent_comment_id FROM comments c WHERE c.id = parent_comment_id) IS NULL", name='check_no_deep_comment_nesting')
-        # This will be enforced at the application level instead
+        # Only one pinned comment per recipe (enforced at application level for database compatibility)
+        # Note: Previously used PostgreSQL-specific partial unique index, now handled in app logic
     )
 
 
@@ -821,6 +850,18 @@ class RecipeComment(db.Model):
             .filter(CommentLike.user_id == user_id, CommentLike.comment_id == self.id)
             .exists()
         ).scalar()
+
+    def validate_data(self) -> List[str]:
+        """Validate comment data before saving.
+        
+        Returns a list of validation error messages. Empty list means valid.
+        """
+        errors = []
+        
+        if not self.content or not self.content.strip():
+            errors.append("Comment content cannot be empty")
+            
+        return errors
 
 
     #---------------#
@@ -1040,8 +1081,8 @@ class Collection(db.Model):
     # Table Constraints #
     #-------------------#
     __table_args__ = (
-        # Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
-        CheckConstraint("char_length(title) > 0", name='check_collection_title_not_empty'),
+        # Database-agnostic constraint using SQLAlchemy functions
+        CheckConstraint(func.length(title) > 0, name='check_collection_title_not_empty'),
     )
 
 
@@ -1113,6 +1154,18 @@ class Collection(db.Model):
     #-----------------#
     def __repr__(self):
         return f"<Collection ID {self.id} | Title: {self.title} | Owner: {self.owner_id} | Public: {self.is_public}>"
+
+    def validate_data(self) -> List[str]:
+        """Validate collection data before saving.
+        
+        Returns a list of validation error messages. Empty list means valid.
+        """
+        errors = []
+        
+        if not self.title or not self.title.strip():
+            errors.append("Collection title cannot be empty")
+            
+        return errors
 
 
 
@@ -1711,9 +1764,8 @@ class Message(db.Model):
     # Table Constraints #
     #-------------------#
     __table_args__ = (
-        # Ensure message content is not empty
-        # Note: char_length() is PostgreSQL-specific, will fail on SQLite, MySQL, etc.
-        CheckConstraint("char_length(content) > 0", name='check_message_content_not_empty'),
+        # Database-agnostic constraint using SQLAlchemy functions
+        CheckConstraint(func.length(content) > 0, name='check_message_content_not_empty'),
     )
 
 
@@ -1748,6 +1800,18 @@ class Message(db.Model):
         """Mark the message as edited and set edited timestamp."""
         self.is_edited = True
         self.edited_at = datetime.now()
+
+    def validate_data(self) -> List[str]:
+        """Validate message data before saving.
+        
+        Returns a list of validation error messages. Empty list means valid.
+        """
+        errors = []
+        
+        if not self.content or not self.content.strip():
+            errors.append("Message content cannot be empty")
+            
+        return errors
 
 
     #---------------#

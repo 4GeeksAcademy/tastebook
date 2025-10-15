@@ -273,3 +273,33 @@ NO ERROR
 cd /workspaces/tastebook && pipenv run api
 
 cd /workspaces/tastebook && npm run dev
+
+
+---------------------
+
+
+$ cd /workspaces/tastebook && pipenv run python -c "
+> import sys
+> sys.path.append('/workspaces/tastebook/src')
+> 
+> from app import app
+> from api.models import RecipeComment
+> 
+> with app.app_context():
+>     # Simple test - just check that we can query the table
+>     try:
+>         count = RecipeComment.query.count()
+>         print(f'SUCCESS: RecipeComment table accessible, {count} total comments')
+>         
+>         # Check for any pinned comments
+>         pinned = RecipeComment.query.filter_by(is_pinned=True).count()
+>         print(f'Found {pinned} pinned comments')
+>         
+>     except Exception as e:
+>         print(f'ERROR: {e}')
+> "
+Loading .env environment variables...
+/workspaces/tastebook/.venv/lib/python3.13/site-packages/flask_admin/contrib/__init__.py:2: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  __import__('pkg_resources').declare_namespace(__name__)
+SUCCESS: RecipeComment table accessible, 0 total comments
+Found 0 pinned comments
