@@ -91,6 +91,7 @@ class SecureModelView(ModelView):
 class DashboardAdminIndexView(AdminIndexView):
     """Custom admin landing page with quick stats and utilities."""
 
+    # Dashboard statistics
     @expose('/')
     def index(self):
         if not admin_policy.is_admin(current_user):
@@ -131,9 +132,12 @@ class DashboardAdminIndexView(AdminIndexView):
             recent_recipes = recent_recipes,
             top_countries  = top_countries,
             activity       = list(_activity_stream),
-            test_password  = os.getenv('ADMIN_TEST_USER_PASSWORD', 'Tastebook123!')
+            test_password  = os.getenv('ADMIN_TEST_USER_PASSWORD', 'Tastebook123!'),
+            environment    = current_app.config.get('ENV', 'production')
         )
 
+
+    # Login page
     @expose('/login', methods=['GET', 'POST'])
     def login(self):
         if current_user.is_authenticated and admin_policy.is_admin(current_user):
@@ -158,6 +162,8 @@ class DashboardAdminIndexView(AdminIndexView):
 
         return self.render('admin/login.html')
 
+
+    # Logout page
     @expose('/logout')
     def logout(self):
         if current_user.is_authenticated:
@@ -166,6 +172,8 @@ class DashboardAdminIndexView(AdminIndexView):
         flash('Signed out successfully.', 'info')
         return redirect(url_for('.login'))
 
+
+    # Action: Create test users
     @expose('/actions/create-test-users', methods=['POST'])
     def create_test_users(self):
         if not admin_policy.is_admin(current_user):
@@ -177,6 +185,8 @@ class DashboardAdminIndexView(AdminIndexView):
         log_admin_event('Created test users', 'success', {'count': created})
         return redirect(url_for('.index'))
 
+
+    # Action: Create test recipes
     @expose('/actions/create-test-recipes', methods=['POST'])
     def create_test_recipes(self):
         if not admin_policy.is_admin(current_user):
@@ -192,6 +202,8 @@ class DashboardAdminIndexView(AdminIndexView):
             log_admin_event('Failed to create sample recipes', 'warning')
         return redirect(url_for('.index'))
 
+
+    # Action: Purge test data
     @expose('/actions/purge-test-data', methods=['POST'])
     def purge_test_data(self):
         if not admin_policy.is_admin(current_user):
@@ -202,6 +214,8 @@ class DashboardAdminIndexView(AdminIndexView):
         log_admin_event('Purged test data', 'info', removed)
         return redirect(url_for('.index'))
 
+
+    # Action: Purge ALL data
     @expose('/actions/purge-all-data', methods=['POST'])
     def purge_all_data(self):
         if not admin_policy.is_admin(current_user):
@@ -214,6 +228,52 @@ class DashboardAdminIndexView(AdminIndexView):
         return redirect(url_for('.index'))
 
 
+    # Action: Total database reset
+    @expose('/actions/total-database-reset', methods=['POST'])
+    def total_database_reset(self):
+        if not admin_policy.is_admin(current_user):
+            return redirect(url_for('.login', next=request.url))
+
+        current_app.logger.info('🔄 Admin dashboard: Total database reset requested')
+
+        # Check environment - be extra careful in production
+        environment = current_app.config.get('ENV', 'production') if current_app else os.getenv('FLASK_ENV', 'production')
+        is_production = environment == 'production'
+
+        current_app.logger.info(f'Environment detected: {environment} (is_production: {is_production})')
+
+        if is_production:
+            current_app.logger.info('Production environment - checking confirmation')
+            # In production, require explicit confirmation
+            confirm_reset = request.form.get('confirm_total_reset', '').lower() == 'yes'
+            current_app.logger.info(f'Confirmation checkbox value: {request.form.get("confirm_total_reset", "")} (confirmed: {confirm_reset})')
+            if not confirm_reset:
+                current_app.logger.warning('Production confirmation failed - redirecting back')
+                flash('⚠️ Production database reset requires explicit confirmation. Please check the confirmation box.', 'danger')
+                return redirect(url_for('.index'))
+
+        current_app.logger.info('Starting database reset process...')
+        try:
+            result = AdminDataSeeder.total_database_reset()
+            current_app.logger.info('Database reset completed successfully')
+            log_admin_event('Total database reset completed', 'success', {'environment': environment})
+            flash(f'🗑️ {result["message"]}! All tables dropped and recreated. Auto-increment IDs reset to 1. Admin account recreated.', 'success')
+            return redirect(url_for('.index'))
+
+        except ValueError as e:
+            current_app.logger.error(f'Configuration error: {str(e)}')
+            log_admin_event('Total database reset failed - missing config', 'danger', {'error': str(e)})
+            flash(f'Configuration error: {str(e)}', 'danger')
+            return redirect(url_for('.index'))
+
+        except Exception as e:
+            current_app.logger.error(f'Database reset failed: {str(e)}', exc_info=True)
+            log_admin_event('Total database reset failed', 'danger', {'error': str(e)})
+            flash(f'Total database reset failed: {str(e)}', 'danger')
+            return redirect(url_for('.index'))
+
+
+# Data seeding and cleanup
 class AdminDataSeeder:
     """Utility helpers to populate and clean development data."""
 
@@ -283,8 +343,8 @@ class AdminDataSeeder:
                 title        = title,
                 description  = description,
                 ingredients  = ingredients,
-                instructions = instructions
-                # is_public    = True
+                instructions = instructions,
+                is_public    = True
             )
 
             db.session.add(recipe)
@@ -380,6 +440,107 @@ class AdminDataSeeder:
         db.session.commit()
         
         return stats
+
+    @classmethod
+    def total_database_reset(cls) -> Dict[str, str]:
+        """
+        Perform a complete database reset by dropping and recreating all tables.
+        This resets auto-increment counters and applies any schema changes.
+        WARNING: This is destructive and should only be used in development!
+        """
+        # Get admin credentials
+        admin_email     = os.getenv('ADMIN_SEED_EMAIL')
+        admin_password  = os.getenv('ADMIN_SEED_PASSWORD')
+        admin_username  = os.getenv('ADMIN_SEED_USERNAME',  'tastebook-admin')
+        admin_full_name = os.getenv('ADMIN_SEED_FULL_NAME', 'Tastebook Administrator')
+
+        current_app.logger.info('🔄 Starting total database reset...')
+        current_app.logger.info(f'Admin credentials: email={admin_email}, username={admin_username}')
+
+        if not admin_email or not admin_password:
+            current_app.logger.error('Missing admin credentials: ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD must be set')
+            raise ValueError('ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD environment variables must be set')
+
+        try:
+            current_app.logger.info('Closing all database connections...')
+            # Close all active sessions and connections before dropping tables
+            db.session.close_all()
+            db.engine.dispose()
+            current_app.logger.info('All connections closed')
+
+            current_app.logger.info('Dropping all tables...')
+            try:
+                # First try the normal SQLAlchemy approach
+                db.drop_all()
+                current_app.logger.info('All tables dropped successfully via SQLAlchemy')
+            except Exception as drop_error:
+                current_app.logger.warning(f'SQLAlchemy drop_all failed: {drop_error}, trying raw SQL approach')
+                # Fallback: use raw SQL to drop tables (SQLite specific)
+                with db.engine.connect() as conn:
+                    # Get all table names
+                    result = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+                    tables = [row[0] for row in result.fetchall()]
+                    
+                    current_app.logger.info(f'Found tables to drop: {tables}')
+                    
+                    # Drop tables in reverse order to handle foreign keys
+                    for table in reversed(tables):
+                        try:
+                            conn.execute(f"DROP TABLE IF EXISTS {table}")
+                            current_app.logger.info(f'Dropped table: {table}')
+                        except Exception as table_error:
+                            current_app.logger.warning(f'Failed to drop table {table}: {table_error}')
+                    
+                    # Reset sequences (auto-increment counters)
+                    conn.execute("DELETE FROM sqlite_sequence")
+                    conn.commit()
+                    
+                current_app.logger.info('All tables dropped successfully via raw SQL')
+
+            current_app.logger.info('Recreating database engine connection...')
+            # Ensure clean connection state
+            db.engine.dispose()
+            current_app.logger.info('Engine disposed and recreated')
+
+            current_app.logger.info('Creating all tables...')
+            # Recreate all tables with fresh schema
+            db.create_all()
+            current_app.logger.info('All tables created successfully')
+
+            current_app.logger.info('Creating admin user...')
+            # Recreate the admin account
+            admin_user = User(
+                email         = admin_email,
+                username      = admin_username,
+                full_name     = admin_full_name,
+                description   = 'Auto-created admin account after database reset',
+                country       = None,
+                is_active     = True,
+                is_admin      = True,
+                plain_psswrd  = admin_password if current_app.config.get('ENV') != 'production' else None,
+                hashed_psswrd = generate_password_hash(admin_password)
+            )
+
+            current_app.logger.info(f'Adding admin user to session: {admin_user.email}')
+            db.session.add(admin_user)
+
+            current_app.logger.info('Committing admin user...')
+            db.session.commit()
+            current_app.logger.info('Admin user committed successfully')
+
+            result = {
+                'status': 'success',
+                'message': 'Database reset completed successfully',
+                'admin_email': admin_email
+            }
+            current_app.logger.info(f'✅ Database reset completed: {result}')
+            return result
+
+        except Exception as e:
+            current_app.logger.error(f'❌ Database reset failed: {str(e)}', exc_info=True)
+            db.session.rollback()
+            current_app.logger.info('Database session rolled back')
+            raise Exception(f'Database reset failed: {str(e)}')
 
 
 @login_manager.user_loader
@@ -523,16 +684,19 @@ def setup_admin(app):
         form_columns   = [      'user_id', 'comment_id']
 
 
+    # Register views
     admin.add_view( UserAdmin          (User,          db.session, name="Users"))
-    admin.add_view( FollowAdmin        (Follow,        db.session,               category='Social'))
+    # --
+    admin.add_view( RecipeAdmin        (Recipe,        db.session, name="Recipes"))
+    admin.add_view( RecipeImageAdmin   (RecipeImage,   db.session,                   category='Media'))
+    # --
+    admin.add_view( FollowAdmin        (Follow,        db.session,                   category='Engagement'))
+    admin.add_view( RecipeLikeAdmin    (RecipeLike,    db.session,                   category='Engagement'))
+    admin.add_view( RecipeCommentAdmin (RecipeComment, db.session,                   category='Engagement'))
+    admin.add_view( CommentLikeAdmin   (CommentLike,   db.session,                   category='Engagement'))
 
-    admin.add_view( RecipeAdmin        (Recipe,        db.session,               category='Content'))
-    admin.add_view( RecipeImageAdmin   (RecipeImage,   db.session,               category='Content'))
-    admin.add_view( RecipeLikeAdmin    (RecipeLike,    db.session,               category='Engagement'))
-    admin.add_view( RecipeCommentAdmin (RecipeComment, db.session,               category='Social'))
-    admin.add_view( CommentLikeAdmin   (CommentLike,   db.session,               category='Engagement'))
 
-
+    # Custom links
     admin.add_link( MenuLink( name='View Tastebook', url='/'))
     admin.add_link( MenuLink( name='Visit API Docs', url='/api'))
 

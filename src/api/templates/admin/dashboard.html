@@ -89,6 +89,19 @@
                         <button type="submit" class="btn btn-danger" onclick="return confirm('⚠️ WARNING: This will DELETE ALL DATA in the database (users, recipes, comments, etc.) except admin accounts!\n\nThis action CANNOT be undone!\n\nAre you absolutely sure you want to proceed?');">🗑️ PURGE ALL DATABASE DATA</button>
                     </form>
 
+                    {% set reset_warning = 'This is PRODUCTION - EXTREMELY DANGEROUS!' if environment == 'production' else 'This is for DEVELOPMENT ONLY' %}
+                    <form method="post" action="{{ url_for('admin.total_database_reset') }}" style="margin-bottom: 15px;">
+                        {% if environment == 'production' %}
+                        <div class="checkbox" style="margin-bottom: 10px;">
+                            <label>
+                                <input type="checkbox" name="confirm_total_reset" value="yes" style="margin-right: 5px;">
+                                I understand this will permanently delete ALL data and cannot be undone
+                            </label>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('🚨 EXTREME WARNING: This will COMPLETELY RESET the entire database!\n\n- All tables will be DROPPED and RECREATED\n- All data will be PERMANENTLY LOST\n- Auto-increment IDs will reset to 1\n- Schema changes will be applied\n\n{{ reset_warning }} and CANNOT be undone!\n\nAre you absolutely certain you want to proceed?');" style="font-weight: bold;">🔄 TOTAL DATABASE RESET</button>
+                    </form>
+
                     <p class="help-block" style="margin-top: 10px;">
                         Test users are created with the password <code>{{ test_password }}</code>.
                     </p>

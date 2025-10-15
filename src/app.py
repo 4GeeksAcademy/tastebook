@@ -40,6 +40,9 @@ app = Flask(__name__)
 
 app.url_map.strict_slashes = False
 
+# Set environment in config so admin panel can detect it
+app.config['ENV'] = ENV
+
 # Basic logging
 logging.basicConfig(level=logging.DEBUG if ENV == "development" else logging.INFO)
 logger = logging.getLogger(__name__)
