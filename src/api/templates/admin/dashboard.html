@@ -4,7 +4,7 @@
 
 
     <!-- Flash messages -- DELETED SINCE Flask-Admin ALREADY DISPLAYS IT -->
-     
+
     <!-- {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="row">
@@ -81,8 +81,12 @@
                         <button type="submit" class="btn btn-success btn-sm">Add Sample Recipes</button>
                     </form>
 
-                    <form method="post" action="{{ url_for('admin.purge_test_data') }}">
+                    <form method="post" action="{{ url_for('admin.purge_test_data') }}" style="margin-bottom: 10px;">
                         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove generated test users and recipes?');">Purge Generated Test Data</button>
+                    </form>
+
+                    <form method="post" action="{{ url_for('admin.purge_all_data') }}" style="margin-bottom: 15px;">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('⚠️ WARNING: This will DELETE ALL DATA in the database (users, recipes, comments, etc.) except admin accounts!\n\nThis action CANNOT be undone!\n\nAre you absolutely sure you want to proceed?');">🗑️ PURGE ALL DATABASE DATA</button>
                     </form>
 
                     <p class="help-block" style="margin-top: 10px;">

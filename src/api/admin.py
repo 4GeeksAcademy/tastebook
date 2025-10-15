@@ -15,7 +15,7 @@ from flask_login import LoginManager, current_user, login_user, logout_user
 from sqlalchemy import func
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .models import db, User, Recipe, RecipeImage, Follow, RecipeComment, RecipeLike, CommentLike
+from .models import db, User, Recipe, RecipeImage, Follow, RecipeComment, RecipeLike, CommentLike, Collection, CollectionRecipe, Chat, Message
 from .countries import get_random_country
 
 faker = Faker()
@@ -202,6 +202,17 @@ class DashboardAdminIndexView(AdminIndexView):
         log_admin_event('Purged test data', 'info', removed)
         return redirect(url_for('.index'))
 
+    @expose('/actions/purge-all-data', methods=['POST'])
+    def purge_all_data(self):
+        if not admin_policy.is_admin(current_user):
+            return redirect(url_for('.login', next=request.url))
+
+        removed = AdminDataSeeder.purge_all_data()
+        total_items = sum(removed.values())
+        flash(f'Database purged successfully! Removed {total_items} total items: {removed["users"]} users, {removed["recipes"]} recipes, {removed["comments"]} comments, {removed["likes"]} likes, and all related data.', 'warning')
+        log_admin_event('Purged ALL database data', 'warning', removed)
+        return redirect(url_for('.index'))
+
 
 class AdminDataSeeder:
     """Utility helpers to populate and clean development data."""
@@ -286,21 +297,89 @@ class AdminDataSeeder:
 
     @classmethod
     def purge_test_data(cls) -> Dict[str, int]:
+
+        # Remove recipes and users created by the seeder
         recipe_query = Recipe.query.filter(Recipe.title.like(f"{cls.RECIPE_PREFIX}%"))
         recipes_removed = recipe_query.count()
 
+        # Remove all test recipes
         user_query = User.query.filter(User.username.like(f"{cls.USER_PREFIX}_%"))
         users_removed = user_query.count()
 
+        # Cascade deletions will clean up related data (comments, likes, follows, etc.)
         if recipes_removed:
             recipe_query.delete(synchronize_session=False)
         if users_removed:
             user_query.delete(synchronize_session=False)
 
+        # Commit if we removed anything
         if recipes_removed or users_removed:
             db.session.commit()
 
         return {'recipes': recipes_removed, 'users': users_removed}
+
+    @classmethod
+    def purge_all_data(cls) -> Dict[str, int]:
+        """
+        Purge ALL data from the database except admin users.
+        This removes all non-admin users and all related data (recipes, comments, likes, etc.).
+        Admin users are preserved to maintain access to the admin panel.
+        """
+        # Count what we're about to remove for reporting
+        stats = {
+            'users': User.query.filter(User.is_admin == False).count(),
+            'recipes': Recipe.query.count(),
+            'comments': RecipeComment.query.count(),
+            'likes': RecipeLike.query.count(),
+            'comment_likes': CommentLike.query.count(),
+            'follows': Follow.query.count(),
+            'collections': Collection.query.count(),
+            'collection_recipes': CollectionRecipe.query.count(),
+            'recipe_images': RecipeImage.query.count(),
+            'chats': Chat.query.count(),
+            'messages': Message.query.count()
+        }
+
+        # Delete in order to respect foreign key constraints
+        # Start with dependent tables first, then work up to users
+        
+        # 1. Delete messages first (depends on chats and users)
+        Message.query.delete(synchronize_session=False)
+        
+        # 2. Delete chats (depends on users)
+        Chat.query.delete(synchronize_session=False)
+        
+        # 3. Delete collection recipes (junction table between collections and recipes)
+        CollectionRecipe.query.delete(synchronize_session=False)
+        
+        # 4. Delete collections (depends on users)
+        Collection.query.delete(synchronize_session=False)
+        
+        # 5. Delete comment likes (depends on comments and users)
+        CommentLike.query.delete(synchronize_session=False)
+        
+        # 6. Delete recipe comments (depends on recipes and users)
+        RecipeComment.query.delete(synchronize_session=False)
+        
+        # 7. Delete recipe likes (depends on recipes and users)
+        RecipeLike.query.delete(synchronize_session=False)
+        
+        # 8. Delete recipe images (depends on recipes)
+        RecipeImage.query.delete(synchronize_session=False)
+        
+        # 9. Delete recipes (depends on users)
+        Recipe.query.delete(synchronize_session=False)
+        
+        # 10. Delete follows (depends on users)
+        Follow.query.delete(synchronize_session=False)
+        
+        # 11. Finally, delete non-admin users
+        User.query.filter(User.is_admin == False).delete(synchronize_session=False)
+        
+        # Commit all deletions
+        db.session.commit()
+        
+        return stats
 
 
 @login_manager.user_loader
