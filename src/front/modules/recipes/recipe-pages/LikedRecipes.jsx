@@ -317,14 +317,14 @@ export const LikedRecipes = () => {
                 </div>
 
                 {/* Search and Filters */}
-                <div className="bg-light p-4 rounded-3 mb-4">
+                <div className="border rounded-3 p-4 mb-4">
                     <form onSubmit={handleSearch}>
                         <div className="row g-3 align-items-end">
                             {/* Search Bar */}
                             <div className="col-md-6">
                                 <label htmlFor="search" className="form-label fw-semibold">Search Recipes</label>
                                 <div className="input-group">
-                                    <span className="input-group-text bg-white border-end-0">
+                                    <span className="input-group-text border-end-0">
                                         <Search size={16} />
                                     </span>
                                     <input
