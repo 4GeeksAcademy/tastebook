@@ -126,12 +126,12 @@ class DashboardAdminIndexView(AdminIndexView):
 
         return self.render(
             'admin/dashboard.html',
-            stats=stats,
-            recent_users=recent_users,
-            recent_recipes=recent_recipes,
-            top_countries=top_countries,
-            activity=list(_activity_stream),
-            test_password=os.getenv('ADMIN_TEST_USER_PASSWORD', 'Tastebook123!')
+            stats          = stats,
+            recent_users   = recent_users,
+            recent_recipes = recent_recipes,
+            top_countries  = top_countries,
+            activity       = list(_activity_stream),
+            test_password  = os.getenv('ADMIN_TEST_USER_PASSWORD', 'Tastebook123!')
         )
 
     @expose('/login', methods=['GET', 'POST'])
@@ -206,7 +206,7 @@ class DashboardAdminIndexView(AdminIndexView):
 class AdminDataSeeder:
     """Utility helpers to populate and clean development data."""
 
-    USER_PREFIX = 'testuser'
+    USER_PREFIX   = 'testuser'
     RECIPE_PREFIX = 'Sample Recipe'
 
     @classmethod
@@ -269,11 +269,11 @@ class AdminDataSeeder:
             ]
 
             recipe = Recipe(
-                author_id=author_id,
-                title=title,
-                description=description,
-                ingredients=ingredients,
-                instructions=instructions
+                author_id    = author_id,
+                title        = title,
+                description  = description,
+                ingredients  = ingredients,
+                instructions = instructions
             )
 
             db.session.add(recipe)
@@ -363,7 +363,7 @@ def ensure_admin_account(app) -> User | None:
 
 def setup_admin(app):
     app.secret_key = os.environ.get('FLASK_APP_KEY', 'sample key')
-    app.config['FLASK_ADMIN_SWATCH'] = 'cyborg'
+    app.config['FLASK_ADMIN_SWATCH'] = 'cyborg' # https://bootswatch.com/cyborg/
 
     login_manager.init_app(app)
     login_manager.login_view             = 'admin.login'
@@ -379,9 +379,9 @@ def setup_admin(app):
 
     admin = Admin(
         app,
-        name='TasteBook Admin',
-        index_view=DashboardAdminIndexView(name='Dashboard'),
-        template_mode='bootstrap3'
+        name          = 'TasteBook Admin',
+        index_view    =  DashboardAdminIndexView(name='Dashboard'),
+        template_mode = 'bootstrap3'
     )
 
 
@@ -411,27 +411,27 @@ def setup_admin(app):
 
 
     class RecipeAdmin(SecureModelView):
-        column_list            = ['id', 'author_id', 'title', 'created_at']
-        column_searchable_list = ['title', 'description']
-        column_filters         = ['author_id', 'created_at']
-        column_default_sort    = ('created_at', True)
-        form_columns           = ['author_id', 'title', 'description', 'ingredients', 'instructions']
+        column_list            = ['id', 'author_id', 'title',                                              'created_at']
+        column_searchable_list = [                   'title', 'description']                               
+        column_filters         = [      'author_id',                                                       'created_at']
+        column_default_sort    = (                                                                         'created_at', True)
+        form_columns           = [      'author_id', 'title', 'description', 'ingredients', 'instructions']
 
     class RecipeImageAdmin(SecureModelView):
-        column_list    = ['id', 'recipe_id', 'url', 'is_primary', 'display_order', 'uploaded_at']
-        column_filters = ['recipe_id', 'is_primary', 'uploaded_at']
-        form_columns   = ['recipe_id', 'url', 'image_id', 'is_primary', 'display_order']
+        column_list    = ['id', 'recipe_id', 'is_primary', 'url',             'display_order', 'uploaded_at']
+        column_filters = [      'recipe_id', 'is_primary',                                     'uploaded_at']
+        form_columns   = [      'recipe_id', 'is_primary', 'url', 'image_id', 'display_order']
 
     class FollowAdmin(SecureModelView):
         column_list    = ['id', 'follower_id', 'followed_id', 'created_at']
-        column_filters = ['follower_id', 'followed_id', 'created_at']
-        form_columns   = ['follower_id', 'followed_id']
+        column_filters = [      'follower_id', 'followed_id', 'created_at']
+        form_columns   = [      'follower_id', 'followed_id']
 
     class RecipeCommentAdmin(SecureModelView):
-        column_list            = ['id', 'user_id', 'recipe_id', 'parent_comment_id', 'is_pinned',        'content',        'is_edited', 'created_at']
+        column_list            = ['id', 'user_id', 'recipe_id', 'parent_comment_id', 'is_pinned', 'content', 'is_edited', 'created_at']
         column_searchable_list =                                                                 ['content']
-        column_filters         = [      'user_id', 'recipe_id',                     'is_pinned',          'is_edited', 'created_at']
-        form_columns           = [      'user_id', 'recipe_id', 'parent_comment_id',        'content', 'is_edited', 'is_pinned']
+        column_filters         = [      'user_id', 'recipe_id',                      'is_pinned',            'is_edited', 'created_at']
+        form_columns           = [      'user_id', 'recipe_id', 'parent_comment_id',              'content', 'is_edited', 'is_pinned']
 
     class RecipeLikeAdmin(SecureModelView):
         column_list    = ['id', 'user_id', 'recipe_id', 'created_at']

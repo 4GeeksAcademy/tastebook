@@ -5,15 +5,15 @@ from flask_admin.contrib.sqla import ModelView
 
 """
 Check the "FLASK_ADMIN_SWATCH" themes at https://bootswatch.com/3/ 
-    
+
 All available themes:
     cerulean, cosmo, cyborg, darkly, flatly, journal, lumen, paper, readable,
 
 Dark themes:
-    'darkly'    - Clean dark
-    'cyborg'    - Dark with cyan accents
-    'slate'     - Dark gray
-    'superhero' - Dark blue
+    'darkly'    ---  Clean dark               https://bootswatch.com/darkly/
+    'cyborg'    ---  Dark with cyan accents   https://bootswatch.com/cyborg/
+    'slate'     ---  Dark gray                https://bootswatch.com/slate/
+    'superhero' ---  Dark blue                https://bootswatch.com/superhero/
 """
 
 
@@ -29,7 +29,7 @@ def setup_admin(app):
         form_columns     = [      'is_active','email', 'username', 'full_name', 'plain_psswrd', 'hashed_psswrd', 'description', 'country', 'cloudinary_url', 'cloudinary_img_id']
         
         column_searchable_list = [            'email', 'username', 'full_name',                                                 'country']
-        column_filters   =       ['is_active', 'country', 'created_at']
+        column_filters   =       ['is_active',                                                                                  'country',                                        'created_at']
 
 
     # Custom ModelView for Recipe
@@ -61,10 +61,10 @@ def setup_admin(app):
     # Custom ModelView for Comment
     class CommentAdmin(ModelView):
         column_list    = ['id', 'user_id', 'recipe_id', 'parent_comment_id', 'content', 'created_at', 'is_edited', 'is_pinned']
-        form_columns   = [      'user_id', 'recipe_id', 'parent_comment_id', 'content', 'is_edited',  'is_pinned']
+        form_columns   = [      'user_id', 'recipe_id', 'parent_comment_id', 'content',               'is_edited', 'is_pinned']
 
         column_searchable_list =                                            ['content']
-        column_filters = [      'user_id', 'recipe_id', 'parent_comment_id', 'created_at', 'is_edited', 'is_pinned']
+        column_filters = [      'user_id', 'recipe_id', 'parent_comment_id',            'created_at', 'is_edited', 'is_pinned']
 
 
     # Custom ModelView for Recipe Like

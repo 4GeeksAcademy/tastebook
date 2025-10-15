@@ -106,7 +106,7 @@ def create_new_recipe():
         # Create new recipe
         new_recipe = Recipe(
             author_id    = current_user_id,
-            title        = data["title"][:100],  # Ensure maximum length
+            title        = data["title"][:100],          # Ensure maximum length
             description  = data.get("description", ""),  # Optional field
             ingredients  = ingredients,
             instructions = instructions
