@@ -555,6 +555,7 @@ class Recipe(db.Model):
             "description":  self.description,
             "ingredients":  self.ingredients,   # Will serialize as JSON automatically
             "instructions": self.instructions,  # Will serialize as JSON automatically
+            "is_public":    self.is_public,
             "created_at":   self.created_at.isoformat() if self.created_at else None,
             "like_count":   self.like_count,
             
