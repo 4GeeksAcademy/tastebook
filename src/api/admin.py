@@ -626,10 +626,10 @@ def setup_admin(app):
 
 
     class UserAdmin(SecureModelView):
-        column_list            = ['id','is_admin', 'email', 'username', 'full_name', 'country', 'is_active', 'plain_psswrd', 'created_at']
+        column_list            = ['id','is_admin', 'email', 'username', 'full_name', 'country', 'is_active', 'plain_psswrd', 'created_at', 'cloudinary_img_id', 'cloudinary_url']  
         column_searchable_list = [                 'email', 'username', 'full_name']
         column_filters         = [     'is_admin',                                              'is_active',                 'created_at']
-        column_default_sort    =                                                                                            ('created_at', True)
+        column_default_sort    =                                                                                            ('created_at', False)
         column_formatters      = {
             'created_at': lambda _v, _c, m, _p: m.created_at.strftime('%Y-%m-%d %H:%M') if m.created_at else '—',
             'country':    lambda _v, _c, m, _p: f"{m.country.get('name', '—')} ({m.country.get('code', '—')})" if m.country else '—'
