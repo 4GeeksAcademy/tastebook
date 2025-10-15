@@ -108,10 +108,10 @@ export const CollectionView = () => {
 
       {collection.description && (
         <div className="mb-4">
-          <div className="card border-0 bg-light">
+          <div className="card border">
             <div className="card-body py-3 px-4">
               <h6 className="text-muted mb-2 fw-semibold">Description</h6>
-              <p className="mb-0 text-dark" style={{ whiteSpace: 'pre-wrap' }}>
+              <p className="mb-0" style={{ whiteSpace: 'pre-wrap' }}>
                 {collection.description}
               </p>
             </div>
