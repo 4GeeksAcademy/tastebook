@@ -257,8 +257,8 @@ class AdminDataSeeder:
             ingredients = [
                 {
                     'ingredient': faker.word(),
-                    'quantity': random.randint(1, 4),
-                    'unit': random.choice(['cups', 'tsp', 'tbsp', 'grams'])
+                    'quantity':   random.randint(1, 4),
+                    'unit':       random.choice(['cups', 'tsp', 'tbsp', 'grams'])
                 }
                 for _ in range(random.randint(3, 6))
             ]
