@@ -247,3 +247,16 @@ cd /workspaces/tastebook && pipenv run migrate
 
 cd /workspaces/tastebook && pipenv run python -c "from src.app import app; print('App imported successfully')"
 cd /workspaces/tastebook && PYTHONPATH=/workspaces/tastebook/src pipenv run python -c "from app import app; print('App imported successfully')"
+
+-------------------------
+
+cd /workspaces/tastebook && pipenv run python -c "import src.api.routes.recipes; print('Routes imported successfully')"
+ERROR
+
+cd /workspaces/tastebook && PYTHONPATH=/workspaces/tastebook/src pipenv run python -c "from api.routes.recipes import recipes_bp; print('Recipe routes imported successfully')"
+NO ERROR
+
+-------------------------
+
+
+cd /workspaces/tastebook && pipenv run api
