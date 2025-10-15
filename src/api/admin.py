@@ -327,17 +327,17 @@ class AdminDataSeeder:
         """
         # Count what we're about to remove for reporting
         stats = {
-            'users': User.query.filter(User.is_admin == False).count(),
-            'recipes': Recipe.query.count(),
-            'comments': RecipeComment.query.count(),
-            'likes': RecipeLike.query.count(),
-            'comment_likes': CommentLike.query.count(),
-            'follows': Follow.query.count(),
-            'collections': Collection.query.count(),
+            'users':              User.query.filter(User.is_admin == False).count(),
+            'recipes':            Recipe.query.count(),
+            'comments':           RecipeComment.query.count(),
+            'likes':              RecipeLike.query.count(),
+            'comment_likes':      CommentLike.query.count(),
+            'follows':            Follow.query.count(),
+            'collections':        Collection.query.count(),
             'collection_recipes': CollectionRecipe.query.count(),
-            'recipe_images': RecipeImage.query.count(),
-            'chats': Chat.query.count(),
-            'messages': Message.query.count()
+            'recipe_images':      RecipeImage.query.count(),
+            'chats':              Chat.query.count(),
+            'messages':           Message.query.count()
         }
 
         # Delete in order to respect foreign key constraints
