@@ -147,7 +147,7 @@ const ProfileImageUpload = ({
 
       {/* Confirmation Dialog */}
       {showConfirmation && (
-        <div className="confirmation-dialog mb-3 p-3 border rounded bg-light text-center">
+        <div className="confirmation-dialog mb-3 p-3 border rounded text-center">
           <p className="mb-2">Do you want to upload this image?</p>
           <div className="d-flex gap-2 justify-content-center">
             <button
