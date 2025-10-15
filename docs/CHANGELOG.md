@@ -2,6 +2,40 @@
 
 >Add new changes at the top of the file, just below this line.
 
+## (October 15, 2025) -- Enhanced Private Recipe Access: User-Friendly Privacy Notice Component
+
+**Frontend UX improvement:**
+Replaced generic error messages for private recipes with a dedicated, user-friendly notice component that provides clear guidance and navigation options.
+
+**Key improvements:**
+
+1. **Dedicated Private Recipe Component:**
+   * **Created**: `PrivateRecipeNotice.jsx` - A polished component with lock icon, clear messaging, and action buttons
+   * **Design**: Professional layout with warning color scheme, explanatory text, and responsive design
+   * **Actions**: "Browse Public Recipes" and "Back to Home" buttons for easy navigation
+
+2. **Improved Privacy Detection Logic:**
+   * **Enhanced 404 handling**: Distinguishes between "recipe not found" and "private recipe access denied"
+   * **Smart fallback detection**: Makes unauthenticated requests to determine if recipe exists but is private
+   * **Uncertainty handling**: Shows appropriate messaging when privacy status cannot be determined definitively
+
+3. **Better User Experience:**
+   * **No more confusing errors**: Private recipes no longer show "Recipe not found" error messages
+   * **Clear privacy communication**: Users understand when content is intentionally restricted vs missing
+   * **Helpful suggestions**: Encourages login for potential recipe owners and provides alternative actions
+
+**Technical implementation:**
+- ✅ **Frontend-first privacy checking** - Handles privacy detection before error handling
+- ✅ **Dual HTTP request strategy** - Uses authenticated + unauthenticated requests to determine recipe status  
+- ✅ **Component state management** - Added `isPrivateRecipe` and `isUncertainPrivacy` states
+- ✅ **Graceful degradation** - Falls back to appropriate notices when backend behavior varies
+
+**Result:**
+- 🎉 **Professional privacy handling** - Private recipes show polished notice instead of error messages
+- 🔒 **Clear privacy communication** - Users understand access restrictions without confusion
+- 🧭 **Better navigation flow** - Action buttons guide users to relevant public content
+- 🎯 **Enhanced discoverability** - Encourages exploration of public recipes when private content is encountered
+
 ## (October 14, 2025) -- Database Migration Fixes: Admin Account Creation and PostgreSQL Constraints
 
 **Migration stability:**

@@ -4,7 +4,7 @@ Handles recipe CRUD operations and recipe-related functionality.
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from datetime import datetime
 from decimal import Decimal
 
@@ -52,7 +52,6 @@ recipes_bp = Blueprint('recipes', __name__)
 }
 """
 @recipes_bp.route('/new-recipe', methods=['POST'])
-@recipes_bp.route('/recipe',     methods=['POST'])  # Alternative endpoint for frontend
 @jwt_required()
 def create_new_recipe():
 
@@ -109,7 +108,8 @@ def create_new_recipe():
             title        = data["title"][:100],          # Ensure maximum length
             description  = data.get("description", ""),  # Optional field
             ingredients  = ingredients,
-            instructions = instructions
+            instructions = instructions,
+            is_public    = data.get("is_public", False)  # Default to private
         )
         
         # Save to database
@@ -144,6 +144,8 @@ def create_new_recipe():
 def get_single_recipe(recipe_id):
     """
     Get a single recipe by ID with author information and images.
+    Public recipes can be viewed by anyone.
+    Private recipes can only be viewed by their author.
     """
     try:
         # Find the recipe
@@ -152,13 +154,22 @@ def get_single_recipe(recipe_id):
         if not recipe:
             return jsonify({"error": "Recipe not found"}), 404
         
-        # Get current user if authenticated (for like information)
+        # Get current user if authenticated
         current_user_id = None
         try:
+            verify_jwt_in_request(optional=True)
             current_user_id = get_jwt_identity()
-        except:
-            # User is not authenticated, which is fine
-            pass
+            if current_user_id is not None:
+                try:
+                    current_user_id = int(current_user_id)
+                except (TypeError, ValueError):
+                    current_user_id = None
+        except Exception:
+            current_user_id = None
+        
+        # Check if recipe is private and user is not the author
+        if not recipe.is_public and current_user_id != recipe.author_id:
+            return jsonify({"error": "This recipe is private and can only be viewed by its author.", "is_private": True}), 403
         
         # Get recipe data with like info
         recipe_data = recipe.serialize(current_user_id=current_user_id)
@@ -273,10 +284,12 @@ def update_recipe(recipe_id):
                 return jsonify({"error": f"Instruction {i+1} must be a non-empty string."}), 400
 
         # Update recipe fields
-        recipe.title = data["title"][:100]  # Ensure maximum length
+        recipe.title        = data["title"][:100]  # Ensure maximum length
         recipe.description  = data.get("description", "")  # Optional field
         recipe.ingredients  = ingredients
         recipe.instructions = instructions
+        if "is_public" in data:
+            recipe.is_public = data["is_public"]
         
         # Save to database
         db.session.commit()
@@ -306,12 +319,49 @@ def update_recipe(recipe_id):
 
 
 ############################################
-#######        GET ALL RECIPES       #######
+#######        DELETE RECIPE         #######
+############################################
+@recipes_bp.route('/recipe/<int:recipe_id>', methods=['DELETE'])
+@jwt_required()
+def delete_recipe(recipe_id):
+    """
+    Delete an existing recipe. Only the recipe author can delete their recipe.
+    """
+    try:
+        # Get authenticated user ID
+        current_user_id = get_jwt_identity()
+        
+        # Find the recipe
+        recipe = Recipe.query.get(recipe_id)
+        if not recipe:
+            return jsonify({"error": "Recipe not found"}), 404
+        
+        # Check if user is the author of the recipe
+        if recipe.author_id != int(current_user_id):
+            return jsonify({"error": "You are not authorized to delete this recipe"}), 403
+        
+        # Delete the recipe (cascade will handle related images, likes, comments)
+        db.session.delete(recipe)
+        db.session.commit()
+        
+        return jsonify({
+            "msg": "Recipe deleted successfully"
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Error deleting recipe", "details": str(e)}), 500
+
+
+
+############################################
+#######    GET ALL PUBLIC RECIPES    #######
 ############################################
 @recipes_bp.route('/recipes', methods=['GET'])
-def get_all_recipes():
+def get_all_public_recipes():
     """
-    Get all recipes with basic information, author details, and primary images.
+    Get all PUBLIC recipes with basic information, author details, and primary images.
+    This endpoint does NOT require authentication and only shows public recipes.
     Supports pagination with limit and offset parameters.
     """
     try:
@@ -327,8 +377,8 @@ def get_all_recipes():
         min_likes        = request.args.get('min_likes',        type=int)
         search           = request.args.get('search')
 
-        # Start query
-        query = Recipe.query
+        # Start query - ONLY PUBLIC RECIPES
+        query = Recipe.query.filter(Recipe.is_public == True)
 
         # Example: Add filters (expand as models support these fields)
         # if category:
@@ -378,7 +428,7 @@ def get_all_recipes():
             recipes_data.append(recipe_data)
 
         return jsonify({
-            "msg": "Recipes retrieved successfully",
+            "msg": "Public recipes retrieved successfully",
             "recipes": recipes_data,
             "pagination": {
                 "total":    total_count,
@@ -388,4 +438,122 @@ def get_all_recipes():
             }
         }), 200
     except Exception as e:
-        return jsonify({"error": "Error fetching recipes", "details": str(e)}), 500
+        return jsonify({"error": "Error fetching public recipes", "details": str(e)}), 500
+
+
+
+############################################
+#######    GET USER'S OWN RECIPES    #######
+############################################
+@recipes_bp.route('/user/recipes', methods=['GET'])
+@jwt_required()
+def get_user_recipes():
+    """
+    Get all recipes created by the authenticated user (both public and private).
+    This endpoint requires authentication and shows ALL user's recipes.
+    Supports pagination, search, filtering by visibility, and sorting.
+    """
+    try:
+        # Get authenticated user ID
+        current_user_id = get_jwt_identity()
+        
+        # Verify that user exists and is active
+        user = User.query.get(current_user_id)
+        if not user or not user.is_active:
+            return jsonify({"error": "User not found"}), 404
+
+        # Get pagination parameters
+        limit  = request.args.get('limit', 20, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        limit  = min(limit, 100)
+
+        # Get filter and search parameters
+        search         = request.args.get('search',       ''     ).strip()
+        public_only    = request.args.get('public_only',  'false').lower() == 'true'
+        private_only   = request.args.get('private_only', 'false').lower() == 'true'
+        sort_by        = request.args.get('sort_by',      'created_at')  # created_at, title, like_count
+        order          = request.args.get('order',        'desc')        # asc, desc
+
+        # Start query - ONLY USER'S RECIPES
+        query = Recipe.query.filter(Recipe.author_id == current_user_id)
+
+        # Apply visibility filters
+        if public_only and not private_only:
+            query = query.filter(Recipe.is_public == True)
+        elif private_only and not public_only:
+            query = query.filter(Recipe.is_public == False)
+        # If both or neither are specified, show all user's recipes
+
+        # Apply search filter
+        if search:
+            query = query.filter(Recipe.title.ilike(f"%{search}%"))
+
+        # Apply sorting
+        if sort_by == 'title':
+            if order == 'desc':
+                query = query.order_by(Recipe.title.desc())
+            else:
+                query = query.order_by(Recipe.title.asc())
+        elif sort_by == 'like_count':
+            # Sort by like count
+            if order == 'desc':
+                query = query.order_by(Recipe.like_count_expression.desc())
+            else:
+                query = query.order_by(Recipe.like_count_expression.asc())
+        else:  # default to created_at
+            if order == 'desc':
+                query = query.order_by(Recipe.created_at.desc())
+            else:
+                query = query.order_by(Recipe.created_at.asc())
+
+        # Get total count and apply pagination
+        total_count = query.count()
+        recipes     = query.offset(offset).limit(limit).all()
+
+        recipes_data = []
+        for recipe in recipes:
+            recipe_data = recipe.serialize(current_user_id=current_user_id)
+            
+            # Add is_public field for user's own recipes
+            recipe_data['is_public'] = recipe.is_public
+            
+            # Add author information (the user themselves)
+            recipe_data['author'] = {
+                'user_id':        user.id,
+                'username':       user.username,
+                'full_name':      user.full_name,
+                'cloudinary_url': user.cloudinary_url
+            }
+            
+            # Add primary image
+            primary_image = RecipeImage.query.filter_by(
+                recipe_id=recipe.id, 
+                is_primary=True
+            ).first()
+            if not primary_image:
+                primary_image = RecipeImage.query.filter_by(
+                    recipe_id=recipe.id
+                ).order_by(RecipeImage.display_order).first()
+            recipe_data['primary_image'] = primary_image.serialize() if primary_image else None
+            recipes_data.append(recipe_data)
+
+        return jsonify({
+            "msg": "User recipes retrieved successfully",
+            "recipes": recipes_data,
+            "pagination": {
+                "total":    total_count,
+                "limit":    limit,
+                "offset":   offset,
+                "has_more": offset + limit < total_count
+            },
+            "filters": {
+                "search":       search,
+                "public_only":  public_only,
+                "private_only": private_only,
+                "sort_by":      sort_by,
+                "order":        order
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": "Error fetching user recipes", "details": str(e)}), 500

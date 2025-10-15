@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle, Menu, User } from "lucide-react";
+import { ChefHat, Cog, DoorOpen, FilePlus, Heart, Bookmark, MessageCircle, Menu, User, NotebookText } from "lucide-react";
 
 import UserAvatar from "../../../shared/shared-components/UserAvatar";
 import socketService from "../../../shared/utils/socketService";
@@ -550,7 +550,7 @@ export const Navbar = () => {
 									</li>
 
 
-								<li><hr className="dropdown-divider" /></li>
+								    <li><hr className="dropdown-divider" /></li>
 
 
                                     {/* New Recipe */}
@@ -561,6 +561,28 @@ export const Navbar = () => {
 										</Link>
 									</li>
 
+
+                                    <li><hr className="dropdown-divider" /></li>
+
+
+                                    {/* My Recipes */}
+									<li>
+										<Link to="/my-recipes" className="dropdown-item d-flex align-items-center gap-2">
+											<NotebookText size={DROPDOWN_ICON_SIZE} className="text-secondary" strokeWidth={DROPDOWN_STROKE_WIDTH}  />
+											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>My Recipes</span>
+										</Link>
+									</li>
+
+
+                                    {/* Liked Recipes */}
+									<li>
+										<Link to="/liked-recipes" className="dropdown-item d-flex align-items-center gap-2">
+											<Heart size={DROPDOWN_ICON_SIZE} className="text-danger" strokeWidth={DROPDOWN_STROKE_WIDTH}  />
+											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>Liked Recipes</span>
+										</Link>
+									</li>
+
+                                    
                                     {/* My Collections */}
 									<li>
 										<Link to="/my-collections" className="dropdown-item d-flex align-items-center gap-2">
@@ -568,6 +590,10 @@ export const Navbar = () => {
 											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>My Collections</span>
 										</Link>
 									</li>
+
+
+                                    <li><hr className="dropdown-divider" /></li>
+                                
 
                                     {/* Messages with unread count */}
 									<li>
@@ -583,13 +609,7 @@ export const Navbar = () => {
 									</li>
 
 
-                                    {/* Liked Recipes */}
-									<li>
-										<Link to="/liked-recipes" className="dropdown-item d-flex align-items-center gap-2">
-											<Heart size={DROPDOWN_ICON_SIZE} className="text-danger" strokeWidth={DROPDOWN_STROKE_WIDTH}  />
-											<span className="m-1" style={{ fontSize: `${DROPDOWN_FONT_SIZE}px` }}>Liked Recipes</span>
-										</Link>
-									</li>
+
 
 
                                 <li><hr className="dropdown-divider" /></li>

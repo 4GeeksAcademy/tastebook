@@ -242,7 +242,7 @@ export const AllRecipes = () => {
                             All Recipes
                         </h1>
                         <p className="lead text-muted mb-1">
-                            Discover amazing recipes from our community of chefs
+                            Discover amazing recipes from our community
                         </p>
                         {pagination.total > 0 && (
                             <div className="mt-3">

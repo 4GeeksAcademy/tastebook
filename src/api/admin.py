@@ -260,11 +260,11 @@ class AdminDataSeeder:
             return 0
 
         created = 0
-        for _ in range(count):
-            author_id = random.choice(user_ids)
-            title = f"{cls.RECIPE_PREFIX} {faker.word().title()}"[:100]
-            description = faker.paragraph(nb_sentences=3)
 
+        for _ in range(count):
+            author_id   = random.choice(user_ids)
+            title       = f"{cls.RECIPE_PREFIX} {faker.word().title()}"[:100]
+            description = faker.paragraph(nb_sentences=3)
             ingredients = [
                 {
                     'ingredient': faker.word(),
@@ -273,7 +273,6 @@ class AdminDataSeeder:
                 }
                 for _ in range(random.randint(3, 6))
             ]
-
             instructions = [
                 faker.sentence(nb_words=12)
                 for _ in range(random.randint(3, 5))
@@ -285,6 +284,7 @@ class AdminDataSeeder:
                 description  = description,
                 ingredients  = ingredients,
                 instructions = instructions
+                # is_public    = True
             )
 
             db.session.add(recipe)
@@ -490,11 +490,11 @@ def setup_admin(app):
 
 
     class RecipeAdmin(SecureModelView):
-        column_list            = ['id', 'author_id', 'title',                                              'created_at']
-        column_searchable_list = [                   'title', 'description']                               
-        column_filters         = [      'author_id',                                                       'created_at']
-        column_default_sort    = (                                                                         'created_at', True)
-        form_columns           = [      'author_id', 'title', 'description', 'ingredients', 'instructions']
+        column_list            = ['id', 'is_public', 'author_id', 'title',                                              'created_at']
+        column_searchable_list = [                                'title', 'description']                               
+        column_filters         = [      'is_public', 'author_id',                                                       'created_at']
+        column_default_sort    = (                                                                                      'created_at', True)
+        form_columns           = [      'is_public', 'author_id', 'title', 'description', 'ingredients', 'instructions']
 
     class RecipeImageAdmin(SecureModelView):
         column_list    = ['id', 'recipe_id', 'is_primary', 'url',             'display_order', 'uploaded_at']

@@ -239,6 +239,17 @@ import\s.*['"][^'"]*FILENAME.*['"]
 
 -----------
 
+```
+from sqlalchemy import Text, text
+```
+
+Text (uppercase) is not the same as text (lowercase). They serve different purposes:
+
+Text (uppercase): This is SQLAlchemy's column type for text fields (like Text in mapped_column(Text, ...)).
+text (lowercase): This is a function that creates SQL text literals, used for server_default=text('false') to generate DEFAULT false in the database schema.
+
+-----------
+
 cd /workspaces/tastebook && pipenv run migrate
 cd /workspaces/tastebook && pipenv run upgrade
 
@@ -260,3 +271,5 @@ NO ERROR
 
 
 cd /workspaces/tastebook && pipenv run api
+
+cd /workspaces/tastebook && npm run dev

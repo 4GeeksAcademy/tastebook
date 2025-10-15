@@ -409,15 +409,15 @@ class Recipe(db.Model):
 
     # Primary Key and Foreign Keys
     id:           Mapped[int] = mapped_column( Integer,  primary_key=True,       autoincrement=True)
-    author_id:    Mapped[int] = mapped_column( Integer,  ForeignKey("users.id",  ondelete="CASCADE"),  nullable=False)
+    author_id:    Mapped[int] = mapped_column( Integer,  ForeignKey("users.id",  ondelete="CASCADE"),   nullable=False)
 
     # Remaining Attributes                                                                       
-    title:        Mapped[str]      = mapped_column( String(100),                                       nullable=False)
-    description:  Mapped[str]      = mapped_column( Text,                                              nullable=True)
+    title:        Mapped[str]      = mapped_column( String(100),                                        nullable=False)
+    description:  Mapped[str]      = mapped_column( Text,                                               nullable=True)
     
-    is_public:    Mapped[bool]     = mapped_column( Boolean,                        default=False,     nullable=False)
+    is_public:    Mapped[bool]     = mapped_column( Boolean,                        default=False,      nullable=False, server_default=text('false'))
 
-    created_at:   Mapped[datetime] = mapped_column( DateTime(timezone=True),        default=func.now(), server_default=func.now(), nullable=False   )
+    created_at:   Mapped[datetime] = mapped_column( DateTime(timezone=True),        default=func.now(), nullable=False, server_default=func.now(),   )
 
     ingredients:  Mapped[List[Dict[str, Any]]] = mapped_column( JSON, nullable=False)
     """ Example structure for INGREDIENTS: 
@@ -591,7 +591,7 @@ class RecipeImage(db.Model):
     is_primary:    Mapped[bool]     = mapped_column( Boolean,     default=False,       nullable=False)
     display_order: Mapped[int]      = mapped_column( Integer,     default=0,           nullable=False)
 
-    uploaded_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True),          nullable=False,   default=func.now(), server_default=func.now())
+    uploaded_at:  Mapped[datetime] = mapped_column( DateTime(timezone=True),           nullable=False,   default=func.now(), server_default=func.now())
 
     # Relation Many-to-One with Recipe --> shows the recipe this image is associated with
     recipe: Mapped["Recipe"] = relationship(
@@ -1031,7 +1031,7 @@ class Collection(db.Model):
 
     title:         Mapped[str]           = mapped_column( String(120),                  nullable=False)
     description:   Mapped[Optional[str]] = mapped_column( Text,                         nullable=True)
-    is_public:     Mapped[bool]          = mapped_column( Boolean,  default=False,      nullable=False)
+    is_public:     Mapped[bool]          = mapped_column( Boolean,  default=False,      nullable=False,  server_default=text('false'))
   
     created_at:    Mapped[datetime]      = mapped_column( DateTime(timezone=True),      nullable=False,  default=func.now(), server_default=func.now())
 

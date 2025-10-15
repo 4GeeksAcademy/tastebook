@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, Minus, Save, Edit, X, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Plus, Minus, Save, Edit, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import RecipeMultiImageUpload from '../recipe-subcomponents/RecipeMultiImageUpload.jsx';
+import {
+  isValidDecimalInput,
+  isValidFractionInput,
+  parseQuantityToFloat,
+  floatToFraction,
+  toDecimalDisplayString
+} from '../utils/quantityUtils.js';
 
 export const ModifyRecipe = () => {
   const { id } = useParams();
@@ -10,7 +17,7 @@ export const ModifyRecipe = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    ingredients: [{ ingredient: '', quantity: '', unit: '' }],
+    ingredients: [{ ingredient: '', quantity: '', unit: '', quantityMode: 'decimal' }],
     instructions: [''],
     is_public: false
   });
@@ -142,9 +149,17 @@ export const ModifyRecipe = () => {
       setFormData({
         title: recipe.title || '',
         description: recipe.description || '',
-        ingredients: recipe.ingredients && recipe.ingredients.length > 0 
-          ? recipe.ingredients 
-          : [{ ingredient: '', quantity: '', unit: '' }],
+        ingredients: (recipe.ingredients && recipe.ingredients.length > 0
+          ? recipe.ingredients
+          : [{ ingredient: '', quantity: '', unit: '' }]
+        ).map(ingredient => ({
+          ingredient: ingredient.ingredient || '',
+          unit: ingredient.unit || '',
+          quantityMode: 'decimal',
+          quantity: toDecimalDisplayString(
+            ingredient.quantity !== undefined ? ingredient.quantity : ''
+          )
+        })),
         instructions: recipe.instructions && recipe.instructions.length > 0 
           ? recipe.instructions 
           : [''],
@@ -181,19 +196,61 @@ export const ModifyRecipe = () => {
     }));
   };
 
+  const updateIngredientAt = (index, updater) => {
+    setFormData(prev => {
+      const ingredients = prev.ingredients.map((ingredient, idx) =>
+        idx === index ? updater({ ...ingredient }) : ingredient
+      );
+      return {
+        ...prev,
+        ingredients
+      };
+    });
+  };
+
   const handleIngredientChange = (index, field, value) => {
-    const newIngredients = [...formData.ingredients];
-    newIngredients[index][field] = value;
-    setFormData(prev => ({
-      ...prev,
-      ingredients: newIngredients
-    }));
+    updateIngredientAt(index, ingredient => {
+      if (field === 'quantity') {
+        if (ingredient.quantityMode === 'decimal') {
+          if (isValidDecimalInput(value)) {
+            ingredient.quantity = value;
+          }
+        } else if (isValidFractionInput(value)) {
+          ingredient.quantity = value.replace(/\s+/g, ' ').trimStart();
+        }
+      } else {
+        ingredient[field] = value;
+      }
+      return ingredient;
+    });
+  };
+
+  const toggleQuantityMode = (index) => {
+    updateIngredientAt(index, ingredient => {
+      const currentValue = ingredient.quantity;
+      if (ingredient.quantityMode === 'decimal') {
+        const numericValue = parseQuantityToFloat(currentValue, 'decimal');
+        if (!Number.isNaN(numericValue)) {
+          ingredient.quantity = floatToFraction(numericValue) || currentValue;
+        }
+        ingredient.quantityMode = 'fraction';
+      } else {
+        const numericValue = parseQuantityToFloat(currentValue, 'fraction');
+        if (!Number.isNaN(numericValue)) {
+          ingredient.quantity = toDecimalDisplayString(numericValue);
+        } else {
+          ingredient.quantity = '';
+        }
+        ingredient.quantityMode = 'decimal';
+      }
+      return ingredient;
+    });
   };
 
   const addIngredient = () => {
     setFormData(prev => ({
       ...prev,
-      ingredients: [...prev.ingredients, { ingredient: '', quantity: '', unit: '' }]
+      ingredients: [...prev.ingredients, { ingredient: '', quantity: '', unit: '', quantityMode: 'decimal' }]
     }));
   };
 
@@ -289,6 +346,24 @@ export const ModifyRecipe = () => {
         return;
       }
 
+      if (formData.ingredients.some(ing => !ing.quantity.trim())) {
+        showAlert('Please enter a quantity for each ingredient', 'danger');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const normalizedIngredients = formData.ingredients.map((ingredient, index) => {
+        const quantityNumber = parseQuantityToFloat(ingredient.quantity.toString().trim(), ingredient.quantityMode);
+        if (Number.isNaN(quantityNumber)) {
+          throw new Error(`Invalid quantity for ingredient ${index + 1}`);
+        }
+        return {
+          ingredient: ingredient.ingredient.trim(),
+          quantity: Number(quantityNumber),
+          unit: ingredient.unit
+        };
+      });
+
       if (formData.instructions.some(inst => !inst.trim())) {
         showAlert('Please fill in all instruction steps', 'danger');
         setIsSubmitting(false);
@@ -311,7 +386,13 @@ export const ModifyRecipe = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          title: formData.title.trim(),
+          description: formData.description,
+          ingredients: normalizedIngredients,
+          instructions: formData.instructions.map(instruction => instruction.trim()),
+          is_public: formData.is_public
+        })
       });
 
       if (!response.ok) {
@@ -492,14 +573,24 @@ export const ModifyRecipe = () => {
                           required
                         />
                       </div>
-                      <div className="col-md-2">
+                      <div className="col-md-3 d-flex align-items-center gap-2">
                         <input
-                          type="text"
+                          type={ingredient.quantityMode === 'decimal' ? 'number' : 'text'}
+                          inputMode={ingredient.quantityMode === 'decimal' ? 'decimal' : 'numeric'}
+                          step="any"
                           className="form-control"
-                          placeholder="Amount"
+                          placeholder={ingredient.quantityMode === 'decimal' ? 'Amount (e.g. 1.5)' : 'Fraction (e.g. 1/2)'}
                           value={ingredient.quantity}
                           onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
+                          required
                         />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary btn-sm text-nowrap"
+                          onClick={() => toggleQuantityMode(index)}
+                        >
+                          {ingredient.quantityMode === 'decimal' ? 'Use Fraction' : 'Use Decimal'}
+                        </button>
                       </div>
                       <div className="col-md-3">
                         <select
@@ -524,7 +615,7 @@ export const ModifyRecipe = () => {
                           <option value="cloves">Cloves</option>
                         </select>
                       </div>
-                      <div className="col-md-2">
+                      <div className="col-md-1">
                         <button
                           type="button"
                           onClick={() => removeIngredient(index)}

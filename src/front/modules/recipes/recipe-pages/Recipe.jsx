@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Clock, Users, ChefHat, Calendar, ArrowLeft, Camera, User, ExternalLink, Share2, Edit, Bookmark } from 'lucide-react';
+import { Clock, Users, ChefHat, Calendar, ArrowLeft, Camera, User, ExternalLink, Share2, Edit, Bookmark, Lock } from 'lucide-react';
 import CommentSection from '../recipe-comments-subcomponents/CommentSection';
 import { LikeButton } from '../recipe-subcomponents/LikeButton';
 import AddToCollectionModal from '../recipe-subcomponents/AddToCollectionModal';
+import PrivateRecipeNotice from '../recipe-subcomponents/PrivateRecipeNotice';
 
 export const Recipe = () => {
   const { id } = useParams();
@@ -11,6 +12,7 @@ export const Recipe = () => {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isPrivateRecipe, setIsPrivateRecipe] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
@@ -18,8 +20,11 @@ export const Recipe = () => {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    fetchRecipe();
-    fetchCurrentUser();
+    const initializeComponent = async () => {
+      const user = await fetchCurrentUser();
+      await fetchRecipe(user);
+    };
+    initializeComponent();
   }, [id]);
 
   useEffect(() => {
@@ -77,16 +82,19 @@ export const Recipe = () => {
       if (response.ok) {
         const data = await response.json();
         setCurrentUser(data.current_user);
+        return data.current_user;
       }
     } catch (error) {
       console.error('Error fetching current user:', error);
     }
+    return null;
   };
 
-  const fetchRecipe = async () => {
+  const fetchRecipe = async (user = null) => {
     try {
       setLoading(true);
       setError(null);
+      setIsPrivateRecipe(false);
 
       // Validate recipe ID
       if (!id || isNaN(parseInt(id))) {
@@ -100,11 +108,18 @@ export const Recipe = () => {
       
       console.log('Fetching recipe from:', apiUrl); // Debug log
 
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      // Include authorization header if user is logged in
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(apiUrl, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers: headers
       });
 
       if (response.ok) {
@@ -112,6 +127,16 @@ export const Recipe = () => {
         console.log('Recipe data received:', data); // Debug log
         
         if (data.recipe) {
+          // Use the passed user parameter or the state currentUser
+          const currentUserData = user || currentUser;
+          
+          // Check if recipe is private and user is not the owner
+          if (!data.recipe.is_public && (!currentUserData || currentUserData.user_id !== data.recipe.author?.user_id)) {
+            setIsPrivateRecipe(true);
+            setLoading(false);
+            return;
+          }
+          
           setRecipe(data.recipe);
         } else {
           throw new Error('Recipe data is missing from response');
@@ -126,6 +151,18 @@ export const Recipe = () => {
         }
       } else if (response.status === 404) {
         setError('Recipe not found');
+      } else if (response.status === 403) {
+        // Check if it's a private recipe
+        try {
+          const errorData = await response.json();
+          if (errorData.is_private) {
+            setIsPrivateRecipe(true);
+          } else {
+            setError('Access denied');
+          }
+        } catch {
+          setError('Access denied');
+        }
       } else {
         setError('Failed to load recipe');
       }
@@ -201,6 +238,11 @@ export const Recipe = () => {
     );
   }
 
+  // Show private recipe notice if recipe is private and user is not the owner
+  if (isPrivateRecipe) {
+    return <PrivateRecipeNotice isUncertain={false} />;
+  }
+
   if (error) {
     return (
       <div className="container py-5">
@@ -219,7 +261,7 @@ export const Recipe = () => {
               </button>
               <button 
                 className="btn btn-primary"
-                onClick={fetchRecipe}
+                onClick={() => fetchRecipe()}
               >
                 Try Again
               </button>

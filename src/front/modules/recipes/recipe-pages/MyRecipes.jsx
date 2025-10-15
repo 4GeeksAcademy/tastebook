@@ -7,11 +7,11 @@ export const MyRecipes = () => {
     const token = localStorage.getItem('token');
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
-    const [recipes, setRecipes] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState('');
+    const [recipes,          setRecipes]  = useState([]);
+    const [loading,          setLoading] = useState(false);
+    const [search,           setSearch] = useState('');
     const [visibilityFilter, setVisibilityFilter] = useState('all'); // 'all', 'public', 'private'
-    const [sortBy, setSortBy] = useState('created_at');
+    const [sortBy,           setSortBy] = useState('created_at');
     const [order, setOrder] = useState('desc');
 
     const [message, setMessage] = useState(null);
@@ -82,8 +82,11 @@ export const MyRecipes = () => {
     };
 
     const RecipeCard = ({ recipe }) => (
+
         <div className="card h-100 shadow-sm border-0">
+
             <div className="position-relative">
+            
                 <Link to={`/recipe/${recipe.recipe_id}`} className="text-decoration-none">
                     <div className="position-relative overflow-hidden rounded-top" style={{ height: '200px' }}>
                         {recipe.primary_image ? (
@@ -192,7 +195,7 @@ export const MyRecipes = () => {
             <div className="d-flex align-items-center justify-content-between mb-4">
                 <h1 className="h3 mb-0">My Recipes</h1>
                 <div className="d-flex gap-2">
-                    <Link to="/recipe/create" className="btn btn-primary d-flex align-items-center">
+                    <Link to="/new-recipe" className="btn btn-primary d-flex align-items-center">
                         <PlusCircle size={16} className="me-2" /> New Recipe
                     </Link>
                 </div>
@@ -284,7 +287,7 @@ export const MyRecipes = () => {
                         <div className="text-center py-5">
                             <p className="text-muted">
                                 You haven't created any recipes yet. 
-                                <Link to="/recipe/create" className="text-decoration-none ms-1">
+                                <Link to="/new-recipe" className="text-decoration-none ms-1">
                                     Create your first recipe!
                                 </Link>
                             </p>
