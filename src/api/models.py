@@ -412,8 +412,10 @@ class Recipe(db.Model):
     author_id:    Mapped[int] = mapped_column( Integer,  ForeignKey("users.id",  ondelete="CASCADE"),  nullable=False)
 
     # Remaining Attributes                                                                       
-    title:        Mapped[str]      = mapped_column( String(100),      nullable=False)
-    description:  Mapped[str]      = mapped_column( Text,             nullable=True)
+    title:        Mapped[str]      = mapped_column( String(100),                                       nullable=False)
+    description:  Mapped[str]      = mapped_column( Text,                                              nullable=True)
+    
+    is_public:    Mapped[bool]     = mapped_column( Boolean,                        default=False,     nullable=False)
 
     created_at:   Mapped[datetime] = mapped_column( DateTime(timezone=True),        default=func.now(), server_default=func.now(), nullable=False   )
 

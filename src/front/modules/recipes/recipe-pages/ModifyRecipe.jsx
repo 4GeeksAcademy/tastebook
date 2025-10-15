@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, Minus, Save, Edit, X, ArrowLeft } from 'lucide-react';
+import { Plus, Minus, Save, Edit, X, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import RecipeMultiImageUpload from '../recipe-subcomponents/RecipeMultiImageUpload.jsx';
 
 export const ModifyRecipe = () => {
@@ -11,7 +11,8 @@ export const ModifyRecipe = () => {
     title: '',
     description: '',
     ingredients: [{ ingredient: '', quantity: '', unit: '' }],
-    instructions: ['']
+    instructions: [''],
+    is_public: false
   });
   
   const [images, setImages] = useState([]);
@@ -146,7 +147,8 @@ export const ModifyRecipe = () => {
           : [{ ingredient: '', quantity: '', unit: '' }],
         instructions: recipe.instructions && recipe.instructions.length > 0 
           ? recipe.instructions 
-          : ['']
+          : [''],
+        is_public: recipe.is_public || false
       });
 
       // Set images
@@ -387,10 +389,25 @@ export const ModifyRecipe = () => {
           <div className="card shadow">
             <div className="card-header bg-warning text-dark">
               <div className="d-flex justify-content-between align-items-center">
-                <h2 className="mb-0">
-                  <Edit className="me-2" size={30} />
-                  Modify Recipe
-                </h2>
+                <div className="d-flex align-items-center">
+                  <h2 className="mb-0 me-3">
+                    <Edit className="me-2" size={30} />
+                    Modify Recipe
+                  </h2>
+                  <span className={`badge ${formData.is_public ? 'bg-success' : 'bg-secondary'} fs-6`}>
+                    {formData.is_public ? (
+                      <>
+                        <Eye size={14} className="me-1" />
+                        Public
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff size={14} className="me-1" />
+                        Private
+                      </>
+                    )}
+                  </span>
+                </div>
                 <button
                   type="button"
                   className="btn btn-outline-dark btn-sm"
@@ -595,6 +612,45 @@ export const ModifyRecipe = () => {
                     </button>
                   </div>
                 )}
+
+                {/* Privacy Settings */}
+                <div className="mb-4 p-3 bg-light rounded">
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div>
+                      <h6 className="mb-1 fw-bold">Recipe Visibility</h6>
+                      <small className="text-muted">
+                        {formData.is_public 
+                          ? "Your recipe will be visible to everyone" 
+                          : "Your recipe will only be visible to you"}
+                      </small>
+                    </div>
+                    <div className="form-check form-switch">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="isPublicSwitch"
+                        checked={formData.is_public}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          is_public: e.target.checked
+                        }))}
+                      />
+                      <label className="form-check-label d-flex align-items-center" htmlFor="isPublicSwitch">
+                        {formData.is_public ? (
+                          <>
+                            <Eye size={16} className="me-1" />
+                            Public
+                          </>
+                        ) : (
+                          <>
+                            <EyeOff size={16} className="me-1" />
+                            Private
+                          </>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Submit Button */}
                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">

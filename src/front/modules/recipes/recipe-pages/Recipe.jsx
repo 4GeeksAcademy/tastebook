@@ -268,7 +268,7 @@ export const Recipe = () => {
               Back to All Recipes
             </Link>
             {isRecipeOwner() ? (
-              <Link to={`/recipe/${id}/modify`} className="btn btn-warning">
+              <Link to={`/recipe/modify/${id}`} className="btn btn-warning">
                 <Edit size={16} className="me-2" />
                 Modify Recipe
               </Link>

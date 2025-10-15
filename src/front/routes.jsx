@@ -30,6 +30,7 @@ import { UserProfile }  from "./modules/user-profile/user-profile-pages/UserProf
 
 // Recipes
 import { AllRecipes }   from "./modules/recipes/recipe-pages/AllRecipes.jsx";
+import { MyRecipes }    from "./modules/recipes/recipe-pages/MyRecipes.jsx";
 import { Recipe }       from "./modules/recipes/recipe-pages/Recipe.jsx";
 import { CreateRecipe } from "./modules/recipes/recipe-pages/CreateRecipe.jsx";
 import { ModifyRecipe } from "./modules/recipes/recipe-pages/ModifyRecipe.jsx";
@@ -71,43 +72,44 @@ export const router = createBrowserRouter(
         <Route path= "/" element={<Home />} />
         
         {/* Auth */}
-        <Route path= "/signup" element={<Signup />} />
-        <Route path= "/login"  element={<Login />} />
-
+        <Route path= "/signup"                 element={<Signup />} />
+        <Route path= "/login"                  element={<Login />} />
+                
         {/* Password Recovery */}
         <Route path= "/recovery-validation"    element={<PasswordRecovery />} />
         <Route path= "/reset-password/:token"  element={<ResetPassword />} />
 
         {/* User Private Settings */}
-        <Route path= "/settings" element={<Settings />} />
+        <Route path= "/settings"           element={<Settings />} />
 
         {/* Admin Access */}
-        <Route path= "/admin-access" element={<AdminAccess />} />
+        <Route path= "/admin-access"       element={<AdminAccess />} />
 
         {/* Users and User Public Profile */}
-        <Route path= "/users"           element={<AllUsers />} />
-        <Route path= "/user/:username"  element={<UserProfile />} />
+        <Route path= "/users"              element={<AllUsers />} />
+        <Route path= "/user/:username"     element={<UserProfile />} />
 
         {/* User Specific Pages  */}
-        <Route path= "/liked-recipes"   element={<LikedRecipes />} />
-        <Route path= "/my-collections"  element={<MyCollections />} />
+        <Route path= "/liked-recipes"      element={<LikedRecipes />} />
+        <Route path= "/my-collections"     element={<MyCollections />} />
+        <Route path= "/my-recipes"         element={<MyRecipes />} />
 
         {/* Recipes */}
         <Route path= "/all-recipes"        element={<AllRecipes />} />
-        <Route path= "/new-recipe"         element={<CreateRecipe />} />
         <Route path= "/recipe/:id"         element={<Recipe />} />
-        <Route path= "/recipe/:id/modify"  element={<ModifyRecipe />} />
+        <Route path= "/new-recipe"         element={<CreateRecipe />} />
+        <Route path= "/recipe/modify/:id"  element={<ModifyRecipe />} />
 
         {/* Collections */}
-        <Route path= "/collections"     element={<PublicCollections />} />
-        <Route path= "/collection/:id"  element={<CollectionView />} />
+        <Route path= "/collections"        element={<PublicCollections />} />
+        <Route path= "/collection/:id"     element={<CollectionView />} />
 
         {/* Messages */}
-        <Route path= "/messages"          element={<Messages />} />
-        <Route path= "/messages/:chatId"  element={<Messages />} />
+        <Route path= "/messages"           element={<Messages />} />
+        <Route path= "/messages/:chatId"   element={<Messages />} />
 
         {/* Theme */}
-        <Route path= "/theme" element={<ThemeTesting />} />
+        <Route path= "/theme"              element={<ThemeTesting />} />
 
 
         {/* Miscellaneous, Testing and Extras*/}

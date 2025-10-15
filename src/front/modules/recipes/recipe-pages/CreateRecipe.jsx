@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Minus, Save, BadgePlus, X } from 'lucide-react';
+import { Plus, Minus, Save, BadgePlus, X, Eye, EyeOff } from 'lucide-react';
 import RecipeMultiImageUpload from '../recipe-subcomponents/RecipeMultiImageUpload.jsx';
 
 export const CreateRecipe = () => {
@@ -8,7 +8,8 @@ export const CreateRecipe = () => {
     title: '',
     description: '',
     ingredients: [{ ingredient: '', quantity: '', unit: '' }],
-    instructions: ['']
+    instructions: [''],
+    is_public: false  // Private by default
   });
   
   const [images, setImages] = useState([]);
@@ -503,6 +504,45 @@ export const CreateRecipe = () => {
                     </button>
                   </div>
                 )}
+
+                {/* Privacy Settings */}
+                <div className="mb-4 p-3 bg-light rounded">
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div>
+                      <h6 className="mb-1 fw-bold">Recipe Visibility</h6>
+                      <small className="text-muted">
+                        {formData.is_public 
+                          ? "Your recipe will be visible to everyone" 
+                          : "Your recipe will only be visible to you"}
+                      </small>
+                    </div>
+                    <div className="form-check form-switch">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="isPublicSwitch"
+                        checked={formData.is_public}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          is_public: e.target.checked
+                        }))}
+                      />
+                      <label className="form-check-label d-flex align-items-center" htmlFor="isPublicSwitch">
+                        {formData.is_public ? (
+                          <>
+                            <Eye size={16} className="me-1" />
+                            Public
+                          </>
+                        ) : (
+                          <>
+                            <EyeOff size={16} className="me-1" />
+                            Private
+                          </>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Submit Button */}
                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">

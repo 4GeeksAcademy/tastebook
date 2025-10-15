@@ -37,6 +37,7 @@ export const AllRecipes = () => {
             const queryParams = new URLSearchParams({
                 limit: pagination.limit,
                 offset: params.offset || pagination.offset,
+                public_only: 'true', // Only fetch public recipes
                 ...(searchTerm && { search: searchTerm }),
                 ...(filters.category && { category: filters.category }),
                 ...(filters.dietary && { dietary: filters.dietary }),
