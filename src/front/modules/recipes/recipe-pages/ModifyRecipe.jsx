@@ -127,7 +127,19 @@ export const ModifyRecipe = () => {
   const fetchRecipe = async () => {
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-      const response = await fetch(`${backendUrl}/api/recipe/${id}`);
+      const token = localStorage.getItem('token');
+      
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${backendUrl}/api/recipe/${id}`, {
+        headers: headers
+      });
       
       if (!response.ok) {
         throw new Error('Recipe not found');
@@ -137,7 +149,6 @@ export const ModifyRecipe = () => {
       const recipe = data.recipe;
 
       // Check if user is authorized to modify this recipe
-      const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
         return;

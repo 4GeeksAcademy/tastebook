@@ -159,10 +159,10 @@ const RecipeMultiImageUpload = ({
                         type="button"
                         onClick={() => onSetPrimary && onSetPrimary(image.id || index)}
                         disabled={loading}
-                        className={`btn btn-sm ${image.is_primary ? 'btn-warning' : 'btn-outline-warning'}`}
+                        className={`btn btn-sm bg-dark bg-opacity-50 ${image.is_primary ? 'btn-warning' : 'btn-outline-warning'}`}
                         title={image.is_primary ? 'Primary image' : 'Set as primary'}
                       >
-                        {image.is_primary ? <Star size={14} fill="currentColor" /> : <StarOff size={14} />}
+                        {image.is_primary ? <Star size={14} fill="#ffc107" /> : <StarOff size={14} />}
                       </button>
 
                       {/* Delete Button */}
@@ -170,7 +170,7 @@ const RecipeMultiImageUpload = ({
                         type="button"
                         onClick={() => onImageDelete && onImageDelete(image.id || index)}
                         disabled={loading}
-                        className="btn btn-sm btn-outline-danger"
+                        className="btn btn-sm btn-outline-danger bg-dark bg-opacity-25"
                         title="Delete image"
                       >
                         <Trash2 size={14} />
