@@ -1,0 +1,94 @@
+[
+
+
+  {
+    "username": "testuser_david",
+    "full_name": "David Frank",
+    "cloudinary_url": "https://res.cloudinary.com/dqzbwmbap/image/upload/v1760597425/tastebook/users/2/dwup0omnvsevqmkbwyeo.png",
+    "description": "Hard actually natural decide spend hour close.",
+    "cloudinary_img_id": "tastebook/users/2/dwup0omnvsevqmkbwyeo",
+    "is_active": true,
+    "email": "testuser.david@example.com",
+    "country": {
+      "code": "FR",
+      "name": "France"
+    },
+    "is_admin": false,
+    "id": 2,
+    "plain_psswrd": "Tastebook123!"
+  },
+
+
+  {
+    "username": "testuser_charles",
+    "full_name": "Charles Robinson",
+    "cloudinary_url": "https://res.cloudinary.com/dqzbwmbap/image/upload/v1760597719/tastebook/users/3/hsdgnkqddckr5ozvaox0.png",
+    "description": "Candidate simply easy difference from watch young effect report though the else.",
+    "cloudinary_img_id": "tastebook/users/3/hsdgnkqddckr5ozvaox0",
+    "is_active": true,
+    "email": "testuser.charles@example.com",
+    "country": {
+      "code": "GB",
+      "name": "United Kingdom"
+    },
+    "is_admin": false,
+    "id": 3,
+    "plain_psswrd": "Tastebook123!"
+  },
+
+
+  {
+    "username": "testuser_monica",
+    "full_name": "Monica Fernandez",
+    "cloudinary_url": "https://res.cloudinary.com/dqzbwmbap/image/upload/v1760598090/tastebook/users/4/in4zoksqaa1zpm8rfwhd.png",
+    "description": "Today door involve style father skill kitchen if air maintain step public relationship analysis say just.",
+    "cloudinary_img_id": "tastebook/users/4/in4zoksqaa1zpm8rfwhd",
+    "is_active": true,
+    "email": "testuser.monica.com",
+    "country": {
+      "code": "CO",
+      "name": "Colombia"
+    },
+    "is_admin": false,
+    "id": 4,
+    "plain_psswrd": "Tastebook123!"
+  },
+
+
+  {
+    "username": "testuser_sofia",
+    "full_name": "Sofia Silva",
+    "cloudinary_url": "https://res.cloudinary.com/dqzbwmbap/image/upload/v1760598782/tastebook/users/5/xyck8n95uq0ns3ubjxkl.png",
+    "description": "Board small major stay all learn specific follow so expect.",
+    "cloudinary_img_id": "tastebook/users/5/xyck8n95uq0ns3ubjxkl",
+    "is_active": true,
+    "email": "testuser.sofia@example.com",
+    "country": {
+      "code": "PT",
+      "name": "Portugal"
+    },
+    "is_admin": false,
+    "id": 5,
+    "plain_psswrd": "Tastebook123!"
+  },
+
+
+  {
+    "username": "testuser_sakura",
+    "full_name": "Sakura Ito",
+    "cloudinary_url": "https://res.cloudinary.com/dqzbwmbap/image/upload/v1760600782/tastebook/users/6/tmaf4h4o3yk4mftuipoq.png",
+    "description": "Career home energy save keep view direction serve training argue glass argue.",
+    "cloudinary_img_id": "tastebook/users/6/tmaf4h4o3yk4mftuipoq",
+    "is_active": true,
+    "email": "testuser.sakuraexample.com",
+    "country": {
+      "code": "JP",
+      "name": "Japan"
+    },
+    "is_admin": false,
+    "id": 6,
+    "plain_psswrd": "Tastebook123!"
+  }
+
+
+]

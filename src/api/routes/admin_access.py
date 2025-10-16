@@ -1,8 +1,9 @@
-
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from api.models import db, User
 import os
+import json
 
 # Optional: load environment variables from a .env file when available (no-op if python-dotenv
 # isn't installed). This keeps production deployments unaffected while allowing local dev to
@@ -102,3 +103,90 @@ def check_admin():
 	except Exception as e:
 		return jsonify({"msg": "Error checking admin users", "error": str(e)}), 500
 
+
+
+#########################################
+#######          Showcase         #######
+#######         Tests users       #######
+#######          CREATION         #######
+#########################################
+
+@admin_access_bp.route('/populate-test-users', methods=['POST'])
+@jwt_required()
+def populate_test_users():
+    """
+    Populates the database with test users from showcase_test_users.json.
+    Only accessible to admin users.
+    """
+    try:
+        # Check if current user is admin
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id)
+        if not current_user or not current_user.is_admin:
+            return jsonify({"msg": "Admin access required"}), 403
+
+        # Load the JSON data
+        import os
+        file_path = os.path.join(os.path.dirname(__file__), '..', 'test-users', 'showcase_test_users.json')
+        with open(file_path, 'r') as f:
+            test_users = json.load(f)
+
+        created_users = []
+        skipped_users = []
+
+        for user_data in test_users:
+            # Check if user already exists
+            existing = User.query.filter(
+                (User.email == user_data['email']) | (User.username == user_data['username'])
+            ).first()
+            if existing:
+                skipped_users.append({
+                    "username": user_data['username'],
+                    "email": user_data['email'],
+                    "reason": "User already exists"
+                })
+                continue
+
+            # Hash the password
+            hashed_password = generate_password_hash(user_data['plain_psswrd'])
+
+            # Create new user
+            new_user = User(
+                email=user_data['email'],
+                username=user_data['username'],
+                full_name=user_data['full_name'],
+                description=user_data.get('description'),
+                is_active=user_data['is_active'],
+                country=user_data['country'],
+                is_admin=user_data['is_admin'],
+                plain_psswrd=user_data['plain_psswrd'],
+                hashed_psswrd=hashed_password,
+                cloudinary_url=user_data.get('cloudinary_url'),
+                cloudinary_img_id=user_data.get('cloudinary_img_id')
+            )
+
+            db.session.add(new_user)
+            created_users.append({
+                "id": new_user.id,  # Will be set after commit
+                "username": new_user.username,
+                "email": new_user.email
+            })
+
+        db.session.commit()
+
+        # Update created_users with actual IDs
+        for user in created_users:
+            db_user = User.query.filter_by(username=user['username']).first()
+            if db_user:
+                user['id'] = db_user.id
+
+        return jsonify({
+            "msg": f"Created {len(created_users)} test users, skipped {len(skipped_users)}",
+            "created_users": created_users,
+            "skipped_users": skipped_users
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error in populate_test_users: {str(e)}")  # For debugging
+        return jsonify({"msg": "Error populating test users", "error": str(e)}), 500

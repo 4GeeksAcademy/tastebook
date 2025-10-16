@@ -510,15 +510,17 @@ class AdminDataSeeder:
             current_app.logger.info('Creating admin user...')
             # Recreate the admin account
             admin_user = User(
-                email         = admin_email,
-                username      = admin_username,
-                full_name     = admin_full_name,
-                description   = 'Auto-created admin account after database reset',
-                country       = None,
-                is_active     = True,
-                is_admin      = True,
-                plain_psswrd  = admin_password if current_app.config.get('ENV') != 'production' else None,
-                hashed_psswrd = generate_password_hash(admin_password)
+                email          = admin_email,
+                username       = admin_username,
+                full_name      = admin_full_name,
+                description    = 'Auto-created admin account after database reset',
+                country        = {'code': "ES", 'name': "Spain"},
+                is_active      = True,
+                is_admin       = True,
+                plain_psswrd   = admin_password if current_app.config.get('ENV') != 'production' else None,
+                hashed_psswrd  = generate_password_hash(admin_password),
+                cloudinary_url    = "https://res.cloudinary.com/dqzbwmbap/image/upload/v1760594180/tastebook/users/1/spczs7xv19nqrkjhvez5.png",
+                cloudinary_img_id = "tastebook/users/1/spczs7xv19nqrkjhvez5"
             )
 
             current_app.logger.info(f'Adding admin user to session: {admin_user.email}')

@@ -4,9 +4,35 @@ export const AdminAccess = () => {
     const [adminStatus, setAdminStatus] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const [currentUser, setCurrentUser] = useState(null);
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || (typeof window !== "undefined" ? window.location.origin : "");
-    const adminUrl = backendUrl ? `${backendUrl.replace(/\/$/, "")}/admin` : "/admin";
+    const backendUrl = (import.meta.env.VITE_BACKEND_URL || (typeof window !== "undefined" ? window.location.origin : "")).replace(/\/+$/, "");
+    const adminUrl = backendUrl ? `${backendUrl}/admin` : "/admin";
+    const token = localStorage.getItem("token");
+
+    useEffect(() => {
+        if (!token) return;
+
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await fetch(`${backendUrl}/api/settings`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setCurrentUser(data.current_user);
+                }
+            } catch (error) {
+                console.error("Error fetching current user:", error);
+            }
+        };
+
+        fetchCurrentUser();
+    }, [token, backendUrl]);
 
     const checkAdmin = async () => {
         setLoading(true);
@@ -40,6 +66,25 @@ export const AdminAccess = () => {
             }
         } catch (error) {
             setMessage("Error creating admin: " + error.message);
+        }
+        setLoading(false);
+    };
+
+    const populateTestUsers = async () => {
+        setLoading(true);
+        setMessage("");
+        try {
+            const response = await fetch(`${backendUrl}/api/populate-test-users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+            const data = await response.json();
+            setMessage(data.msg);
+        } catch (error) {
+            setMessage("Error populating test users: " + error.message);
         }
         setLoading(false);
     };
@@ -114,6 +159,19 @@ export const AdminAccess = () => {
                                             </div>
                                         ))}
                                     </ul>
+                                </div>
+                            )}
+
+                            {currentUser && currentUser.is_admin && (
+                                <div className="alert alert-info mt-3">
+                                    <strong>Admin user detected!</strong> You can populate the database with test users.
+                                    <button
+                                        className="btn btn-warning ms-2"
+                                        onClick={populateTestUsers}
+                                        disabled={loading}
+                                    >
+                                        {loading ? "Populating..." : "Populate Test Users"}
+                                    </button>
                                 </div>
                             )}
 
