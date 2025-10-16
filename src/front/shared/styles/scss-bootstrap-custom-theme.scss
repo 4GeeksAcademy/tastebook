@@ -1047,11 +1047,11 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
 
 // Light mode buttons
 [data-bs-theme="light"] {
-  .btn {
-    &:focus {
-      box-shadow: $btn-focus-box-shadow-light;
-    }
-  }
+  // .btn {
+  //   &:focus {
+  //     box-shadow: $btn-focus-box-shadow-light;
+  //   }
+  // }
   
   // Primary button
   .btn-primary {
@@ -1084,11 +1084,11 @@ $spinner-border-active-color-dark: color.adjust($beige-500, $lightness: 10%);
 
 // Dark mode buttons
 [data-bs-theme="dark"] {
-  .btn {
-    &:focus {
-      box-shadow: $btn-focus-box-shadow-dark;
-    }
-  }
+  // .btn {
+  //   &:focus {
+  //     box-shadow: $btn-focus-box-shadow-dark;
+  //   }
+  // }
   
   // Primary button
   .btn-primary {
