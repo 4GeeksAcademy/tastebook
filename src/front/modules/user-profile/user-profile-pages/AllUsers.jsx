@@ -251,7 +251,7 @@ export const AllUsers = () => {
                             <div className="row g-4 mb-4">
                                 {users.map((user) => (
                                     <div key={user.id} className="col-sm-6 col-lg-4 col-xl-3">
-                                        <div className="card h-100 shadow-sm border-0 user-card">
+                                        <div className="card h-100 shadow user-card">
                                             <div className="card-body text-center p-4">
                                                 {/* Profile Image */}
                                                 <div className="mb-3">
