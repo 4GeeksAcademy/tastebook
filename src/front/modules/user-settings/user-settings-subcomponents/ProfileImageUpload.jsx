@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, X, Camera, Trash2, User, HelpCircle } from 'lucide-react';
 
 const ProfileImageUpload = ({ 
@@ -13,7 +13,16 @@ const ProfileImageUpload = ({
   const [preview, setPreview] = useState(null);
   const [pendingFile, setPendingFile] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Clear preview when upload completes
+  useEffect(() => {
+    if (!loading && isUploading) {
+      setIsUploading(false);
+      clearPreview();
+    }
+  }, [loading, isUploading]);
 
   // Fixed pixel sizes for perfect circles
   const sizeStyles = {
@@ -74,8 +83,10 @@ const ProfileImageUpload = ({
 
   const confirmUpload = () => {
     if (pendingFile && onImageUpload) {
+      setIsUploading(true);
       onImageUpload(pendingFile);
-      setShowConfirmation(false);
+      // Don't hide confirmation dialog immediately - let it show loading state
+      // setShowConfirmation(false) will be called when upload completes via clearPreview
       setPendingFile(null);
     }
   };
@@ -146,36 +157,40 @@ const ProfileImageUpload = ({
       </div>
 
       {/* Confirmation Dialog */}
-      {showConfirmation && (
+      {(showConfirmation || isUploading) && (
         <div className="confirmation-dialog mb-3 p-3 border rounded text-center">
-          <p className="mb-2">Do you want to upload this image?</p>
-          <div className="d-flex gap-2 justify-content-center">
-            <button
-              type="button"
-              onClick={confirmUpload}
-              disabled={loading}
-              className="btn btn-success btn-sm"
-            >
-              {loading ? (
-                <>
-                  <div className="spinner-border spinner-border-sm me-1" role="status">
-                    <span className="visually-hidden">Uploading...</span>
-                  </div>
-                  Uploading...
-                </>
-              ) : (
-                'Confirm Upload'
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={clearPreview}
-              disabled={loading}
-              className="btn btn-danger btn-sm"
-            >
-              Cancel
-            </button>
-          </div>
+          {loading ? (
+            <>
+              <p className="mb-2">Uploading image...</p>
+              <div className="d-flex justify-content-center">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Uploading...</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mb-2">Do you want to upload this image?</p>
+              <div className="d-flex gap-2 justify-content-center">
+                <button
+                  type="button"
+                  onClick={confirmUpload}
+                  disabled={loading}
+                  className="btn btn-success btn-sm"
+                >
+                  Confirm Upload
+                </button>
+                <button
+                  type="button"
+                  onClick={clearPreview}
+                  disabled={loading}
+                  className="btn btn-danger btn-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
 
