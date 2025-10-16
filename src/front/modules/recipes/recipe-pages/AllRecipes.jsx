@@ -118,7 +118,7 @@ export const AllRecipes = () => {
     const RecipeCard = ({ recipe }) => (
 
         // Card Container
-        <div className={`card h-100 shadow-sm border-0 ${view === 'list' ? 'd-flex flex-row' : ''}`}
+        <div className={`card h-100 shadow-sm border ${view === 'list' ? 'd-flex flex-row' : ''}`}
              style={{ 
                  transition: 'all 0.3s ease',
                  cursor: 'pointer'
