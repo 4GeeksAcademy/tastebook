@@ -27,12 +27,7 @@ from .collections      import collections_bp
 from .messaging        import messaging_bp
 # --
 from .recipes          import recipes_bp
-
-
 # ------------- END OF IMPORTS --------------
-
-
-
 
 
 
@@ -43,25 +38,26 @@ api = Blueprint('api', __name__)
 CORS(api)
 
 # Register all sub-blueprints
-api.register_blueprint( admin_access_bp         )
+api.register_blueprint( admin_access_bp    )
 
-api.register_blueprint( auth_bp                 )
-api.register_blueprint( users_bp                )
-api.register_blueprint( follow_bp               )
+api.register_blueprint( auth_bp            )
+api.register_blueprint( users_bp           )
+api.register_blueprint( follow_bp          )
 
-api.register_blueprint( cloudinary_bp           )
+api.register_blueprint( cloudinary_bp      )
 
-api.register_blueprint( recipes_bp              )
-api.register_blueprint( recipe_comments_bp      )
-api.register_blueprint( recipe_likes_bp         )
+api.register_blueprint( recipes_bp         )
+api.register_blueprint( recipe_comments_bp )
+api.register_blueprint( recipe_likes_bp    )
 
-api.register_blueprint( collections_bp          )
+api.register_blueprint( collections_bp     )
 
-api.register_blueprint( messaging_bp            )
+api.register_blueprint( messaging_bp       )
 
 
 
 # ----------------------------------------------------------
+
 
 
 ############################################
@@ -73,6 +69,7 @@ def handle_hello():
         "msg": "Hello! I'm a message from the backend. Check the network tab in Google Inspector and you'll see the GET request"
     }
     return jsonify(response_body), 200
+
 
 ############################################
 #######     PRIVATE SITE TESTING     #######
