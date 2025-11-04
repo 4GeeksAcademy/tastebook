@@ -391,7 +391,7 @@ export const Navbar = () => {
 
 						<Link 
 							to="/all-recipes" 
-							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
+							className="nav-link text-decoration-none fs-1 fw-semibold p-2 rounded"
 		                    // data-bs-dismiss="offcanvas"
 							onClick={(e) => handleOffcanvasLinkClick(e, '/all-recipes')}
 						>
@@ -400,7 +400,7 @@ export const Navbar = () => {
 
 						<Link 
 							to="/collections" 
-							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
+							className="nav-link text-decoration-none fs-1 fw-semibold p-2 rounded"
 		                    // data-bs-dismiss="offcanvas"
 							onClick={(e) => handleOffcanvasLinkClick(e, '/collections')}
 						>
@@ -409,7 +409,7 @@ export const Navbar = () => {
 
 						<Link 
 							to="/users" 
-							className="nav-link text-decoration-none fs-1 fw-semibold text-secondary p-2 rounded"
+							className="nav-link text-decoration-none fs-1 fw-semibold p-2 rounded"
 		                    // data-bs-dismiss="offcanvas"
 							onClick={(e) => handleOffcanvasLinkClick(e, '/users')}
 						>
@@ -452,15 +452,15 @@ export const Navbar = () => {
 					{/* Navigation Links - Only visible on larger screens */}
 					<div className="d-none d-lg-flex gap-3 ms-4">
 
-						<Link to="/all-recipes" className="nav-link text-decoration-none fw-semibold text-secondary">
+						<Link to="/all-recipes" className="nav-link text-decoration-none fw-semibold">
 							All Recipes
 						</Link>
 
-						<Link to="/collections" className="nav-link text-decoration-none fw-semibold text-secondary">
+						<Link to="/collections" className="nav-link text-decoration-none fw-semibold">
 							Collections
 						</Link>
 
-						<Link to="/users" className="nav-link text-decoration-none fw-semibold text-secondary">
+						<Link to="/users" className="nav-link text-decoration-none fw-semibold">
 							Users
 						</Link>
 
