@@ -348,8 +348,10 @@ export const Recipe = () => {
             </div>
 
             <div className="row">
+
                 {/* Main Content */}
-                <div className="col-lg-8">
+                <div className="col-lg-8 mx-auto">
+
                     {/* Recipe Title and Info */}
                     <div className="mb-4">
                         <div className="d-flex justify-content-between align-items-start mb-3">
@@ -521,6 +523,31 @@ export const Recipe = () => {
                         </div>
                     )}
 
+                    {/* Ingredients */}
+                    <div className="mb-4">
+                        <h3 className="h4 mb-3 d-flex align-items-center">
+                            <Users className="me-2 text-primary" size={24} />
+                            Ingredients
+                        </h3>
+                        <div className="card">
+                            <div className="card-body">
+                                {recipe.ingredients && recipe.ingredients.length > 0 ? (
+                                    <ul className="list-unstyled mb-0">
+                                        {recipe.ingredients.map((ingredient, index) =>
+                                            renderIngredient(ingredient, index)
+                                        )}
+                                    </ul>
+                                ) : (
+                                    <div className="text-center py-4">
+                                        <Users size={48} className="text-muted mb-3" />
+                                        <h5 className="text-muted">No ingredients available</h5>
+                                        <p className="text-muted mb-0">No ingredients listed for this recipe.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Instructions */}
                     <div className="mb-4">
                         <h3 className="h4 mb-3 d-flex align-items-center">
@@ -545,37 +572,6 @@ export const Recipe = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Sidebar */}
-                <div className="col-lg-4">
-
-                    {/* Ingredients */}
-                    <div className="card sticky-top" style={{ top: '20px' }}>
-
-                        <div className="card-header bg-primary text-white">
-                            <h5 className="mb-0 d-flex align-items-center">
-                                <Users className="me-2" size={20} />
-                                Ingredients
-                            </h5>
-                        </div>
-
-                        <div className="card-body">
-                            {recipe.ingredients && recipe.ingredients.length > 0 ? (
-                                <ul className="list-unstyled mb-0">
-                                    {recipe.ingredients.map((ingredient, index) =>
-                                        renderIngredient(ingredient, index)
-                                    )}
-                                </ul>
-                            ) : (
-                                <div className="text-center py-3">
-                                    <Users size={32} className="text-muted mb-2" />
-                                    <p className="text-muted mb-0">No ingredients listed for this recipe.</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
                 </div>
 
 
